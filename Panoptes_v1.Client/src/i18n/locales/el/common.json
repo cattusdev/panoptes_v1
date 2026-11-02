@@ -70,7 +70,16 @@
     "range": "{{from}}–{{to}} από {{total}}",
     "page": "Σελίδα {{page}} από {{last}}",
     "previousPage": "Προηγούμενη σελίδα",
-    "nextPage": "Επόμενη σελίδα"
+    "nextPage": "Επόμενη σελίδα",
+    "selectPage": "Επιλογή όλων των γραμμών της σελίδας",
+    "selectRow": "Επιλογή: {{name}}",
+    "bulkActions": "Μαζικές ενέργειες",
+    "selected_one": "{{count}} επιλεγμένη",
+    "selected_other": "{{count}} επιλεγμένες",
+    "clearSelection": "Καθαρισμός",
+    "columns": "Στήλες",
+    "showColumns": "Εμφάνιση στηλών",
+    "rowsPerPage": "Γραμμές ανά σελίδα"
   },
   "password": {
     "showPassword": "Εμφάνιση κωδικού",
@@ -84,5 +93,37 @@
   },
   "code": {
     "label": "6ψήφιος κωδικός"
+  },
+  "validation": {
+    "required": "Το πεδίο είναι υποχρεωτικό.",
+    "email": "Γράψτε ένα έγκυρο email.",
+    "invalid": "Ελέγξτε αυτή την τιμή.",
+    "number": "Γράψτε έναν αριθμό.",
+    "amount": "Γράψτε ένα ποσό, π.χ. {{example}}.",
+    "date": "Γράψτε μια έγκυρη ημερομηνία.",
+    "tooShort_one": "Χρησιμοποιήστε τουλάχιστον {{count}} χαρακτήρα.",
+    "tooShort_other": "Χρησιμοποιήστε τουλάχιστον {{count}} χαρακτήρες.",
+    "tooLong_one": "Χρησιμοποιήστε έως {{count}} χαρακτήρα.",
+    "tooLong_other": "Χρησιμοποιήστε έως {{count}} χαρακτήρες.",
+    "min": "Γράψτε {{min}} ή περισσότερο.",
+    "max": "Γράψτε {{max}} ή λιγότερο.",
+    "chooseAtLeast_one": "Διαλέξτε τουλάχιστον {{count}} επιλογή.",
+    "chooseAtLeast_other": "Διαλέξτε τουλάχιστον {{count}} επιλογές."
+  },
+  "money": {
+    "unknown": "Άγνωστο",
+    "credit": "Πίστωση"
+  },
+  "datePicker": {
+    "placeholder": "Επιλέξτε ημερομηνία",
+    "today": "Σήμερα",
+    "clear": "Καθαρισμός"
+  },
+  "picker": {
+    "placeholder": "Επιλέξτε…",
+    "search": "Αναζήτηση…",
+    "empty": "Κανένα αποτέλεσμα.",
+    "clear": "Καθαρισμός επιλογής",
+    "more": "+{{count}}"
   }
 }

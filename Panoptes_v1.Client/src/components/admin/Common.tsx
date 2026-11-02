@@ -1,11 +1,12 @@
 import type { ComponentType, ReactNode } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Search } from 'lucide-react'
-import { Badge } from '@/components/ui/badge'
+import { StatusBadge } from '@/components/admin/StatusBadge'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Empty, EmptyDescription, EmptyHeader, EmptyMedia, EmptyTitle } from '@/components/ui/empty'
 import { Input } from '@/components/ui/input'
 import { initials } from '@/lib/format'
+import { userStatus } from '@/lib/status'
 import { cn } from '@/lib/utils'
 
 // Φωτογραφία προφίλ ή αρχικά (όταν δεν υπάρχει φωτογραφία)
@@ -42,9 +43,8 @@ export function UserAvatar({
 
 export function UserStatusBadge({ isLockedOut, emailConfirmed }: { isLockedOut: boolean; emailConfirmed: boolean }) {
   const { t } = useTranslation('admin')
-  if (isLockedOut) return <Badge variant="destructive">{t('status.locked')}</Badge>
-  if (!emailConfirmed) return <Badge variant="warning">{t('status.unconfirmed')}</Badge>
-  return <Badge variant="success">{t('status.active')}</Badge>
+  const status = userStatus({ isLockedOut, emailConfirmed })
+  return <StatusBadge tone={status.tone}>{t(`status.${status.key}`)}</StatusBadge>
 }
 
 export function SearchInput({ value, onChange, placeholder }: { value: string; onChange: (value: string) => void; placeholder: string }) {

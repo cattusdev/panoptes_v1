@@ -51,10 +51,15 @@ public class SetupCommandTests : E2ETest
         using var app = await AppProcess.StartAsync(new Dictionary<string, string>(AppFixture.DefaultEnvironment())
         {
             ["ConnectionStrings__DefaultConnection"] = FreshDatabase,
+            ["Diagnostics__EnableTestEndpoints"] = "false", // Όπως στην παραγωγή
         });
         var page = await (await Browser.NewContextAsync(new() { BaseURL = app.BaseUrl })).NewPageAsync();
         await LoginAsync(page, Owner);
         Assert.That(await IsAdminAsync(page), Is.True);
+
+        // Η δοκιμαστική σελίδα των components δεν υπάρχει χωρίς τα test endpoints
+        await page.GotoAsync("/admin/dev/kit");
+        await Expect(page.GetByRole(AriaRole.Heading, new() { Name = "Page not found" })).ToBeVisibleAsync();
         await page.GotoAsync("/admin/users");
         await Expect(page.GetByRole(AriaRole.Main)).ToContainTextAsync(Owner);
         var created = await ApiAsync(page, "POST", "/api/users", new { email = Teammate, password = TestData.Password });

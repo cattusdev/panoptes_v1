@@ -70,7 +70,16 @@
     "range": "{{from}}–{{to}} of {{total}}",
     "page": "Page {{page}} of {{last}}",
     "previousPage": "Previous page",
-    "nextPage": "Next page"
+    "nextPage": "Next page",
+    "selectPage": "Select all rows on this page",
+    "selectRow": "Select {{name}}",
+    "bulkActions": "Bulk actions",
+    "selected_one": "{{count}} selected",
+    "selected_other": "{{count}} selected",
+    "clearSelection": "Clear",
+    "columns": "Columns",
+    "showColumns": "Show columns",
+    "rowsPerPage": "Rows per page"
   },
   "password": {
     "showPassword": "Show password",
@@ -84,5 +93,37 @@
   },
   "code": {
     "label": "6-digit code"
+  },
+  "validation": {
+    "required": "This field is required.",
+    "email": "Enter a valid email address.",
+    "invalid": "Check this value.",
+    "number": "Enter a number.",
+    "amount": "Enter an amount, e.g. {{example}}.",
+    "date": "Enter a valid date.",
+    "tooShort_one": "Use at least {{count}} character.",
+    "tooShort_other": "Use at least {{count}} characters.",
+    "tooLong_one": "Use at most {{count}} character.",
+    "tooLong_other": "Use at most {{count}} characters.",
+    "min": "Enter {{min}} or more.",
+    "max": "Enter {{max}} or less.",
+    "chooseAtLeast_one": "Choose at least {{count}} option.",
+    "chooseAtLeast_other": "Choose at least {{count}} options."
+  },
+  "money": {
+    "unknown": "Unknown",
+    "credit": "Credit"
+  },
+  "datePicker": {
+    "placeholder": "Pick a date",
+    "today": "Today",
+    "clear": "Clear"
+  },
+  "picker": {
+    "placeholder": "Select…",
+    "search": "Search…",
+    "empty": "No results.",
+    "clear": "Clear selection",
+    "more": "+{{count}}"
   }
 }

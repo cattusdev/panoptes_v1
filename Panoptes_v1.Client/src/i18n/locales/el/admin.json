@@ -303,5 +303,49 @@
         }
       }
     }
+  },
+  "kit": {
+    "title": "Κιτ components",
+    "description": "Δοκιμαστική σελίδα των κοινών components. Υπάρχει μόνο όταν είναι ενεργά τα test endpoints.",
+    "form": {
+      "title": "Φόρμα",
+      "amount": "Ποσό",
+      "dueOn": "Ημερομηνία λήξης",
+      "client": "Πελάτης",
+      "tags": "Ετικέτες",
+      "note": "Σημείωση",
+      "submit": "Υποβολή"
+    },
+    "money": {
+      "title": "Ποσά"
+    },
+    "badges": {
+      "title": "Status badges"
+    },
+    "alerts": {
+      "title": "Ειδοποιήσεις",
+      "info": "Για ενημέρωση",
+      "warning": "Θέλει προσοχή",
+      "success": "Όλα εντάξει",
+      "error": "Κάτι απέτυχε",
+      "errorDescription": "Δοκιμάστε ξανά σε λίγο."
+    },
+    "table": {
+      "title": "Πίνακας",
+      "name": "Όνομα",
+      "amount": "Υπόλοιπο",
+      "status": "Κατάσταση",
+      "archive": "Αρχειοθέτηση",
+      "archived_one": "Αρχειοθετήθηκε {{count}} γραμμή",
+      "archived_other": "Αρχειοθετήθηκαν {{count}} γραμμές"
+    },
+    "tones": {
+      "danger": "Εκπρόθεσμο",
+      "warning": "Αναμένει έγκριση",
+      "info": "Σε εξέλιξη",
+      "success": "Πληρώθηκε",
+      "neutral": "Αρχειοθετημένο",
+      "historical": "Ιστορικό"
+    }
   }
 }

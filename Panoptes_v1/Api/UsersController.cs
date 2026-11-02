@@ -83,11 +83,14 @@ namespace Panoptes_v1.Api
             _guard = guard;
         }
 
-        // GET /api/users?search=&role=&status=active|locked|unconfirmed&page=&pageSize=
+        // Ταξινόμηση της λίστας: email (προεπιλογή)
+        private static readonly SortMap<IdentityUser> UserSort = new SortMap<IdentityUser>("email").Add("email", u => u.Email);
+
+        // GET /api/users?search=&role=&status=active|locked|unconfirmed&sort=email|-email&page=&pageSize=
         [HttpGet]
         [Authorize(Policy = Permissions.Users.View)]
         public async Task<ActionResult<PagedResult<UserListItemDto>>> List(
-            string? search, string? role, string? status, int page = 1, int pageSize = 20)
+            string? search, string? role, string? status, string? sort, int page = 1, int pageSize = 20)
         {
             var actor = await _userManager.GetUserAsync(User);
             if (actor == null) return Unauthorized();
@@ -118,8 +121,8 @@ namespace Panoptes_v1.Api
             };
 
             var total = await query.CountAsync();
-            var users = await query
-                .OrderBy(u => u.Email)
+            var users = await UserSort.Apply(query, sort)
+                .ThenBy(u => u.Id)
                 .Skip((page - 1) * pageSize)
                 .Take(pageSize)
                 .ToListAsync();

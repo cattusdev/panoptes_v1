@@ -29,6 +29,8 @@ export type DateFormatter = {
   date: (value: string | Date) => string
   time: (value: string | Date) => string
   dateTime: (value: string | Date) => string
+  // Ημερομηνία χωρίς ώρα (DateOnly του server, "yyyy-MM-dd"): ίδια μορφή, χωρίς μετατροπή ζώνης ώρας
+  day: (value: string) => string
 }
 
 type DateSettings = Pick<GeneralSettings, 'dateFormat' | 'timeFormat' | 'timeZone'>
@@ -84,9 +86,14 @@ export function createDateFormatter({ dateFormat, timeFormat, timeZone }: DateSe
     return `${String(hour).padStart(2, '0')}:${minute}`
   }
 
+  // Το DateOnly δεν είναι στιγμή: το διαβάζουμε ως μεσημέρι UTC και το γράφουμε σε UTC, ώστε να μη "γλιστράει" μέρα
+  const utc = timeZone === 'UTC' ? null : createDateFormatter({ dateFormat, timeFormat, timeZone: 'UTC' }, language)
+  const day = (value: string) => (utc ? utc.date(`${value}T12:00:00Z`) : formatDate(`${value}T12:00:00Z`))
+
   return {
     date: formatDate,
     time: formatTime,
+    day,
     // Το ISO μένει "σκέτο" (2026-11-02 14:30), οι υπόλοιπες με κόμμα (2 Nov 2026, 14:30)
     dateTime: (value) => `${formatDate(value)}${dateFormat === 'yyyy-MM-dd' ? ' ' : ', '}${formatTime(value)}`,
   }

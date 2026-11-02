@@ -65,6 +65,69 @@ public class UsersPageTests : E2ETest
     }
 
     [Test]
+    public async Task CreateUser_WithEmptyFields_ShowsTheErrorsInline_WithoutCallingTheServer()
+    {
+        await LoginAsync(TestData.Admin);
+        await Page.GotoAsync("/admin/users");
+        var requests = 0;
+        Page.Request += (_, request) => { if (request.Method == "POST" && request.Url.Contains("/api/users")) requests++; };
+
+        await Page.GetByRole(AriaRole.Button, new() { Name = "New user" }).ClickAsync();
+        await Page.GetByRole(AriaRole.Button, new() { Name = "Create user" }).ClickAsync();
+
+        var dialog = Page.GetByRole(AriaRole.Dialog);
+        await Expect(dialog.GetByText("This field is required.")).ToHaveCountAsync(2);
+        await Expect(Page.Locator("#new-user-email")).ToBeFocusedAsync();
+
+        await Page.Locator("#new-user-email").FillAsync("not-an-email");
+        await Page.Locator("#new-user-password").FocusAsync();
+        await Expect(dialog.GetByText("Enter a valid email address.")).ToBeVisibleAsync();
+        Assert.That(requests, Is.EqualTo(0));
+    }
+
+    [Test]
+    public async Task List_SortsOnTheServer_ChangesPageSize_AndHidesColumns()
+    {
+        await LoginAsync(TestData.Admin);
+        await Page.GotoAsync("/admin/users");
+        var table = Page.GetByRole(AriaRole.Table);
+        var userHeader = table.GetByRole(AriaRole.Columnheader, new() { Name = "User" });
+        var firstRow = table.Locator("tbody tr").First;
+
+        await Expect(userHeader).ToHaveAttributeAsync("aria-sort", "ascending");
+        var ascending = await FirstEmailAsync("email");
+        await Expect(firstRow).ToHaveAccessibleNameAsync(ascending);
+
+        await userHeader.GetByRole(AriaRole.Button).ClickAsync();
+        await Expect(Page).ToHaveURLAsync(new Regex("sort=-email"));
+        await Expect(userHeader).ToHaveAttributeAsync("aria-sort", "descending");
+        var descending = await FirstEmailAsync("-email");
+        Assert.That(descending, Is.Not.EqualTo(ascending));
+        await Expect(firstRow).ToHaveAccessibleNameAsync(descending);
+
+        // Μόνο τα πεδία της whitelist: ένα άγνωστο πεδίο δίνει την προεπιλεγμένη σειρά
+        Assert.That(await FirstEmailAsync("passwordHash"), Is.EqualTo(ascending));
+
+        await SelectOptionAsync(Page.GetByRole(AriaRole.Combobox, new() { Name = "Rows per page" }), "10");
+        await Expect(Page).ToHaveURLAsync(new Regex("pageSize=10"));
+        await Expect(table.Locator("tbody tr")).ToHaveCountAsync(10);
+        await Expect(Page.GetByText(new Regex(@"^1–10 of \d+$"))).ToBeVisibleAsync();
+
+        await Page.GetByRole(AriaRole.Button, new() { Name = "Columns" }).ClickAsync();
+        await Page.GetByRole(AriaRole.Menuitemcheckbox, new() { Name = "Status" }).ClickAsync();
+        await Page.Keyboard.PressAsync("Escape");
+        await Expect(table.GetByRole(AriaRole.Columnheader, new() { Name = "Status" })).ToHaveCountAsync(0);
+        await Expect(table.GetByRole(AriaRole.Columnheader, new() { Name = "Role" })).ToBeVisibleAsync();
+    }
+
+    private async Task<string> FirstEmailAsync(string sort)
+    {
+        var response = await ApiAsync("GET", $"/api/users?sort={sort}&pageSize=10");
+        Assert.That(response.Status, Is.EqualTo(200));
+        return (await response.JsonAsync())!.Value.GetProperty("items")[0].GetProperty("email").GetString()!;
+    }
+
+    [Test]
     public async Task Admin_CanUnlockALockedAccount()
     {
         await LoginAsync(TestData.Admin);

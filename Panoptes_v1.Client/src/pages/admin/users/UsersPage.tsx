@@ -1,11 +1,11 @@
-import { useEffect, useState } from 'react'
+import { useState } from 'react'
 import { Trans, useTranslation } from 'react-i18next'
-import { useNavigate, useSearchParams } from 'react-router'
+import { useNavigate } from 'react-router'
 import { toast } from 'sonner'
 import { ChevronDown, Pencil, Plus, ShieldPlus, Trash2, Users } from 'lucide-react'
 import { SearchInput, TableEmpty, UserAvatar, UserStatusBadge } from '@/components/admin/Common'
 import { ConfirmDialog } from '@/components/admin/ConfirmDialog'
-import { DataTable, TablePagination, type Column } from '@/components/admin/DataTable'
+import { ColumnsMenu, DataTable, TablePagination, type Column } from '@/components/admin/DataTable'
 import { OptionSelect } from '@/components/admin/OptionSelect'
 import { AccessTabs } from '@/components/admin/PageHeader'
 import { Badge } from '@/components/ui/badge'
@@ -17,7 +17,8 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu'
-import { useDebouncedValue } from '@/hooks/use-debounced-value'
+import { useColumnVisibility } from '@/hooks/use-column-visibility'
+import { useUrlFilters } from '@/hooks/use-url-filters'
 import { useRoleOptions, useUserAction, useUsers, type UserListItem } from '@/lib/admin-api'
 import { problemMessage } from '@/lib/api'
 import { hasPermission, useSession } from '@/lib/auth'
@@ -32,48 +33,26 @@ export function UsersPage() {
   const { t } = useTranslation('admin')
   const navigate = useNavigate()
   const { user: me } = useSession()
-  const [params, setParams] = useSearchParams()
-  const [search, setSearch] = useState(params.get('search') ?? '')
-  const debouncedSearch = useDebouncedValue(search)
+  const list = useUrlFilters(['search', 'role', 'status'], { defaultSort: 'email' })
+  const { search, role, status } = list.filters
+  const columnVisibility = useColumnVisibility('users')
   const [createOpen, setCreateOpen] = useState(false)
   const [pending, setPending] = useState<PendingAction>(null)
 
-  const role = params.get('role') ?? ''
-  const status = params.get('status') ?? ''
-  const page = Number(params.get('page') ?? '1') || 1
-
-  // Τα φίλτρα ζουν στο URL (μπορείς να το μοιραστείς / bookmark)
-  function setFilter(key: string, value: string) {
-    setParams(
-      (prev) => {
-        const next = new URLSearchParams(prev)
-        if (value) next.set(key, value)
-        else next.delete(key)
-        if (key !== 'page') next.delete('page')
-        return next
-      },
-      { replace: true },
-    )
-  }
-
-  useEffect(() => {
-    if (debouncedSearch !== (params.get('search') ?? '')) setFilter('search', debouncedSearch)
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [debouncedSearch])
-
-  const users = useUsers({ search: debouncedSearch, role, status, page })
+  const users = useUsers({ search, role, status, sort: list.sort, page: list.page, pageSize: list.pageSize })
   const roleOptions = useRoleOptions()
   const userAction = useUserAction()
 
   const canCreate = hasPermission(me, Permissions.Users.Create)
   const canDelete = hasPermission(me, Permissions.Users.Delete)
-  const filtered = !!(debouncedSearch || role || status)
+  const filtered = list.isFiltered
   const statusOptions = statuses.map((value) => ({ value, label: t(`status.${value}`) }))
 
   const columns: Column<UserListItem>[] = [
     {
-      key: 'user',
+      key: 'email',
       header: t('users.list.columns.user'),
+      sortable: true,
       cell: (u) => (
         <div className="flex items-center gap-3">
           <UserAvatar email={u.email} avatarUrl={u.avatarUrl} active={!u.isLockedOut} />
@@ -88,6 +67,7 @@ export function UsersPage() {
     {
       key: 'role',
       header: t('users.list.columns.role'),
+      label: t('users.list.columns.role'),
       cell: (u) =>
         u.roles.length ? (
           <div className="flex flex-wrap gap-1">
@@ -101,7 +81,12 @@ export function UsersPage() {
           <Badge variant="muted">{t('users.list.noAccess')}</Badge>
         ),
     },
-    { key: 'status', header: t('users.list.columns.status'), cell: (u) => <UserStatusBadge isLockedOut={u.isLockedOut} emailConfirmed={u.emailConfirmed} /> },
+    {
+      key: 'status',
+      header: t('users.list.columns.status'),
+      label: t('users.list.columns.status'),
+      cell: (u) => <UserStatusBadge isLockedOut={u.isLockedOut} emailConfirmed={u.emailConfirmed} />,
+    },
     {
       key: 'actions',
       header: <span className="sr-only">{t('shared.actions')}</span>,
@@ -172,12 +157,12 @@ export function UsersPage() {
       </div>
 
       <div className="mb-3 flex flex-col gap-2 sm:flex-row">
-        <SearchInput value={search} onChange={setSearch} placeholder={t('users.list.search')} />
+        <SearchInput value={list.searchInput} onChange={list.setSearchInput} placeholder={t('users.list.search')} />
         <div className="flex gap-2 sm:ml-auto">
           <OptionSelect
             ariaLabel={t('users.list.filterByRole')}
             value={role}
-            onChange={(v) => setFilter('role', v)}
+            onChange={(v) => list.set('role', v)}
             emptyLabel={t('users.list.allRoles')}
             options={(roleOptions.data?.all ?? []).map((r) => ({ value: r, label: r }))}
             className="sm:w-40"
@@ -185,11 +170,12 @@ export function UsersPage() {
           <OptionSelect
             ariaLabel={t('users.list.filterByStatus')}
             value={status}
-            onChange={(v) => setFilter('status', v)}
+            onChange={(v) => list.set('status', v)}
             emptyLabel={t('users.list.allStatuses')}
             options={statusOptions}
             className="sm:w-40"
           />
+          <ColumnsMenu columns={columns} visibility={columnVisibility.visibility} onToggle={columnVisibility.toggle} />
         </div>
       </div>
 
@@ -200,6 +186,9 @@ export function UsersPage() {
         rowLabel={(u) => u.email}
         isLoading={users.isPending}
         onRowClick={(u) => navigate(`/admin/users/${u.id}`)}
+        sort={list.sort}
+        onSortChange={list.setSort}
+        columnVisibility={columnVisibility.visibility}
         empty={
           <TableEmpty
             icon={Users}
@@ -214,7 +203,8 @@ export function UsersPage() {
           page={users.data.page}
           pageSize={users.data.pageSize}
           total={users.data.total}
-          onPageChange={(p) => setFilter('page', String(p))}
+          onPageChange={(p) => list.set('page', String(p))}
+          onPageSizeChange={(size) => list.set('pageSize', String(size))}
         />
       )}
 

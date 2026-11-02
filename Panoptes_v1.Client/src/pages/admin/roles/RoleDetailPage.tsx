@@ -151,7 +151,7 @@ function RoleDetailView({ role }: { role: RoleDetail }) {
       />
 
       {!role.canManage && role.readOnlyReason && (
-        <Alert className="mb-5">
+        <Alert variant="info" className="mb-5">
           <Lock />
           <AlertTitle>{t('roles.detail.readOnly')}</AlertTitle>
           <AlertDescription>{role.readOnlyReason}</AlertDescription>

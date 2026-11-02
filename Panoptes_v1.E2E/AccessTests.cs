@@ -72,6 +72,24 @@ public class AccessTests : E2ETest
     }
 
     [Test]
+    public async Task AuditLog_SortsByTime_OldestFirst_WhenAsked()
+    {
+        await LoginAsync(TestData.Auditor);
+        await Page.GotoAsync("/admin/audit-logs");
+        var timeHeader = Page.GetByRole(AriaRole.Columnheader, new() { Name = "Time" });
+        await Expect(timeHeader).ToHaveAttributeAsync("aria-sort", "descending");
+
+        await timeHeader.GetByRole(AriaRole.Button).ClickAsync();
+
+        await Expect(Page).ToHaveURLAsync(new Regex("sort=time"));
+        await Expect(timeHeader).ToHaveAttributeAsync("aria-sort", "ascending");
+        var oldest = (await (await ApiAsync("GET", "/api/audit-logs?sort=time&pageSize=2")).JsonAsync())!.Value.GetProperty("items");
+        var newest = (await (await ApiAsync("GET", "/api/audit-logs?pageSize=1")).JsonAsync())!.Value.GetProperty("items");
+        Assert.That(oldest[0].GetProperty("dateTime").GetDateTimeOffset(), Is.LessThanOrEqualTo(oldest[1].GetProperty("dateTime").GetDateTimeOffset()));
+        Assert.That(oldest[0].GetProperty("dateTime").GetDateTimeOffset(), Is.LessThan(newest[0].GetProperty("dateTime").GetDateTimeOffset()));
+    }
+
+    [Test]
     public async Task Sidebar_HasNoDuplicates_OfTheUsersTabs_OrTheUserMenu()
     {
         await LoginAsync(TestData.Admin);

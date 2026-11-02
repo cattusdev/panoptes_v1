@@ -28,7 +28,7 @@ export type UserDetail = {
   avatarUrl: string | null
 }
 
-export type UserFilters = { search?: string; role?: string; status?: string; page: number; pageSize?: number }
+export type UserFilters = { search?: string; role?: string; status?: string; sort?: string; page: number; pageSize?: number }
 
 export function useUsers(filters: UserFilters) {
   return useQuery({
@@ -187,12 +187,12 @@ export function useAuditTypeLabel() {
   return (type: string) => (auditTypes.includes(type) ? t(`audit.types.${type as AuditLogItem['type']}`) : type)
 }
 
-export type AuditFilters = { search?: string; type?: string; page: number }
+export type AuditFilters = { search?: string; type?: string; sort?: string; page: number; pageSize?: number }
 
 export function useAuditLogs(filters: AuditFilters) {
   return useQuery({
     queryKey: ['audit-logs', filters],
-    queryFn: () => api<Paged<AuditLogItem>>(`/api/audit-logs${toQuery({ ...filters, pageSize: 25 })}`),
+    queryFn: () => api<Paged<AuditLogItem>>(`/api/audit-logs${toQuery({ ...filters, pageSize: filters.pageSize ?? 25 })}`),
     placeholderData: keepPreviousData,
   })
 }

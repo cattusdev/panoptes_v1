@@ -1,59 +1,38 @@
-import { useEffect, useState } from 'react'
+import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
-import { useSearchParams } from 'react-router'
 import { ChevronRight, NotebookText } from 'lucide-react'
 import { SearchInput, TableEmpty } from '@/components/admin/Common'
-import { DataTable, TablePagination, type Column } from '@/components/admin/DataTable'
+import { ColumnsMenu, DataTable, TablePagination, type Column } from '@/components/admin/DataTable'
 import { DateTime } from '@/components/admin/DateTime'
 import { OptionSelect } from '@/components/admin/OptionSelect'
 import { PageHeader } from '@/components/admin/PageHeader'
-import { Badge } from '@/components/ui/badge'
+import { StatusBadge } from '@/components/admin/StatusBadge'
 import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle } from '@/components/ui/sheet'
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
-import { useDebouncedValue } from '@/hooks/use-debounced-value'
+import { useColumnVisibility } from '@/hooks/use-column-visibility'
+import { useUrlFilters } from '@/hooks/use-url-filters'
 import { useAuditLogs, useAuditTypeLabel, type AuditLogItem } from '@/lib/admin-api'
-
-const typeBadge = { Create: 'success', Update: 'warning', Delete: 'destructive', Manual: 'muted', None: 'muted' } as const
+import { auditTypeTone } from '@/lib/status'
 
 const filterTypes = ['Create', 'Update', 'Delete'] as const
 
 export function AuditLogsPage() {
   const { t } = useTranslation('admin')
   const typeLabel = useAuditTypeLabel()
-  const [params, setParams] = useSearchParams()
-  const [search, setSearch] = useState(params.get('search') ?? '')
-  const debouncedSearch = useDebouncedValue(search)
+  const list = useUrlFilters(['search', 'type'], { defaultPageSize: 20, defaultSort: '-time' })
+  const { search, type } = list.filters
+  const columnVisibility = useColumnVisibility('audit-logs')
   const [selected, setSelected] = useState<AuditLogItem | null>(null)
 
-  const type = params.get('type') ?? ''
-  const page = Number(params.get('page') ?? '1') || 1
-
-  function setFilter(key: string, value: string) {
-    setParams(
-      (prev) => {
-        const next = new URLSearchParams(prev)
-        if (value) next.set(key, value)
-        else next.delete(key)
-        if (key !== 'page') next.delete('page')
-        return next
-      },
-      { replace: true },
-    )
-  }
-
-  useEffect(() => {
-    if (debouncedSearch !== (params.get('search') ?? '')) setFilter('search', debouncedSearch)
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [debouncedSearch])
-
-  const logs = useAuditLogs({ search: debouncedSearch, type, page })
-  const filtered = !!(debouncedSearch || type)
+  const logs = useAuditLogs({ search, type, sort: list.sort, page: list.page, pageSize: list.pageSize })
+  const filtered = list.isFiltered
   const typeOptions = filterTypes.map((value) => ({ value, label: t(`audit.filter.${value}`) }))
 
   const columns: Column<AuditLogItem>[] = [
     {
       key: 'time',
       header: t('audit.columns.time'),
+      sortable: true,
       cell: (l) => (
         <DateTime value={l.dateTime} mode="relative" className="whitespace-nowrap text-muted-foreground" />
       ),
@@ -61,6 +40,7 @@ export function AuditLogsPage() {
     {
       key: 'user',
       header: t('audit.columns.user'),
+      label: t('audit.columns.user'),
       cell: (l) => (
         <div className="min-w-0">
           <div className="font-medium">{l.userEmail ?? t('shared.system')}</div>
@@ -68,10 +48,17 @@ export function AuditLogsPage() {
         </div>
       ),
     },
-    { key: 'action', header: t('audit.columns.action'), cell: (l) => <Badge variant={typeBadge[l.type]}>{typeLabel(l.type)}</Badge> },
     {
-      key: 'resource',
+      key: 'action',
+      header: t('audit.columns.action'),
+      label: t('audit.columns.action'),
+      cell: (l) => <StatusBadge tone={auditTypeTone(l.type)}>{typeLabel(l.type)}</StatusBadge>,
+    },
+    {
+      key: 'table',
       header: t('audit.columns.resource'),
+      label: t('audit.columns.resource'),
+      sortable: true,
       cell: (l) => (
         <div className="min-w-0">
           <div className="font-mono text-xs">{l.tableName}</div>
@@ -92,15 +79,16 @@ export function AuditLogsPage() {
       <PageHeader title={t('audit.title')} description={t('audit.description')} />
 
       <div className="mb-3 flex flex-col gap-2 sm:flex-row">
-        <SearchInput value={search} onChange={setSearch} placeholder={t('audit.search')} />
+        <SearchInput value={list.searchInput} onChange={list.setSearchInput} placeholder={t('audit.search')} />
         <OptionSelect
           ariaLabel={t('audit.filterByAction')}
           value={type}
-          onChange={(v) => setFilter('type', v)}
+          onChange={(v) => list.set('type', v)}
           emptyLabel={t('audit.allActions')}
           options={typeOptions}
           className="sm:ml-auto sm:w-40"
         />
+        <ColumnsMenu columns={columns} visibility={columnVisibility.visibility} onToggle={columnVisibility.toggle} />
       </div>
 
       <DataTable
@@ -110,6 +98,9 @@ export function AuditLogsPage() {
         rowLabel={(l) => t('audit.rowLabel', { type: typeLabel(l.type), table: l.tableName ?? '' })}
         isLoading={logs.isPending}
         onRowClick={setSelected}
+        sort={list.sort}
+        onSortChange={list.setSort}
+        columnVisibility={columnVisibility.visibility}
         empty={
           <TableEmpty
             icon={NotebookText}
@@ -124,7 +115,8 @@ export function AuditLogsPage() {
           page={logs.data.page}
           pageSize={logs.data.pageSize}
           total={logs.data.total}
-          onPageChange={(p) => setFilter('page', String(p))}
+          onPageChange={(p) => list.set('page', String(p))}
+          onPageSizeChange={(size) => list.set('pageSize', String(size))}
         />
       )}
 
@@ -147,7 +139,7 @@ function AuditDetail({ log }: { log: AuditLogItem }) {
     <>
       <SheetHeader className="border-b">
         <div className="flex items-center gap-2">
-          <Badge variant={typeBadge[log.type]}>{typeLabel(log.type)}</Badge>
+          <StatusBadge tone={auditTypeTone(log.type)}>{typeLabel(log.type)}</StatusBadge>
           <span className="font-mono text-sm">{log.tableName}</span>
         </div>
         <SheetTitle className="sr-only">{t('audit.detail.title')}</SheetTitle>

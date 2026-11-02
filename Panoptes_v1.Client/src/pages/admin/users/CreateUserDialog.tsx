@@ -1,7 +1,8 @@
-import { useState, type FormEvent } from 'react'
 import { useTranslation } from 'react-i18next'
 import { toast } from 'sonner'
+import { z } from 'zod'
 import { OptionSelect } from '@/components/admin/OptionSelect'
+import { FormField } from '@/components/form/FormField'
 import { PasswordInput } from '@/components/form/PasswordInput'
 import { Button } from '@/components/ui/button'
 import {
@@ -12,109 +13,101 @@ import {
   DialogHeader,
   DialogTitle,
 } from '@/components/ui/dialog'
-import { Field, FieldDescription, FieldError, FieldGroup, FieldLabel } from '@/components/ui/field'
+import { FieldGroup } from '@/components/ui/field'
 import { Input } from '@/components/ui/input'
 import { Spinner } from '@/components/ui/spinner'
 import { useCreateUser, useRoleOptions } from '@/lib/admin-api'
-import { fieldErrors, problemMessage } from '@/lib/api'
+import { problemMessage } from '@/lib/api'
+import { applyServerErrors, schemas, useZodForm } from '@/lib/forms'
+
+// Οι κανόνες του κωδικού τους ελέγχει ο server (ίδιοι με το Identity): εδώ μόνο ότι δεν είναι κενός
+const schema = z.object({
+  email: schemas.email(),
+  password: z.string().min(1),
+  role: z.string(),
+})
+
+const empty = { email: '', password: '', role: '' }
 
 export function CreateUserDialog({ open, onOpenChange }: { open: boolean; onOpenChange: (open: boolean) => void }) {
   const { t } = useTranslation('admin')
   const createUser = useCreateUser()
   const roleOptions = useRoleOptions()
-  const [email, setEmail] = useState('')
-  const [password, setPassword] = useState('')
-  const [role, setRole] = useState('')
-  const [errors, setErrors] = useState<Record<string, string>>({})
+  const form = useZodForm(schema, empty)
 
-  function reset() {
-    setEmail('')
-    setPassword('')
-    setRole('')
-    setErrors({})
-  }
-
-  async function onSubmit(e: FormEvent) {
-    e.preventDefault()
-    setErrors({})
+  const onSubmit = form.handleSubmit(async (values) => {
     try {
-      const user = await createUser.mutateAsync({ email, password, role: role || null })
+      const user = await createUser.mutateAsync({ email: values.email, password: values.password, role: values.role || null })
       toast.success(t('users.create.created', { email: user.email }), { description: t('users.create.createdDescription') })
-      reset()
+      form.reset(empty)
       onOpenChange(false)
     } catch (error) {
-      const byField = fieldErrors(error)
-      if (Object.keys(byField).length > 0) setErrors(byField)
-      else toast.error(problemMessage(error))
+      if (!applyServerErrors(form, error)) toast.error(problemMessage(error))
     }
-  }
+  })
 
   return (
     <Dialog
       open={open}
       onOpenChange={(value) => {
-        if (!value) reset()
+        if (!value) form.reset(empty)
         onOpenChange(value)
       }}
     >
       <DialogContent className="sm:max-w-md">
-        <form onSubmit={onSubmit}>
+        <form onSubmit={onSubmit} noValidate>
           <DialogHeader className="mb-5">
             <DialogTitle>{t('users.create.title')}</DialogTitle>
             <DialogDescription>{t('users.create.description')}</DialogDescription>
           </DialogHeader>
 
           <FieldGroup>
-            <Field data-invalid={!!errors.email || undefined}>
-              <FieldLabel htmlFor="new-user-email">{t('users.create.email')}</FieldLabel>
-              <Input
-                id="new-user-email"
-                type="email"
-                required
-                autoFocus
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                aria-invalid={!!errors.email || undefined}
-              />
-              <FieldError>{errors.email}</FieldError>
-            </Field>
+            <FormField control={form.control} name="email" id="new-user-email" label={t('users.create.email')}>
+              {(field) => <Input type="email" autoFocus {...field} />}
+            </FormField>
 
-            <Field data-invalid={!!errors.password || undefined}>
-              <FieldLabel htmlFor="new-user-password">{t('users.create.password')}</FieldLabel>
-              <PasswordInput
-                id="new-user-password"
-                required
-                autoComplete="new-password"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                aria-invalid={!!errors.password || undefined}
-              />
-              {errors.password ? (
-                <FieldError>{errors.password}</FieldError>
-              ) : (
-                <FieldDescription>{t('users.create.passwordHint')}</FieldDescription>
+            <FormField
+              control={form.control}
+              name="password"
+              id="new-user-password"
+              label={t('users.create.password')}
+              description={t('users.create.passwordHint')}
+            >
+              {(field) => <PasswordInput autoComplete="new-password" {...field} />}
+            </FormField>
+
+            <FormField
+              control={form.control}
+              name="role"
+              id="new-user-role"
+              label={t('users.create.role')}
+              description={t('users.create.roleHint')}
+            >
+              {(field) => (
+                <OptionSelect
+                  id={field.id}
+                  value={field.value}
+                  onChange={field.onChange}
+                  emptyLabel={t('users.create.noRole')}
+                  options={(roleOptions.data?.assignable ?? []).map((r) => ({ value: r, label: r }))}
+                />
               )}
-            </Field>
-
-            <Field>
-              <FieldLabel htmlFor="new-user-role">{t('users.create.role')}</FieldLabel>
-              <OptionSelect
-                id="new-user-role"
-                value={role}
-                onChange={setRole}
-                emptyLabel={t('users.create.noRole')}
-                options={(roleOptions.data?.assignable ?? []).map((r) => ({ value: r, label: r }))}
-              />
-              <FieldDescription>{t('users.create.roleHint')}</FieldDescription>
-            </Field>
+            </FormField>
           </FieldGroup>
 
           <DialogFooter className="mt-6">
-            <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>
+            <Button
+              type="button"
+              variant="outline"
+              onClick={() => {
+                form.reset(empty)
+                onOpenChange(false)
+              }}
+            >
               {t('actions.cancel', { ns: 'common' })}
             </Button>
-            <Button type="submit" disabled={createUser.isPending}>
-              {createUser.isPending && <Spinner />}
+            <Button type="submit" disabled={form.formState.isSubmitting}>
+              {form.formState.isSubmitting && <Spinner />}
               {t('users.create.submit')}
             </Button>
           </DialogFooter>

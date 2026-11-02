@@ -84,7 +84,7 @@ function UserDetail({ user }: { user: UserDetail }) {
       />
 
       {!user.canManage && (
-        <Alert className="mb-5">
+        <Alert variant="info" className="mb-5">
           <Eye />
           <AlertTitle>{t('users.detail.viewOnly')}</AlertTitle>
           <AlertDescription>{t('users.detail.viewOnlyDescription')}</AlertDescription>

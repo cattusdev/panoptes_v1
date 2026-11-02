@@ -61,7 +61,7 @@ function Profile({ account }: { account: Account }) {
   return (
     <div className="grid gap-4">
       {!account.emailConfirmed && (
-        <Alert>
+        <Alert variant="warning">
           <MailWarning />
           <AlertTitle>{t('profile.verify.title')}</AlertTitle>
           <AlertDescription>{t('profile.verify.description')}</AlertDescription>

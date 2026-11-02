@@ -65,6 +65,8 @@ export const router = createBrowserRouter([
                 ],
               },
               { path: 'media', lazy: lazyPage(() => import('@/pages/admin/media/MediaPage'), (m) => m.MediaPage) },
+              // Μόνο με τα test endpoints (E2E): δοκιμή των κοινών components
+              { path: 'dev/kit', lazy: lazyPage(() => import('@/pages/admin/dev/KitPage'), (m) => m.KitPage) },
               { path: '*', element: <NotFoundPage /> },
             ],
           },

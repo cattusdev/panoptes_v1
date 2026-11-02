@@ -303,5 +303,49 @@
         }
       }
     }
+  },
+  "kit": {
+    "title": "Component kit",
+    "description": "Test page for the shared components. It exists only when the test endpoints are on.",
+    "form": {
+      "title": "Form",
+      "amount": "Amount",
+      "dueOn": "Due date",
+      "client": "Client",
+      "tags": "Tags",
+      "note": "Note",
+      "submit": "Submit"
+    },
+    "money": {
+      "title": "Money"
+    },
+    "badges": {
+      "title": "Status badges"
+    },
+    "alerts": {
+      "title": "Alerts",
+      "info": "For your information",
+      "warning": "Needs attention",
+      "success": "All good",
+      "error": "Something failed",
+      "errorDescription": "Try again in a moment."
+    },
+    "table": {
+      "title": "Table",
+      "name": "Name",
+      "amount": "Balance",
+      "status": "Status",
+      "archive": "Archive",
+      "archived_one": "{{count}} row archived",
+      "archived_other": "{{count}} rows archived"
+    },
+    "tones": {
+      "danger": "Overdue",
+      "warning": "Pending approval",
+      "info": "In progress",
+      "success": "Paid",
+      "neutral": "Archived",
+      "historical": "Historical"
+    }
   }
 }

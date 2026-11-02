@@ -35,8 +35,13 @@ namespace Panoptes_v1.Api
 
         // GET /api/audit-logs?search=&type=Create|Update|Delete&page=&pageSize=
         // search: email του χρήστη ή όνομα πίνακα
+        // Ταξινόμηση: time (προεπιλογή: η πιο πρόσφατη πρώτη) ή table
+        private static readonly SortMap<AuditLog> LogSort = new SortMap<AuditLog>("-time")
+            .Add("time", a => a.DateTime)
+            .Add("table", a => a.TableName);
+
         [HttpGet]
-        public async Task<PagedResult<AuditLogDto>> List(string? search, string? type, int page = 1, int pageSize = 25)
+        public async Task<PagedResult<AuditLogDto>> List(string? search, string? type, string? sort, int page = 1, int pageSize = 25)
         {
             (page, pageSize) = Paging.Normalize(page, pageSize);
             var query = _context.AuditLogs.AsQueryable();
@@ -59,8 +64,7 @@ namespace Panoptes_v1.Api
             }
 
             var total = await query.CountAsync();
-            var logs = await query
-                .OrderByDescending(a => a.DateTime)
+            var logs = await LogSort.Apply(query, sort)
                 .ThenByDescending(a => a.Id)
                 .Skip((page - 1) * pageSize)
                 .Take(pageSize)

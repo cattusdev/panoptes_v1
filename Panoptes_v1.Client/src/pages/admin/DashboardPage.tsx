@@ -4,6 +4,7 @@ import { Trans, useTranslation } from 'react-i18next'
 import { Link } from 'react-router'
 import { Activity, ArrowRight, CircleAlert, CircleCheck, KeyRound, Layers, ListOrdered, ShieldAlert, ShieldCheck, Users } from 'lucide-react'
 import { DateTime } from '@/components/admin/DateTime'
+import { StatusBadge } from '@/components/admin/StatusBadge'
 import { Alert, AlertAction, AlertDescription, AlertTitle } from '@/components/ui/alert'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
@@ -14,6 +15,7 @@ import { useAuditTypeLabel } from '@/lib/admin-api'
 import { api } from '@/lib/api'
 import { hasPermission, useSession } from '@/lib/auth'
 import { timeAgo } from '@/lib/format'
+import { auditTypeTone, toneDot } from '@/lib/status'
 import { Permissions } from '@/lib/permissions'
 import { cn } from '@/lib/utils'
 
@@ -22,18 +24,6 @@ type Dashboard = {
   security: { usersWithFailedLogins: number; lockedAccounts: number; unconfirmedEmails: number; twoFactorEnabled: number }
   health: { databaseHealthy: boolean; databaseResponseMs: number }
   recentActivity: { id: number; type: string; tableName: string | null; dateTime: string; userEmail: string | null }[] | null
-}
-
-const activityBadge: Record<string, 'success' | 'warning' | 'destructive' | 'muted'> = {
-  Create: 'success',
-  Update: 'warning',
-  Delete: 'destructive',
-}
-
-const activityDot: Record<string, string> = {
-  Create: 'bg-success',
-  Update: 'bg-warning',
-  Delete: 'bg-destructive',
 }
 
 const panelCard = 'gap-0 rounded-[14px] py-0 ring-border'
@@ -196,12 +186,12 @@ export function DashboardPage() {
                     >
                       <span
                         aria-hidden
-                        className={cn('absolute top-1/2 left-0 size-2 -translate-y-1/2 rounded-full ring-4 ring-card', activityDot[item.type] ?? 'bg-muted-foreground')}
+                        className={cn('absolute top-1/2 left-0 size-2 -translate-y-1/2 rounded-full ring-4 ring-card', toneDot[auditTypeTone(item.type)])}
                       />
                       <div className="flex min-w-0 flex-1 items-center gap-3 border-b py-3 group-last:border-b-0">
-                        <Badge variant={activityBadge[item.type] ?? 'muted'} className="min-w-16 justify-center">
+                        <StatusBadge tone={auditTypeTone(item.type)} className="min-w-16 justify-center">
                           {auditTypeLabel(item.type)}
-                        </Badge>
+                        </StatusBadge>
                         <div className="min-w-0 flex-1 truncate">
                           <Trans
                             t={t}

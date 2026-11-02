@@ -242,6 +242,8 @@ app.MapGet("/Identity/Account/{**path}", (string? path) =>
 // Μόνο για τα E2E tests: ελέγχει ότι ένα crash φτάνει σωστά στον χρήστη (JSON / σελίδα λάθους)
 if (app.Configuration.GetValue<bool>("Diagnostics:EnableTestEndpoints"))
 {
+    // Υπάρχει μόνο εδώ: η σελίδα /admin/dev/kit (δοκιμή των κοινών components) δείχνει "δεν βρέθηκε" όταν λείπει
+    app.MapGet("/api/test/enabled", () => Results.NoContent());
     app.MapGet("/api/test/crash", () => { throw new InvalidOperationException("Simulated crash (API)"); });
     app.MapGet("/test/crash", () => { throw new InvalidOperationException("Simulated crash (page)"); });
     app.MapPost("/api/test/media-options", (bool? allowSvg, int? maxVersions, IOptions<MediaOptions> options) =>
