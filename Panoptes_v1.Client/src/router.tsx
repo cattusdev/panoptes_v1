@@ -71,6 +71,11 @@ export const router = createBrowserRouter([
                 lazy: lazyPage(() => import('@/modules/crm/pages/ClientLayout'), (m) => m.ClientLayout),
                 children: [
                   { index: true, lazy: lazyPage(() => import('@/modules/crm/pages/ClientTabs'), (m) => m.ClientOverviewTab) },
+                  {
+                    path: 'files',
+                    lazy: requires(Permissions.Media.View),
+                    children: [{ index: true, lazy: lazyPage(() => import('@/modules/crm/pages/ClientTabs'), (m) => m.ClientFilesTab) }],
+                  },
                   { path: 'activity', lazy: lazyPage(() => import('@/modules/crm/pages/ClientTabs'), (m) => m.ClientActivityTab) },
                 ],
               },

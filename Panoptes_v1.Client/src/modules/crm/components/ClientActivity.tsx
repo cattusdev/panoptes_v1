@@ -30,6 +30,8 @@ const verbs = [
   'client.contactAdded',
   'client.contactUpdated',
   'client.contactRemoved',
+  'client.fileAttached',
+  'client.fileUnlinked',
 ] as const
 
 type Verb = (typeof verbs)[number]
@@ -42,6 +44,7 @@ function useDescribe() {
     const data = item.data as {
       ref?: string
       person?: string
+      file?: string
       role?: string | null
       reason?: string
       fields?: string[]
@@ -54,6 +57,7 @@ function useDescribe() {
       actor,
       ref: data.ref ?? '',
       person: data.person ?? '',
+      file: data.file ?? '',
       role: data.role ?? '',
       reason: data.reason ?? '',
       fields,

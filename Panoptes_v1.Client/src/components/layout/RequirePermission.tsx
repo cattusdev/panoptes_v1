@@ -1,5 +1,5 @@
 import { useTranslation } from 'react-i18next'
-import { Link, Outlet } from 'react-router'
+import { Link, Outlet, useOutletContext } from 'react-router'
 import { ShieldX } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Empty, EmptyContent, EmptyDescription, EmptyHeader, EmptyMedia, EmptyTitle } from '@/components/ui/empty'
@@ -7,13 +7,16 @@ import { homePath, useCan, useSession } from '@/lib/auth'
 
 // Route guard: η σελίδα ανοίγει μόνο με το permission της. Είναι UX (όχι ασφάλεια, αυτήν την κάνει ο server):
 // αντί για μισοφορτωμένη σελίδα με 403, ένα καθαρό "δεν έχετε πρόσβαση" μέσα στο console, στο ίδιο URL.
+// Το outlet context του γονέα περνάει όπως είναι (π.χ. μια καρτέλα του Client 360° με δικό της permission).
 export function RequirePermission({ permission }: { permission: string }) {
-  return useCan(permission) ? <Outlet /> : <NoAccess />
+  const context = useOutletContext()
+  return useCan(permission) ? <Outlet context={context} /> : <NoAccess />
 }
 
 // Σελίδες μόνο για τον Admin (ο server τις έχει [Authorize(Roles = Admin)])
 export function RequireAdmin() {
-  return useSession().user?.isAdmin ? <Outlet /> : <NoAccess />
+  const context = useOutletContext()
+  return useSession().user?.isAdmin ? <Outlet context={context} /> : <NoAccess />
 }
 
 export function NoAccess() {

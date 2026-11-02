@@ -6,6 +6,7 @@ export type ClientOutletContext = {
   client: Client
   contacts: ClientContact[] | undefined
   openAddContact: () => void
+  openUpload: () => void
 }
 
 export function useClientContext() {

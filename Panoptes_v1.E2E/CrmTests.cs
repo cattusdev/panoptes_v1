@@ -235,6 +235,7 @@ public class CrmTests : E2ETest
         var client = await CreateClientAsync(name);
         var id = client.GetProperty("id").GetString();
 
+        await Page.GotoAsync("about:blank");
         await Page.Context.ClearCookiesAsync();
         await LoginAsync(TestData.ClientsViewer);
         await Page.GotoAsync($"/clients/{id}");
@@ -248,6 +249,7 @@ public class CrmTests : E2ETest
         // Άγνωστος πελάτης: 404, όπως και χωρίς πρόσβαση
         Assert.That((await ApiAsync("GET", $"/api/crm/clients/{Guid.NewGuid()}")).Status, Is.EqualTo(404));
 
+        await Page.GotoAsync("about:blank");
         await Page.Context.ClearCookiesAsync();
         await LoginAsync(TestData.MediaViewer);
         Assert.That((await ApiAsync("GET", "/api/crm/clients")).Status, Is.EqualTo(403));

@@ -105,6 +105,12 @@ namespace Panoptes_v1.Modules.Crm.Api
         public List<ContactMethodRequest> ContactMethods { get; set; } = [];
     }
 
+    public class AttachFileRequest
+    {
+        [Required]
+        public Guid? MediaItemId { get; set; }
+    }
+
     public class VersionRequest
     {
         public uint? Version { get; set; }

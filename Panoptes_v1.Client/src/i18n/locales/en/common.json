@@ -75,11 +75,15 @@
     "open": "Search or jump to…",
     "title": "Command palette",
     "description": "Search for a page or an action",
-    "placeholder": "Search pages and actions…",
+    "placeholder": "Search clients, contacts and pages…",
     "empty": "No results found.",
     "groups": {
+      "client": "Clients",
+      "person": "Contacts",
       "pages": "Pages"
     },
+    "searching": "Searching…",
+    "archived": "Archived",
     "hints": {
       "navigate": "to navigate",
       "select": "to open",

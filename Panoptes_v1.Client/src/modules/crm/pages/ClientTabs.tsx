@@ -8,6 +8,7 @@ import { Alert, AlertAction, AlertDescription } from '@/components/ui/alert'
 import { problemMessage } from '@/lib/api'
 import { useClientActivity } from '../api'
 import { ClientActivityList } from '../components/ClientActivity'
+import { ClientFilesList } from '../components/ClientFiles'
 import { useClientContext } from './client-context'
 
 // Overview: τα πρώτα βήματα για νέο πελάτη και η πρόσφατη δραστηριότητα. Τα "Needs attention", projects και services
@@ -60,6 +61,12 @@ export function ClientOverviewTab() {
       </section>
     </div>
   )
+}
+
+// Τα αρχεία του πελάτη (DOC-01): ανέβασμα, σύνδεση από τη βιβλιοθήκη, αποσύνδεση
+export function ClientFilesTab() {
+  const { client, openUpload } = useClientContext()
+  return <ClientFilesList client={client} onUpload={openUpload} />
 }
 
 // Όλο το ιστορικό, 20 τη φορά ("Load older")

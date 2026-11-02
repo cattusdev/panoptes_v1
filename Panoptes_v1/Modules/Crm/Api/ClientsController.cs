@@ -6,6 +6,7 @@ using Panoptes_v1.Constants;
 using Panoptes_v1.Modules.Collaboration.Services;
 using Panoptes_v1.Modules.Crm.Entities;
 using Panoptes_v1.Modules.Crm.Services;
+using Panoptes_v1.Services.Media;
 
 namespace Panoptes_v1.Modules.Crm.Api
 {
@@ -18,12 +19,14 @@ namespace Panoptes_v1.Modules.Crm.Api
         private readonly ClientService _clients;
         private readonly PersonService _people;
         private readonly IActivityLog _activity;
+        private readonly RecordFiles _files;
 
-        public ClientsController(ClientService clients, PersonService people, IActivityLog activity)
+        public ClientsController(ClientService clients, PersonService people, IActivityLog activity, RecordFiles files)
         {
             _clients = clients;
             _people = people;
             _activity = activity;
+            _files = files;
         }
 
         // Ταξινόμηση: name (προεπιλογή), ref, created
@@ -154,6 +157,26 @@ namespace Panoptes_v1.Modules.Crm.Api
         [Authorize(Policy = Permissions.Clients.Edit)]
         public async Task<ActionResult<IReadOnlyList<ClientContactDto>>> RemoveContact(Guid id, Guid contactId, CancellationToken cancellationToken) =>
             await _clients.RemoveContactAsync(id, contactId, User, cancellationToken) ? await Contacts(id, cancellationToken) : NotFound();
+
+        // Τα αρχεία του πελάτη (χωρίς Media.View: κενή λίστα, το κατέβασμα ούτως ή άλλως το θέλει)
+        [HttpGet("{id:guid}/files")]
+        public async Task<ActionResult<IReadOnlyList<RecordFileDto>>> Files(Guid id, CancellationToken cancellationToken)
+        {
+            var files = await _clients.FilesAsync(id, User, _files, cancellationToken);
+            return files == null ? NotFound() : files;
+        }
+
+        // Σύνδεση αρχείου της βιβλιοθήκης (ή αρχείου που μόλις ανέβηκε από την καρτέλα)
+        [HttpPost("{id:guid}/files")]
+        [Authorize(Policy = Permissions.Clients.Edit)]
+        public async Task<ActionResult<IReadOnlyList<RecordFileDto>>> AttachFile(Guid id, AttachFileRequest request, CancellationToken cancellationToken) =>
+            await _clients.AttachFileAsync(id, request.MediaItemId!.Value, User, _files, cancellationToken) ? await Files(id, cancellationToken) : NotFound();
+
+        // Αποσύνδεση: μόνο η σύνδεση, το αρχείο μένει στη βιβλιοθήκη
+        [HttpDelete("{id:guid}/files/{mediaItemId:guid}")]
+        [Authorize(Policy = Permissions.Clients.Edit)]
+        public async Task<ActionResult<IReadOnlyList<RecordFileDto>>> DetachFile(Guid id, Guid mediaItemId, CancellationToken cancellationToken) =>
+            await _clients.DetachFileAsync(id, mediaItemId, User, _files, cancellationToken) ? await Files(id, cancellationToken) : NotFound();
 
         // Το ιστορικό του πελάτη, το πιο πρόσφατο πρώτο
         [HttpGet("{id:guid}/activity")]

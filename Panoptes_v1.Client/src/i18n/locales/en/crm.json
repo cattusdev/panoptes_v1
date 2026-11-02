@@ -118,6 +118,7 @@
     "back": "Clients",
     "new": "New",
     "newContact": "Contact",
+    "uploadFile": "Upload file",
     "edit": "Edit details",
     "more": "More actions",
     "copyRef": "Copy reference",
@@ -146,6 +147,7 @@
   "tabs": {
     "label": "Client sections",
     "overview": "Overview",
+    "files": "Files",
     "activity": "Activity"
   },
   "about": {
@@ -252,6 +254,44 @@
       "edit": "Edit details"
     }
   },
+  "files": {
+    "columns": {
+      "name": "Name",
+      "linkedTo": "Linked to",
+      "uploaded": "Uploaded",
+      "by": "By",
+      "actions": "Actions"
+    },
+    "thisClient": "This client",
+    "attachFromLibrary": "Attach from library",
+    "pickerTitle": "Attach files from the library",
+    "pickerDescription": "The files stay in the library and are linked to {{client}}.",
+    "attached_one": "{{count}} file attached",
+    "attached_other": "{{count}} files attached",
+    "download": "Download {{file}}",
+    "unlinkFile": "Unlink {{file}}",
+    "unlink": "Unlink",
+    "unlinked": "{{file}} unlinked",
+    "unlinkConfirm": {
+      "title": "Unlink this file?",
+      "description": "This removes the link only: <strong>{{file}}</strong> stays in the library and anywhere else it's used. It's no longer listed under <strong>{{client}}</strong>."
+    },
+    "empty": {
+      "title": "No files yet",
+      "description": "Upload contracts, briefs or other documents, or attach files that are already in the library."
+    },
+    "upload": {
+      "button": "Upload",
+      "title": "Upload files",
+      "description": "Files go to the library as private files and are linked to {{client}}.",
+      "busy": "Wait for the uploads to finish before closing.",
+      "uploading": "Uploading…",
+      "done": "Done",
+      "doneCount_one": "Done · {{count}} file attached",
+      "doneCount_other": "Done · {{count}} files attached",
+      "attachFailed": "{{file}} was uploaded but not linked: {{message}}"
+    }
+  },
   "overview": {
     "getStarted": "Get started",
     "getStartedDescription": "A few things that make this client easier to work with.",
@@ -291,6 +331,8 @@
       "contactAddedWithRole": "<strong>{{actor}}</strong> added <strong>{{person}}</strong> as a contact ({{role}})",
       "contactUpdated": "<strong>{{actor}}</strong> changed the {{fields}} of <strong>{{person}}</strong>",
       "contactRemoved": "<strong>{{actor}}</strong> removed <strong>{{person}}</strong> from the contacts",
+      "fileAttached": "<strong>{{actor}}</strong> attached <strong>{{file}}</strong>",
+      "fileUnlinked": "<strong>{{actor}}</strong> unlinked <strong>{{file}}</strong> (the file stays in the library)",
       "unknown": "<strong>{{actor}}</strong> made a change"
     },
     "empty": {

@@ -1,19 +1,28 @@
 import { useEffect, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { useNavigate } from 'react-router'
-import { LogOut, Search } from 'lucide-react'
+import { Building2, Contact, LogOut, Search, type LucideIcon } from 'lucide-react'
 import { navPages } from '@/components/layout/nav'
+import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Command, CommandDialog, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from '@/components/ui/command'
 import { Kbd, KbdGroup } from '@/components/ui/kbd'
+import { useDebouncedValue } from '@/hooks/use-debounced-value'
 import { hasPermission, useLogout, useSession } from '@/lib/auth'
+import { searchMinLength, useGlobalSearch, type SearchHit } from '@/lib/search-api'
 import { accountSections } from '@/pages/account/sections'
 import { settingsSections } from '@/pages/admin/settings/sections'
 
 const isMac = typeof navigator !== 'undefined' && /Mac|iPhone|iPad/.test(navigator.userAgent)
 
-// Ctrl/⌘+K (όπως Linear, Vercel, GitHub): μετάβαση σε όποια σελίδα επιτρέπεται στον χρήστη και γρήγορες ενέργειες.
-// Η αναζήτηση εγγραφών (πελάτες, projects...) θα μπει εδώ μέσω του /api/search (ARCHITECTURE §10).
+// Πού ανοίγει κάθε τύπος αποτελέσματος του /api/search (νέο module = μία γραμμή εδώ + common:palette.groups.<type>)
+const searchTargets: Record<string, { icon: LucideIcon; to: (hit: SearchHit) => string }> = {
+  client: { icon: Building2, to: (hit) => `/clients/${hit.id}` },
+  person: { icon: Contact, to: (hit) => `/contacts?person=${hit.id}` },
+}
+
+// Ctrl/⌘+K (όπως Linear, Vercel, GitHub): εγγραφές από το /api/search (ARCHITECTURE §10, μόνο όσες βλέπει ο χρήστης),
+// μετάβαση σε όποια σελίδα επιτρέπεται και γρήγορες ενέργειες.
 export function CommandPalette() {
   const { t } = useTranslation()
   const { t: tSettings } = useTranslation('settings')
@@ -22,12 +31,23 @@ export function CommandPalette() {
   const { user } = useSession()
   const logout = useLogout()
   const [open, setOpen] = useState(false)
+  const [search, setSearch] = useState('')
+  const debouncedSearch = useDebouncedValue(search, 200)
+  const results = useGlobalSearch(open ? debouncedSearch : '')
+  const groups = search.trim().length >= searchMinLength ? (results.data?.groups ?? []).filter((g) => searchTargets[g.type]) : []
+
+  // Κάθε άνοιγμα ξεκινά με κενή αναζήτηση
+  function changeOpen(value: boolean) {
+    setOpen(value)
+    if (!value) setSearch('')
+  }
 
   useEffect(() => {
     function onKeyDown(event: KeyboardEvent) {
       if (event.key.toLowerCase() === 'k' && (event.metaKey || event.ctrlKey) && !event.altKey && !event.shiftKey) {
         // Αλλιώς ο browser πάει στη δική του αναζήτηση
         event.preventDefault()
+        setSearch('')
         setOpen((value) => !value)
       }
     }
@@ -36,12 +56,12 @@ export function CommandPalette() {
   }, [])
 
   function go(to: string) {
-    setOpen(false)
+    changeOpen(false)
     navigate(to)
   }
 
   async function signOut() {
-    setOpen(false)
+    changeOpen(false)
     await logout.mutateAsync()
     navigate('/login', { replace: true })
   }
@@ -68,11 +88,37 @@ export function CommandPalette() {
         </KbdGroup>
       </Button>
 
-      <CommandDialog open={open} onOpenChange={setOpen} title={t('palette.title')} description={t('palette.description')}>
+      <CommandDialog open={open} onOpenChange={changeOpen} title={t('palette.title')} description={t('palette.description')}>
         <Command loop>
-          <CommandInput placeholder={t('palette.placeholder')} />
+          <CommandInput placeholder={t('palette.placeholder')} value={search} onValueChange={setSearch} />
           <CommandList className="max-h-[min(60vh,24rem)]">
-            <CommandEmpty>{t('palette.empty')}</CommandEmpty>
+            <CommandEmpty>{results.isFetching ? t('palette.searching') : t('palette.empty')}</CommandEmpty>
+
+            {groups.map((group) => {
+              const target = searchTargets[group.type]
+              const Icon = target.icon
+              return (
+                <CommandGroup key={group.type} heading={t(`palette.groups.${group.type as 'client' | 'person'}`)}>
+                  {group.hits.map((hit) => (
+                    <CommandItem
+                      key={`hit-${hit.type}-${hit.id}`}
+                      value={`hit-${hit.type}-${hit.id}`}
+                      // Ο server έχει ήδη φιλτράρει: το κείμενο της αναζήτησης ταιριάζει πάντα, ώστε το cmdk να μην τα κρύψει
+                      keywords={[search, hit.title, hit.subtitle ?? '', hit.reference ?? '']}
+                      onSelect={() => go(target.to(hit))}
+                    >
+                      <Icon />
+                      <span className="min-w-0 flex-1 truncate">
+                        {hit.title}
+                        {hit.subtitle && <span className="ml-2 text-xs text-muted-foreground">{hit.subtitle}</span>}
+                      </span>
+                      {hit.isArchived && <Badge variant="muted">{t('palette.archived')}</Badge>}
+                      {hit.reference && <span className="font-mono text-xs text-muted-foreground">{hit.reference}</span>}
+                    </CommandItem>
+                  ))}
+                </CommandGroup>
+              )
+            })}
 
             {pages.length > 0 && (
               <CommandGroup heading={t('palette.groups.pages')}>

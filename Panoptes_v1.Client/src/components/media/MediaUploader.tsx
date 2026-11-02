@@ -60,6 +60,8 @@ export type MediaUploaderProps = {
   initialFiles?: File[]
   onUploaded?: (item: MediaItem) => void
   onReverted?: () => void
+  // Πριν από την αναίρεση (undo) ενός upload, π.χ. αποσύνδεση από την εγγραφή όπου συνδέθηκε (αλλιώς ο server την αρνείται)
+  beforeRevert?: (item: MediaItem) => Promise<unknown>
   onBusyChange?: (busy: boolean) => void
   // Τετράγωνο κόψιμο + σμίκρυνση στον browser πριν το upload (π.χ. φωτογραφία προφίλ). Ο server ξαναεπεξεργάζεται ούτως ή άλλως.
   squareCrop?: number
@@ -77,6 +79,8 @@ export function MediaUploader(props: MediaUploaderProps) {
   const inputRef = useRef<HTMLInputElement>(null)
   const pondRef = useRef<FilePond.FilePond | null>(null)
   const latest = useRef(props)
+  // uploadId -> το αρχείο που δημιουργήθηκε (για το beforeRevert)
+  const uploaded = useRef(new Map<string, MediaItem>())
 
   useEffect(() => {
     latest.current = props
@@ -120,6 +124,7 @@ export function MediaUploader(props: MediaUploaderProps) {
           })
             .then((result) => {
               done = true
+              uploaded.current.set(result.uploadId, result.item)
               load(result.uploadId)
               latest.current.onUploaded?.(result.item)
             })
@@ -140,7 +145,10 @@ export function MediaUploader(props: MediaUploaderProps) {
           }
         },
         revert: (uploadId, load, error) => {
-          revertUpload(uploadId)
+          const item = uploaded.current.get(uploadId)
+          const before = item && latest.current.beforeRevert ? latest.current.beforeRevert(item) : Promise.resolve()
+          before
+            .then(() => revertUpload(uploadId))
             .then(() => {
               load()
               latest.current.onReverted?.()

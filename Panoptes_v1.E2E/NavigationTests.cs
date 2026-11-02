@@ -217,7 +217,7 @@ public class NavigationTests : E2ETest
         await Page.GetByRole(AriaRole.Button, new() { Name = "Αναζήτηση ή μετάβαση…" }).ClickAsync();
 
         var palette = Page.GetByRole(AriaRole.Dialog, new() { Name = "Παλέτα εντολών" });
-        await Expect(palette.GetByPlaceholder("Αναζήτηση σελίδων και ενεργειών…")).ToBeVisibleAsync();
+        await Expect(palette.GetByPlaceholder("Αναζήτηση πελατών, επαφών και σελίδων…")).ToBeVisibleAsync();
         await palette.GetByRole(AriaRole.Combobox).FillAsync("αρχείο");
         await palette.GetByRole(AriaRole.Option, new() { Name = "Αρχείο ενεργειών", Exact = true }).ClickAsync();
         await Expect(Page).ToHaveURLAsync(new Regex("/admin/audit-logs$"));

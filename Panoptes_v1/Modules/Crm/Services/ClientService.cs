@@ -10,6 +10,7 @@ using Panoptes_v1.Modules.Crm.Api;
 using Panoptes_v1.Modules.Crm.Entities;
 using Panoptes_v1.Services;
 using Panoptes_v1.Services.Access;
+using Panoptes_v1.Services.Media;
 
 namespace Panoptes_v1.Modules.Crm.Services
 {
@@ -309,6 +310,50 @@ namespace Panoptes_v1.Modules.Crm.Services
             if (current.Count == 0) return;
             current.ForEach(cc => cc.IsPrimary = false);
             await _db.SaveChangesAsync(cancellationToken);
+        }
+
+        // --- Αρχεία (καρτέλα Files) ---
+
+        // Ο πελάτης δεν ανήκει σε project: η σύνδεση δεν στενεύει την πρόσβαση (τα αρχεία projects θα έχουν το ProjectId τους)
+        private static AttachmentTarget FileTarget(Guid clientId) => new(EntityType, clientId.ToString());
+
+        public async Task<List<RecordFileDto>?> FilesAsync(Guid clientId, ClaimsPrincipal user, RecordFiles files, CancellationToken cancellationToken = default)
+        {
+            if (!await Visible(user).AnyAsync(c => c.Id == clientId, cancellationToken)) return null;
+            var target = FileTarget(clientId);
+            return await files.ListAsync([(target.EntityType, target.EntityId)], user, cancellationToken);
+        }
+
+        // false = ο πελάτης ή το αρχείο δεν υπάρχει / δεν το βλέπει ο χρήστης. Σύνδεση και ιστορικό στο ίδιο transaction.
+        public async Task<bool> AttachFileAsync(Guid clientId, Guid mediaItemId, ClaimsPrincipal user, RecordFiles files, CancellationToken cancellationToken = default)
+        {
+            if (!await Visible(user).AnyAsync(c => c.Id == clientId, cancellationToken)) return false;
+
+            await using var transaction = await _db.Database.BeginTransactionAsync(cancellationToken);
+            var attached = await files.AttachAsync(mediaItemId, FileTarget(clientId), user, cancellationToken);
+            if (attached == null) return false;
+            if (attached.Value.Created)
+            {
+                _activity.Add(new ActivityEntry(EntityType, clientId, "client.fileAttached", new { fileId = mediaItemId, file = attached.Value.Title }, clientId));
+                await _db.SaveChangesAsync(cancellationToken);
+            }
+            await transaction.CommitAsync(cancellationToken);
+            return true;
+        }
+
+        // Σβήνει μόνο τη σύνδεση: το αρχείο μένει στη βιβλιοθήκη (DOC-01)
+        public async Task<bool> DetachFileAsync(Guid clientId, Guid mediaItemId, ClaimsPrincipal user, RecordFiles files, CancellationToken cancellationToken = default)
+        {
+            if (!await Visible(user).AnyAsync(c => c.Id == clientId, cancellationToken)) return false;
+
+            await using var transaction = await _db.Database.BeginTransactionAsync(cancellationToken);
+            var target = FileTarget(clientId);
+            var title = await files.DetachAsync(mediaItemId, target.EntityType, target.EntityId, cancellationToken);
+            if (title == null) return false;
+            _activity.Add(new ActivityEntry(EntityType, clientId, "client.fileUnlinked", new { fileId = mediaItemId, file = title }, clientId));
+            await _db.SaveChangesAsync(cancellationToken);
+            await transaction.CommitAsync(cancellationToken);
+            return true;
         }
 
         // --- Βοηθητικά ---

@@ -1,5 +1,6 @@
 import { keepPreviousData, useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { api, ApiError, toQuery, type Paged } from '@/lib/api'
+import type { MediaItem } from '@/lib/media-api'
 
 // ---------- Τύποι (ίδιοι με τα DTOs του Modules/Crm/Api/CrmContracts.cs) ----------
 export type ClientKind = 'Organization' | 'Individual'
@@ -237,6 +238,35 @@ export function useClientActivity(id: string, page: number) {
     queryKey: ['crm', 'activity', id, page],
     queryFn: () => api<Paged<ActivityItem>>(`/api/crm/clients/${id}/activity${toQuery({ page, pageSize: 20 })}`),
     placeholderData: keepPreviousData,
+  })
+}
+
+// ---------- Αρχεία πελάτη ----------
+export type RecordFile = { item: MediaItem; entityType: string; entityId: string; linkedAt: string; linkedBy: string | null }
+
+export function useClientFiles(id: string, enabled: boolean) {
+  return useQuery({ queryKey: ['crm', 'files', id], queryFn: () => api<RecordFile[]>(`/api/crm/clients/${id}/files`), enabled })
+}
+
+// Η βιβλιοθήκη αλλάζει κι αυτή (το αρχείο δεν μπαίνει πια στον κάδο όσο είναι συνδεδεμένο)
+function useInvalidateFiles() {
+  const queryClient = useQueryClient()
+  return () => Promise.all([queryClient.invalidateQueries({ queryKey: ['crm'] }), queryClient.invalidateQueries({ queryKey: ['media'] })])
+}
+
+export function useAttachClientFile(clientId: string) {
+  const invalidate = useInvalidateFiles()
+  return useMutation({
+    mutationFn: (mediaItemId: string) => api<RecordFile[]>(`/api/crm/clients/${clientId}/files`, { method: 'POST', body: { mediaItemId } }),
+    onSuccess: invalidate,
+  })
+}
+
+export function useDetachClientFile(clientId: string) {
+  const invalidate = useInvalidateFiles()
+  return useMutation({
+    mutationFn: (mediaItemId: string) => api<RecordFile[]>(`/api/crm/clients/${clientId}/files/${mediaItemId}`, { method: 'DELETE' }),
+    onSuccess: invalidate,
   })
 }
 

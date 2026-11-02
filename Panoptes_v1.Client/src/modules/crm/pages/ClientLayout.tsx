@@ -2,7 +2,7 @@ import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Link, Outlet, useParams } from 'react-router'
 import { toast } from 'sonner'
-import { Archive, ArchiveRestore, ArrowLeft, ChevronDown, Copy, EllipsisVertical, Mail, Pencil, Phone, Plus, SearchX, UserPlus } from 'lucide-react'
+import { Archive, ArchiveRestore, ArrowLeft, ChevronDown, Copy, EllipsisVertical, Mail, Pencil, Phone, Plus, SearchX, Upload, UserPlus } from 'lucide-react'
 import { ConfirmDialog } from '@/components/admin/ConfirmDialog'
 import { useDateFormat } from '@/lib/dates'
 import { RouteTabs } from '@/components/admin/PageHeader'
@@ -14,13 +14,17 @@ import { Empty, EmptyContent, EmptyDescription, EmptyHeader, EmptyMedia, EmptyTi
 import { Skeleton } from '@/components/ui/skeleton'
 import { useMediaQuery } from '@/hooks/use-media-query'
 import { ApiError, problemMessage } from '@/lib/api'
+import { hasPermission, useSession } from '@/lib/auth'
+import { Permissions } from '@/lib/permissions'
 import { cn } from '@/lib/utils'
 import { useArchiveClient, useClient, useClientContacts, type Client, type ClientContact } from '../api'
 import { ClientAbout } from '../components/ClientAbout'
 import { ClientStatusBadge, KindIcon } from '../components/ClientBadges'
 import { ClientFormSheet } from '../components/ClientFormSheet'
 import type { ClientOutletContext } from './client-context'
+import { ClientUploadDialog } from '../components/ClientFiles'
 import { AddContactDialog } from '../components/ContactDialogs'
+import { useClientFileAbilities } from '../file-abilities'
 
 
 // Client 360° (docs/ux/client-360.md): κεφαλίδα, About (επαφές κ.λπ.) και καρτέλες ως routes.
@@ -35,6 +39,8 @@ export function ClientLayout() {
   const [aboutOpen, setAboutOpen] = useState(false)
   const [editOpen, setEditOpen] = useState(false)
   const [addContactOpen, setAddContactOpen] = useState(false)
+  const [uploadOpen, setUploadOpen] = useState(false)
+  const { user } = useSession()
 
   if (client.isPending) return <ClientSkeleton />
   if (client.isError) {
@@ -63,12 +69,20 @@ export function ClientLayout() {
   )
   const tabs = [
     { to: `/clients/${c.id}`, label: t('tabs.overview'), end: true },
+    // Τα αρχεία κατεβαίνουν μόνο με Media.View: χωρίς αυτό η καρτέλα δεν εμφανίζεται
+    ...(hasPermission(user, Permissions.Media.View) ? [{ to: `/clients/${c.id}/files`, label: t('tabs.files') }] : []),
     { to: `/clients/${c.id}/activity`, label: t('tabs.activity') },
   ]
 
   return (
     <div className="pb-20 md:pb-0">
-      <ClientHeader client={c} contacts={contacts.data} onEdit={() => setEditOpen(true)} onAddContact={() => setAddContactOpen(true)} />
+      <ClientHeader
+        client={c}
+        contacts={contacts.data}
+        onEdit={() => setEditOpen(true)}
+        onAddContact={() => setAddContactOpen(true)}
+        onUpload={() => setUploadOpen(true)}
+      />
       {c.archivedAt && <ArchivedBanner client={c} />}
 
       <div className={cn(wide && 'grid grid-cols-[minmax(0,1fr)_320px] gap-6')}>
@@ -89,7 +103,16 @@ export function ClientLayout() {
           )}
           <RouteTabs label={t('tabs.label')} tabs={tabs} />
           <div className="pt-5">
-            <Outlet context={{ client: c, contacts: contacts.data, openAddContact: () => setAddContactOpen(true) } satisfies ClientOutletContext} />
+            <Outlet
+              context={
+                {
+                  client: c,
+                  contacts: contacts.data,
+                  openAddContact: () => setAddContactOpen(true),
+                  openUpload: () => setUploadOpen(true),
+                } satisfies ClientOutletContext
+              }
+            />
           </div>
         </div>
         {wide && (
@@ -107,6 +130,7 @@ export function ClientLayout() {
         hasPrimary={(contacts.data ?? []).some((contact) => contact.isPrimary)}
       />
       <ClientFormSheet open={editOpen} onOpenChange={setEditOpen} client={c} />
+      <ClientUploadDialog client={c} open={uploadOpen} onOpenChange={setUploadOpen} />
     </div>
   )
 }
@@ -116,13 +140,16 @@ function ClientHeader({
   contacts,
   onEdit,
   onAddContact,
+  onUpload,
 }: {
   client: Client
   contacts: ClientContact[] | undefined
   onEdit: () => void
   onAddContact: () => void
+  onUpload: () => void
 }) {
   const { t } = useTranslation('crm')
+  const files = useClientFileAbilities(client)
   const archive = useArchiveClient(client.id)
   const [confirmArchive, setConfirmArchive] = useState(false)
   const primary = contacts?.find((c) => c.isPrimary)
@@ -147,7 +174,11 @@ function ClientHeader({
     }
   }
 
-  const newItems = client.canEdit ? [{ key: 'contact', icon: UserPlus, label: t('header.newContact'), onSelect: onAddContact }] : []
+  // Μόνο ό,τι επιτρέπεται στον χρήστη (Project, Task, Ticket, Service, Note έρχονται με τα modules τους)
+  const newItems = [
+    ...(client.canEdit ? [{ key: 'contact', icon: UserPlus, label: t('header.newContact'), onSelect: onAddContact }] : []),
+    ...(files.canUpload ? [{ key: 'file', icon: Upload, label: t('header.uploadFile'), onSelect: onUpload }] : []),
+  ]
 
   const newMenu = newItems.length > 0 && (
     <DropdownMenu>

@@ -1,4 +1,4 @@
-﻿using Microsoft.Extensions.Localization;
+using Microsoft.Extensions.Localization;
 using Panoptes_v1;
 using Panoptes_v1.Data;
 using Microsoft.AspNetCore.Identity;
@@ -163,6 +163,7 @@ builder.Services.AddSingleton<MediaUploadLocks>();
 builder.Services.AddScoped<MediaService>();
 builder.Services.AddScoped<MediaUsage>();
 builder.Services.AddScoped<MediaAttachments>();
+builder.Services.AddScoped<RecordFiles>();
 builder.Services.AddScoped<ProfileService>();
 builder.Services.AddScoped<MediaCleanup>();
 builder.Services.AddHostedService<MediaCleanupService>();

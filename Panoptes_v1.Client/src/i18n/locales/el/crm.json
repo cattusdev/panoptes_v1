@@ -118,6 +118,7 @@
     "back": "Πελάτες",
     "new": "Νέο",
     "newContact": "Επαφή",
+    "uploadFile": "Ανέβασμα αρχείου",
     "edit": "Επεξεργασία",
     "more": "Περισσότερες ενέργειες",
     "copyRef": "Αντιγραφή κωδικού",
@@ -146,6 +147,7 @@
   "tabs": {
     "label": "Ενότητες πελάτη",
     "overview": "Επισκόπηση",
+    "files": "Αρχεία",
     "activity": "Δραστηριότητα"
   },
   "about": {
@@ -252,6 +254,44 @@
       "edit": "Επεξεργασία στοιχείων"
     }
   },
+  "files": {
+    "columns": {
+      "name": "Όνομα",
+      "linkedTo": "Συνδέεται με",
+      "uploaded": "Ανέβηκε",
+      "by": "Από",
+      "actions": "Ενέργειες"
+    },
+    "thisClient": "Αυτόν τον πελάτη",
+    "attachFromLibrary": "Από τη βιβλιοθήκη",
+    "pickerTitle": "Σύνδεση αρχείων από τη βιβλιοθήκη",
+    "pickerDescription": "Τα αρχεία μένουν στη βιβλιοθήκη και συνδέονται με τον πελάτη {{client}}.",
+    "attached_one": "Συνδέθηκε {{count}} αρχείο",
+    "attached_other": "Συνδέθηκαν {{count}} αρχεία",
+    "download": "Λήψη {{file}}",
+    "unlinkFile": "Αποσύνδεση {{file}}",
+    "unlink": "Αποσύνδεση",
+    "unlinked": "Το αρχείο {{file}} αποσυνδέθηκε",
+    "unlinkConfirm": {
+      "title": "Αποσύνδεση αρχείου;",
+      "description": "Αφαιρείται μόνο η σύνδεση: το <strong>{{file}}</strong> μένει στη βιβλιοθήκη και όπου αλλού χρησιμοποιείται. Απλώς δεν εμφανίζεται πια στον πελάτη <strong>{{client}}</strong>."
+    },
+    "empty": {
+      "title": "Δεν υπάρχουν ακόμα αρχεία",
+      "description": "Ανεβάστε συμβάσεις, briefs ή άλλα έγγραφα, ή συνδέστε αρχεία που υπάρχουν ήδη στη βιβλιοθήκη."
+    },
+    "upload": {
+      "button": "Ανέβασμα",
+      "title": "Ανέβασμα αρχείων",
+      "description": "Τα αρχεία μπαίνουν στη βιβλιοθήκη ως ιδιωτικά και συνδέονται με τον πελάτη {{client}}.",
+      "busy": "Περιμένετε να ολοκληρωθούν τα uploads πριν κλείσετε.",
+      "uploading": "Ανέβασμα…",
+      "done": "Τέλος",
+      "doneCount_one": "Τέλος · συνδέθηκε {{count}} αρχείο",
+      "doneCount_other": "Τέλος · συνδέθηκαν {{count}} αρχεία",
+      "attachFailed": "Το {{file}} ανέβηκε αλλά δεν συνδέθηκε: {{message}}"
+    }
+  },
   "overview": {
     "getStarted": "Πρώτα βήματα",
     "getStartedDescription": "Μερικά πράγματα που κάνουν τη δουλειά με αυτόν τον πελάτη πιο εύκολη.",
@@ -291,6 +331,8 @@
       "contactAddedWithRole": "<strong>{{actor}}</strong>: προσθήκη του προσώπου <strong>{{person}}</strong> ως επαφής ({{role}})",
       "contactUpdated": "<strong>{{actor}}</strong>: αλλαγή σε {{fields}} για <strong>{{person}}</strong>",
       "contactRemoved": "<strong>{{actor}}</strong>: αφαίρεση του προσώπου <strong>{{person}}</strong> από τις επαφές",
+      "fileAttached": "<strong>{{actor}}</strong>: σύνδεση του αρχείου <strong>{{file}}</strong>",
+      "fileUnlinked": "<strong>{{actor}}</strong>: αποσύνδεση του αρχείου <strong>{{file}}</strong> (μένει στη βιβλιοθήκη)",
       "unknown": "<strong>{{actor}}</strong>: αλλαγή"
     },
     "empty": {
