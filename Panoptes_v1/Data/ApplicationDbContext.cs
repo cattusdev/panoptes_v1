@@ -3,7 +3,9 @@ using Panoptes_v1.Models.Media;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
+using System.Diagnostics;
 using System.Security.Claims;
+using Microsoft.EntityFrameworkCore.ChangeTracking;
 
 namespace Panoptes_v1.Data
 {
@@ -28,6 +30,8 @@ namespace Panoptes_v1.Data
         public DbSet<UserProfile> UserProfiles { get; set; }
         public DbSet<BrandingSettings> Branding { get; set; }
         public DbSet<AppSetting> AppSettings { get; set; }
+        public DbSet<MediaAttachment> MediaAttachments { get; set; }
+        public DbSet<BackgroundJob> BackgroundJobs { get; set; }
 
         protected override void OnModelCreating(ModelBuilder builder)
         {
@@ -97,24 +101,108 @@ namespace Panoptes_v1.Data
                 upload.Property(u => u.FileName).HasMaxLength(255);
                 upload.HasIndex(u => u.CreatedAt);
             });
+
+            // Ένα αρχείο, πολλές εγγραφές. Restrict: αρχείο με συνδέσεις δεν σβήνεται (πρώτα αποσυνδέεται)
+            builder.Entity<MediaAttachment>(attachment =>
+            {
+                attachment.Property(a => a.EntityType).HasMaxLength(50);
+                attachment.Property(a => a.EntityId).HasMaxLength(64);
+                attachment.Property(a => a.RequiredPermission).HasMaxLength(100);
+                attachment.HasOne(a => a.MediaItem).WithMany().HasForeignKey(a => a.MediaItemId).OnDelete(DeleteBehavior.Restrict);
+                attachment.HasIndex(a => new { a.MediaItemId, a.EntityType, a.EntityId }).IsUnique();
+                attachment.HasIndex(a => new { a.EntityType, a.EntityId });
+                attachment.HasIndex(a => a.ProjectId);
+            });
+
+            builder.Entity<BackgroundJob>(job =>
+            {
+                job.Property(j => j.Type).HasMaxLength(100);
+                job.Property(j => j.IdempotencyKey).HasMaxLength(200);
+                job.Property(j => j.Payload).HasColumnType("jsonb");
+                job.Property(j => j.Status).HasConversion<string>().HasMaxLength(20);
+                job.HasIndex(j => j.IdempotencyKey).IsUnique();
+                job.HasIndex(j => new { j.Status, j.RunAt });
+            });
+
+            builder.Entity<AuditLog>(log =>
+            {
+                log.Property(l => l.Source).HasMaxLength(100);
+                log.Property(l => l.TraceId).HasMaxLength(64);
+                log.HasIndex(l => l.DateTime);
+                log.HasIndex(l => new { l.TableName, l.PrimaryKey });
+                log.HasIndex(l => l.UserId);
+            });
+
+            // Optimistic concurrency: το xmin της Postgres αλλάζει σε κάθε UPDATE. Αν η εγγραφή άλλαξε στο μεταξύ,
+            // το SaveChanges πετάει DbUpdateConcurrencyException (-> 409 από τον GlobalExceptionHandler).
+            builder.Entity<MediaFolder>().Property(f => f.RowVersion).IsRowVersion();
+            builder.Entity<MediaItem>().Property(i => i.RowVersion).IsRowVersion();
+            builder.Entity<UserProfile>().Property(p => p.RowVersion).IsRowVersion();
+            builder.Entity<BrandingSettings>().Property(b => b.RowVersion).IsRowVersion();
+            builder.Entity<AppSetting>().Property(s => s.RowVersion).IsRowVersion();
         }
 
-        // OVERRIDE: Πιάνουμε το SaveChanges πριν εκτελεστεί!
-        public override async Task<int> SaveChangesAsync(CancellationToken cancellationToken = default)
+        // Ό,τι αποθηκεύεται (sync ή async) περνάει από το audit. Τα SaveChanges()/SaveChangesAsync(ct) καταλήγουν εδώ.
+        public override int SaveChanges(bool acceptAllChangesOnSuccess)
         {
-            var auditEntries = OnBeforeSaveChanges(); // Δες τι άλλαξε
-            var result = await base.SaveChangesAsync(cancellationToken); // Σώσε τις πραγματικές αλλαγές
-            await OnAfterSaveChangesAsync(auditEntries); // Σώσε και τα Logs!
+            var pending = OnBeforeSaveChanges();
+            if (pending.Count == 0)
+                return base.SaveChanges(acceptAllChangesOnSuccess);
+
+            // Οι εγγραφές με IDs από τη βάση γράφουν το log τους σε δεύτερο βήμα: και τα δύο μαζί ή τίποτα
+            using var transaction = Database.CurrentTransaction == null ? Database.BeginTransaction() : null;
+            var result = base.SaveChanges(acceptAllChangesOnSuccess);
+            AuditLogs.AddRange(pending.Select(e => e.ToAuditLog()));
+            base.SaveChanges(acceptAllChangesOnSuccess);
+            transaction?.Commit();
             return result;
         }
 
+        public override async Task<int> SaveChangesAsync(bool acceptAllChangesOnSuccess, CancellationToken cancellationToken = default)
+        {
+            var pending = OnBeforeSaveChanges();
+            if (pending.Count == 0)
+                return await base.SaveChangesAsync(acceptAllChangesOnSuccess, cancellationToken);
+
+            await using var transaction = Database.CurrentTransaction == null ? await Database.BeginTransactionAsync(cancellationToken) : null;
+            var result = await base.SaveChangesAsync(acceptAllChangesOnSuccess, cancellationToken);
+            AuditLogs.AddRange(pending.Select(e => e.ToAuditLog()));
+            await base.SaveChangesAsync(acceptAllChangesOnSuccess, cancellationToken);
+            if (transaction != null) await transaction.CommitAsync(cancellationToken);
+            return result;
+        }
+
+        // Στήλες που δεν γράφονται ποτέ στο log, ανά πίνακα (όχι ανά όνομα: ένα PhoneNumber πελάτη πρέπει να καταγράφεται).
+        // Επιπλέον: τα concurrency tokens (RowVersion, ConcurrencyStamp) και ό,τι έχει [AuditIgnore].
+        private static readonly Dictionary<Type, HashSet<string>> SensitiveColumns = new()
+        {
+            [typeof(IdentityUser)] = ["PasswordHash", "SecurityStamp", "PhoneNumber"], // PhoneNumber: τηλέφωνο λογαριασμού (2FA/GDPR)
+            [typeof(IdentityUserToken<string>)] = ["Value"], // authenticator key / recovery codes
+            [typeof(AppSetting)] = ["Secret"],                // κρυπτογραφημένα μυστικά (π.χ. SMTP password)
+        };
+
+        private static bool IsSensitive(PropertyEntry property, Type entityType)
+        {
+            if (property.Metadata.IsConcurrencyToken)
+                return true;
+            if (property.Metadata.PropertyInfo?.IsDefined(typeof(AuditIgnoreAttribute), inherit: true) == true)
+                return true;
+            return SensitiveColumns.Any(s => s.Key.IsAssignableFrom(entityType) && s.Value.Contains(property.Metadata.Name));
+        }
+
+        // Γράφει τα logs που είναι έτοιμα· επιστρέφει όσα περιμένουν IDs από τη βάση
         private List<AuditEntry> OnBeforeSaveChanges()
         {
             ChangeTracker.DetectChanges();
             var auditEntries = new List<AuditEntry>();
 
-            // Βρες το ID του χρήστη που κάνει την κίνηση (αν είναι Logged in)
-            var userId = _httpContextAccessor.HttpContext?.User?.FindFirstValue(ClaimTypes.NameIdentifier);
+            // Ποιος κάνει την κίνηση: το κομμάτι του συστήματος που το δήλωσε (job, CLI), αλλιώς ο χρήστης του request,
+            // αλλιώς "system" (κώδικας χωρίς request που δεν δήλωσε τι είναι)
+            var httpContext = _httpContextAccessor.HttpContext;
+            var source = AuditContext.Source;
+            var userId = source == null ? httpContext?.User?.FindFirstValue(ClaimTypes.NameIdentifier) : null;
+            if (source == null && userId == null && httpContext == null) source = AuditContext.DefaultSource;
+            var traceId = httpContext?.TraceIdentifier ?? Activity.Current?.TraceId.ToString();
 
             foreach (var entry in ChangeTracker.Entries())
             {
@@ -122,44 +210,35 @@ namespace Panoptes_v1.Data
                 if (entry.Entity is AuditLog || entry.State == EntityState.Detached || entry.State == EntityState.Unchanged)
                     continue;
 
-                // Owned (π.χ. τα variants σε jsonb) και τα "θορυβώδη" (upload sessions) δεν χρειάζονται δικό τους log
+                // Owned (π.χ. τα variants σε jsonb) και τα "θορυβώδη" (upload sessions, jobs) δεν χρειάζονται δικό τους log
                 if (entry.Metadata.IsOwned() || entry.Entity is INotAudited)
                     continue;
 
                 var auditEntry = new AuditEntry(entry)
                 {
                     TableName = entry.Metadata.GetTableName() ?? entry.Entity.GetType().Name,
-                    UserId = userId
+                    UserId = userId,
+                    Source = source,
+                    TraceId = traceId,
+                    AuditType = entry.State switch
+                    {
+                        EntityState.Added => AuditType.Create,
+                        EntityState.Deleted => AuditType.Delete,
+                        _ => AuditType.Update,
+                    },
                 };
-                auditEntries.Add(auditEntry);
 
                 foreach (var property in entry.Properties)
                 {
-                    if (property.IsTemporary)
-                    {
-                        // Αν το ID δεν έχει δημιουργηθεί ακόμα (π.χ. νέος χρήστης), το προσπερνάμε προς το παρόν
+                    if (IsSensitive(property, entry.Entity.GetType()))
                         continue;
-                    }
 
                     string propertyName = property.Metadata.Name;
-                    
-                    var sensitiveColumns = new List<string>
-                    {
-                        "PasswordHash",
-                        "SecurityStamp",
-                        "ConcurrencyStamp",
-                        "PhoneNumber", // Αν θεωρείς τα τηλέφωνα GDPR sensitive
-                        "Secret" // AppSettings: κρυπτογραφημένα μυστικά (π.χ. SMTP password)
-                    };
 
-                    if (sensitiveColumns.Contains(propertyName))
+                    if (property.IsTemporary)
                     {
-                        continue; // Αγνοούμε εντελώς αυτή τη στήλη!
-                    }
-
-                    // AspNetUserTokens.Value = authenticator key / recovery codes: ποτέ στο log
-                    if (entry.Entity is IdentityUserToken<string> && propertyName == "Value")
-                    {
+                        // Το ID (ή άλλη τιμή) δεν έχει δημιουργηθεί ακόμα: το διαβάζουμε μετά το Save
+                        auditEntry.TemporaryProperties.Add(property);
                         continue;
                     }
 
@@ -171,58 +250,30 @@ namespace Panoptes_v1.Data
                     switch (entry.State)
                     {
                         case EntityState.Added:
-                            auditEntry.AuditType = AuditType.Create;
                             auditEntry.NewValues[propertyName] = property.CurrentValue;
                             break;
                         case EntityState.Deleted:
-                            auditEntry.AuditType = AuditType.Delete;
                             auditEntry.OldValues[propertyName] = property.OriginalValue;
                             break;
                         case EntityState.Modified:
                             if (property.IsModified)
                             {
                                 auditEntry.ChangedColumns.Add(propertyName);
-                                auditEntry.AuditType = AuditType.Update;
                                 auditEntry.OldValues[propertyName] = property.OriginalValue;
                                 auditEntry.NewValues[propertyName] = property.CurrentValue;
                             }
                             break;
                     }
                 }
+
+                auditEntries.Add(auditEntry);
             }
 
-            // Όσα Logs είναι έτοιμα (δεν περιμένουν ID), τα βάζουμε να σωθούν
-            foreach (var auditEntry in auditEntries.Where(_ => !_.Entry.Properties.Any(p => p.IsTemporary)))
-            {
-                AuditLogs.Add(auditEntry.ToAuditLog());
-            }
+            // Όσα Logs είναι έτοιμα (δεν περιμένουν ID), τα βάζουμε να σωθούν μαζί με τις αλλαγές
+            AuditLogs.AddRange(auditEntries.Where(e => !e.HasTemporaryProperties).Select(e => e.ToAuditLog()));
 
             // Επιστρέφουμε όσα Logs περιμένουν να παραχθεί ID από τη Βάση
-            return auditEntries.Where(_ => _.Entry.Properties.Any(p => p.IsTemporary)).ToList();
-        }
-
-        private Task OnAfterSaveChangesAsync(List<AuditEntry> auditEntries)
-        {
-            if (auditEntries == null || auditEntries.Count == 0)
-                return Task.CompletedTask;
-
-            // Τώρα που έγινε το Save, η βάση έφτιαξε τα νέα IDs. Τα παίρνουμε και τα βάζουμε στα Logs.
-            foreach (var auditEntry in auditEntries)
-            {
-                foreach (var prop in auditEntry.Entry.Properties)
-                {
-                    if (prop.IsTemporary)
-                    {
-                        auditEntry.KeyValues[prop.Metadata.Name] = prop.CurrentValue;
-                        if (auditEntry.AuditType == AuditType.Create)
-                            auditEntry.NewValues[prop.Metadata.Name] = prop.CurrentValue;
-                    }
-                }
-                AuditLogs.Add(auditEntry.ToAuditLog());
-            }
-
-            // Σώζουμε τα Logs των νέων εγγραφών
-            return base.SaveChangesAsync();
+            return auditEntries.Where(e => e.HasTemporaryProperties).ToList();
         }
     }
 }

@@ -153,6 +153,20 @@ public class MediaLibraryTests : MediaTest
         await Expect(sheet.GetByRole(AriaRole.Link, new() { Name = "Download" })).ToBeVisibleAsync();
     }
 
+    // Ένα μεγάλο όνομα φακέλου κόβεται μέσα στο δέντρο και δεν "πατάει" πάνω στη λίστα αρχείων (ούτε μπλοκάρει τα κλικ της)
+    [Test]
+    public async Task FolderTree_LongNames_StayInsideTheTree()
+    {
+        await LoginAsync(TestData.MediaEditor);
+        var name = $"Client-handover-documents-and-contracts-{Guid.NewGuid():N}";
+        await CreateFolderAsync(name);
+
+        await Page.GotoAsync("/admin/media");
+        var tree = Page.GetByRole(AriaRole.Navigation, new() { Name = "Folders" });
+        await Expect(tree.GetByText(name)).ToBeVisibleAsync();
+        Assert.That(await tree.EvaluateAsync<bool>("nav => nav.scrollWidth <= nav.clientWidth"), Is.True);
+    }
+
     [Test]
     public async Task Folders_CreateOpenAndNavigateWithBreadcrumbs()
     {

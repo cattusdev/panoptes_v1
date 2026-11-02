@@ -111,14 +111,15 @@ namespace Panoptes_v1.Services.Media
             while (true)
             {
                 var batch = await _db.MediaItems.Include(i => i.Versions)
-                    .Where(i => i.DeletedAt != null && i.DeletedAt < cutoff)
+                    .Where(i => i.DeletedAt != null && i.DeletedAt < cutoff && !_db.MediaAttachments.Any(a => a.MediaItemId == i.Id))
                     .OrderBy(i => i.Id)
                     .Take(100)
                     .ToListAsync(cancellationToken);
                 if (batch.Count == 0) return count;
 
-                await _media.DeletePermanentlyAsync(batch, cancellationToken);
-                count += batch.Count;
+                var deleted = await _media.DeletePermanentlyAsync(batch, cancellationToken);
+                if (deleted == 0) return count;
+                count += deleted;
             }
         }
 
@@ -246,6 +247,7 @@ namespace Panoptes_v1.Services.Media
                 {
                     try
                     {
+                        using var audit = AuditContext.Use("media:cleanup");
                         using var scope = _scopes.CreateScope();
                         await scope.ServiceProvider.GetRequiredService<MediaCleanup>().RunAsync(stoppingToken);
                     }

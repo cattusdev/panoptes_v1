@@ -80,7 +80,8 @@ export function FolderTree({
 
   return (
     <nav aria-label={t('folders')} className="text-sm">
-      <ul className="grid gap-0.5">
+      {/* grid-cols-1 = minmax(0, 1fr): τα μεγάλα ονόματα κόβονται (truncate) αντί να βγαίνουν πάνω από τη λίστα αρχείων */}
+      <ul className="grid grid-cols-1 gap-0.5">
         <li>
           <TreeRow
             label={t('library')}

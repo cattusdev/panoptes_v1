@@ -1,3 +1,4 @@
+using Microsoft.Extensions.Localization;
 using Panoptes_v1;
 using Panoptes_v1.Data;
 using Microsoft.AspNetCore.Identity;
@@ -7,6 +8,8 @@ using Panoptes_v1.Constants;
 using Panoptes_v1.Middlewares;
 using Panoptes_v1.Services.Media;
 using Panoptes_v1.Services.Settings;
+using Panoptes_v1.Services.Jobs;
+using Panoptes_v1.Services.Access;
 using Panoptes_v1.Api;
 using Microsoft.AspNetCore.DataProtection;
 using Microsoft.AspNetCore.Localization;
@@ -105,7 +108,27 @@ builder.Services.AddScoped<SettingsService>();
 
 builder.Services.AddScoped<EmailSender>();
 builder.Services.AddScoped<IEmailSender>(services => services.GetRequiredService<EmailSender>());
+builder.Services.AddSingleton<AppUrls>();
 builder.Services.AddScoped<AccountEmails>();
+builder.Services.AddSingleton(TimeProvider.System);
+builder.Services.AddScoped<BusinessClock>();
+
+// --- ΔΟΥΛΕΙΕΣ ΠΑΡΑΣΚΗΝΙΟΥ ---
+// Ουρά στη βάση (BackgroundJobs): αντέχει restart, επαναλήψεις με καθυστέρηση, ποτέ διπλή δουλειά (IdempotencyKey)
+builder.Services.AddOptions<JobOptions>()
+    .Bind(builder.Configuration.GetSection(JobOptions.Section))
+    .Validate(o => o.PollSeconds >= 0 && o.LeaseMinutes >= 1 && o.DefaultMaxAttempts >= 1 && o.RetryDelaySeconds >= 0, "Jobs settings must be positive (PollSeconds 0 turns the runner off).")
+    .ValidateOnStart();
+builder.Services.AddScoped<JobQueue>();
+builder.Services.AddScoped<JobProcessor>();
+builder.Services.AddScoped<IJobHandler, SendEmailJob>();
+builder.Services.AddHostedService<JobRunnerService>();
+if (builder.Configuration.GetValue<bool>("Diagnostics:EnableTestEndpoints"))
+    builder.Services.AddScoped<IJobHandler, TestJob>();
+
+// --- ΠΡΟΣΒΑΣΗ ΣΕ PROJECTS ---
+// Μέχρι το module των projects: ό,τι ανήκει σε project το βλέπει μόνο ο Admin (fail closed)
+builder.Services.AddScoped<IProjectAccess, AdminOnlyProjectAccess>();
 builder.Services.AddExceptionHandler<GlobalExceptionHandler>();
 builder.Services.AddProblemDetails();
 
@@ -129,6 +152,7 @@ builder.Services.AddSingleton<ImageProcessor>();
 builder.Services.AddSingleton<MediaUploadLocks>();
 builder.Services.AddScoped<MediaService>();
 builder.Services.AddScoped<MediaUsage>();
+builder.Services.AddScoped<MediaAttachments>();
 builder.Services.AddScoped<ProfileService>();
 builder.Services.AddScoped<MediaCleanup>();
 builder.Services.AddHostedService<MediaCleanupService>();
@@ -229,7 +253,64 @@ if (app.Configuration.GetValue<bool>("Diagnostics:EnableTestEndpoints"))
         if (maxVersions is int versions) options.Value.MaxVersions = versions;
     });
     app.MapPost("/api/test/media-cleanup", (MediaCleanup cleanup, CancellationToken cancellationToken) => cleanup.RunAsync(cancellationToken));
+
+    // Δουλειές παρασκηνίου: μια δοκιμαστική (test.record) ή ένα email στην ουρά, και εκτέλεση χωρίς να περιμένουμε τον runner
+    app.MapPost("/api/test/jobs", async (TestJobRequest request, JobQueue queue) =>
+        new { created = await queue.EnqueueAsync(TestJob.JobType, request, $"test:{request.Key}", maxAttempts: request.MaxAttempts) });
+    app.MapPost("/api/test/jobs/email", async (EmailMessage message, string key, JobQueue queue) =>
+        new { created = await queue.EnqueueEmailAsync(message, key) });
+    app.MapPost("/api/test/jobs/run", async (JobProcessor processor, CancellationToken cancellationToken) =>
+        new { ran = await processor.RunDueAsync(cancellationToken: cancellationToken) });
+    app.MapGet("/api/test/jobs/runs", (string key) => new { runs = TestJob.Runs(key) });
+
+    // Σύνδεση αρχείου με εγγραφή (μέχρι να υπάρξουν τα modules που θα το κάνουν από το UI)
+    app.MapPost("/api/test/media-attachments", async (TestAttachmentRequest request, ApplicationDbContext db, MediaAttachments attachments,
+        IStringLocalizer<SharedResource> t, ClaimsPrincipal user) =>
+    {
+        var item = await db.MediaItems.FirstOrDefaultAsync(i => i.Id == request.MediaItemId);
+        if (item == null) return Results.NotFound();
+        if (MediaAttachments.CannotAttach(item) is string reason)
+            return Results.Problem(t[reason], statusCode: StatusCodes.Status409Conflict);
+        var attachment = await attachments.AttachAsync(item,
+            new AttachmentTarget(request.EntityType, request.EntityId, request.ProjectId, request.RequiredPermission),
+            user.FindFirstValue(ClaimTypes.NameIdentifier)!);
+        return Results.Ok(new { attachment.Id });
+    }).RequireAuthorization();
+    app.MapDelete("/api/test/media-attachments", async (Guid mediaItemId, string entityType, string entityId, MediaAttachments attachments) =>
+        await attachments.DetachAsync(mediaItemId, entityType, entityId) ? Results.NoContent() : Results.NotFound()).RequireAuthorization();
+
+    // Δύο αποθηκεύσεις της ίδιας εγγραφής από δύο "χρήστες": η δεύτερη πρέπει να πάρει 409
+    app.MapPost("/api/test/concurrency-conflict", async (IServiceScopeFactory scopes) =>
+    {
+        using var first = scopes.CreateScope();
+        using var second = scopes.CreateScope();
+        var db1 = first.ServiceProvider.GetRequiredService<ApplicationDbContext>();
+        var db2 = second.ServiceProvider.GetRequiredService<ApplicationDbContext>();
+
+        var name = $"conflict-{Guid.NewGuid():N}";
+        var folder = new Panoptes_v1.Models.Media.MediaFolder { Id = Guid.NewGuid(), Name = name, NormalizedName = name.ToUpperInvariant(), CreatedById = "system", CreatedAt = DateTime.UtcNow };
+        db1.MediaFolders.Add(folder);
+        await db1.SaveChangesAsync();
+
+        var stale = await db2.MediaFolders.FirstAsync(f => f.Id == folder.Id);
+        folder.Name = $"{name}-a";
+        folder.NormalizedName = folder.Name.ToUpperInvariant();
+        await db1.SaveChangesAsync();
+
+        stale.Name = $"{name}-b";
+        stale.NormalizedName = stale.Name.ToUpperInvariant();
+        await db2.SaveChangesAsync(); // DbUpdateConcurrencyException -> 409
+        return Results.Ok();
+    });
+
+    // Σε ποια ημέρα της επιχείρησης πέφτει μια στιγμή (BusinessClock)
+    app.MapGet("/api/test/business-date", async (DateTimeOffset at, BusinessClock clock) =>
+        new { date = (await clock.ToBusinessDateAsync(at.UtcDateTime)).ToString("yyyy-MM-dd"), startOfDayUtc = await clock.StartOfDayUtcAsync(DateOnly.FromDateTime(at.UtcDateTime)) });
 }
+
+// Στην παραγωγή τα links των emails πρέπει να βγαίνουν από ρύθμιση, όχι από το Host header του request
+if (!app.Environment.IsDevelopment() && !app.Services.GetRequiredService<AppUrls>().IsConfigured)
+    app.Logger.LogWarning("{Key} is not set: email links are built from the request's host. Set it in production.", AppUrls.ConfigKey);
 
 // Άγνωστα /api/* -> 404 (όχι το index.html του SPA)
 app.Map("/api/{**rest}", context =>
@@ -269,3 +350,6 @@ static RateLimitPartition<string> PerUser(HttpContext context, int permitsPerMin
             SegmentsPerWindow = 6,
             QueueLimit = 0,
         });
+
+// Μόνο για τα E2E tests: /api/test/media-attachments
+record TestAttachmentRequest(Guid MediaItemId, string EntityType, string EntityId, Guid? ProjectId, string? RequiredPermission);

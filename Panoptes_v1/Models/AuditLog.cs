@@ -19,6 +19,12 @@ namespace Panoptes_v1.Models
         // Ποιος το έκανε (Μπορεί να είναι null αν π.χ. είναι σύστημα ή ανώνυμος)
         public string? UserId { get; set; }
 
+        // Χωρίς χρήστη: ποιο κομμάτι του συστήματος (π.χ. "jobs:email.send", "cli:admin:create")
+        public string? Source { get; set; }
+
+        // Το reference του request (ίδιο με αυτό που βλέπει ο χρήστης σε ένα λάθος) ή του job
+        public string? TraceId { get; set; }
+
         // Τι έκανε
         public AuditType Type { get; set; }
 

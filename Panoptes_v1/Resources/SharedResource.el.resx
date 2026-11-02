@@ -486,4 +486,28 @@
   <data name="The supplied value is invalid for {0}." xml:space="preserve">
     <value>Η τιμή δεν είναι έγκυρη για το πεδίο {0}.</value>
   </data>
+  <data name="Conflict" xml:space="preserve">
+    <value>Σύγκρουση</value>
+  </data>
+  <data name="Someone else changed this at the same time. Reload and try again." xml:space="preserve">
+    <value>Κάποιος άλλος το άλλαξε ταυτόχρονα. Ανανεώστε τη σελίδα και δοκιμάστε ξανά.</value>
+  </data>
+  <data name="“{0}” is attached to records. Remove it from them first." xml:space="preserve">
+    <value>Το «{0}» είναι συνδεδεμένο με εγγραφές. Αφαιρέστε το πρώτα από αυτές.</value>
+  </data>
+  <data name="“{0}” is attached to records and must stay private." xml:space="preserve">
+    <value>Το «{0}» είναι συνδεδεμένο με εγγραφές και πρέπει να μείνει ιδιωτικό.</value>
+  </data>
+  <data name="Public files can't be attached to records. Make the file private first." xml:space="preserve">
+    <value>Τα δημόσια αρχεία δεν συνδέονται με εγγραφές. Κάντε πρώτα το αρχείο ιδιωτικό.</value>
+  </data>
+  <data name="The file no longer exists." xml:space="preserve">
+    <value>Το αρχείο δεν υπάρχει πια.</value>
+  </data>
+  <data name="Only failed or cancelled jobs can be retried." xml:space="preserve">
+    <value>Μόνο εργασίες που απέτυχαν ή ακυρώθηκαν μπορούν να ξανατρέξουν.</value>
+  </data>
+  <data name="Only pending jobs can be cancelled." xml:space="preserve">
+    <value>Μόνο εργασίες σε αναμονή μπορούν να ακυρωθούν.</value>
+  </data>
 </root>

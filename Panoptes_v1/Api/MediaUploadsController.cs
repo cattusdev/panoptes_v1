@@ -28,16 +28,20 @@ namespace Panoptes_v1.Api
         private readonly MediaService _media;
         private readonly MediaPaths _paths;
         private readonly MediaUploadLocks _locks;
+        private readonly MediaAttachments _attachments;
+        private readonly MediaUsage _usage;
         private readonly IStringLocalizer<SharedResource> _t;
 
         public MediaUploadsController(ApplicationDbContext db, MediaService media, MediaPaths paths, MediaUploadLocks locks,
-            IStringLocalizer<SharedResource> localizer)
+            MediaAttachments attachments, MediaUsage usage, IStringLocalizer<SharedResource> localizer)
         {
             _t = localizer;
             _db = db;
             _media = media;
             _paths = paths;
             _locks = locks;
+            _attachments = attachments;
+            _usage = usage;
         }
 
         private string UserId => User.FindFirstValue(ClaimTypes.NameIdentifier)!;
@@ -58,7 +62,7 @@ namespace Panoptes_v1.Api
             }
             else if (request.ReplaceItemId is Guid replaceId)
             {
-                var item = await _db.MediaItems.AsNoTracking()
+                var item = await _attachments.VisibleTo(_db.MediaItems.AsNoTracking(), User)
                     .FirstOrDefaultAsync(i => i.Id == replaceId && i.DeletedAt == null && i.Purpose == MediaPurpose.Library);
                 if (item == null || !MediaAccess.CanView(User, item)) return NotFound();
                 if (!MediaAccess.CanEdit(User, item))
@@ -223,6 +227,10 @@ namespace Panoptes_v1.Api
 
             if (upload.ResultItemId is Guid itemId)
             {
+                // Στο μεταξύ το αρχείο μπορεί να συνδέθηκε με εγγραφή ή να έγινε λογότυπο: τότε δεν αναιρείται
+                if (await _usage.BlockingUsageAsync([itemId]) is string used)
+                    return Problem(used, statusCode: StatusCodes.Status409Conflict);
+
                 var item = await _db.MediaItems.Include(i => i.Versions).FirstOrDefaultAsync(i => i.Id == itemId);
                 if (item != null && upload.ReplaceItemId == null)
                 {

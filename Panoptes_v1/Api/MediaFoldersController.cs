@@ -21,15 +21,22 @@ namespace Panoptes_v1.Api
         private readonly ApplicationDbContext _db;
         private readonly MediaService _media;
         private readonly MediaUsage _usage;
+        private readonly MediaAttachments _attachments;
         private readonly IStringLocalizer<SharedResource> _t;
 
-        public MediaFoldersController(ApplicationDbContext db, MediaService media, MediaUsage usage, IStringLocalizer<SharedResource> localizer)
+        public MediaFoldersController(ApplicationDbContext db, MediaService media, MediaUsage usage, MediaAttachments attachments,
+            IStringLocalizer<SharedResource> localizer)
         {
             _t = localizer;
             _db = db;
             _media = media;
             _usage = usage;
+            _attachments = attachments;
         }
+
+        // Οι μετρήσεις αρχείων δείχνουν μόνο όσα βλέπει ο χρήστης (αλλιώς θα "πρόδιδαν" κρυφά αρχεία)
+        private IQueryable<MediaItem> VisibleLibrary() =>
+            _attachments.VisibleTo(_db.MediaItems.Where(i => i.Purpose == MediaPurpose.Library && i.DeletedAt == null), User);
 
         // Όλοι οι φάκελοι μαζί (είναι λίγοι): το δέντρο το χτίζει ο client
         [HttpGet]
@@ -37,8 +44,8 @@ namespace Panoptes_v1.Api
         public async Task<ActionResult<IReadOnlyList<MediaFolderDto>>> List()
         {
             var folders = await _db.MediaFolders.AsNoTracking().OrderBy(f => f.Name).ToListAsync();
-            var counts = await _db.MediaItems
-                .Where(i => i.Purpose == MediaPurpose.Library && i.DeletedAt == null && i.FolderId != null)
+            var counts = await VisibleLibrary()
+                .Where(i => i.FolderId != null)
                 .GroupBy(i => i.FolderId)
                 .Select(g => new { FolderId = g.Key!.Value, Count = g.Count() })
                 .ToDictionaryAsync(g => g.FolderId, g => g.Count);
@@ -137,7 +144,7 @@ namespace Panoptes_v1.Api
             if (folders.All(f => f.Id != id)) return NotFound();
 
             var subtree = Descendants(folders, id).Append(id).ToList();
-            var files = await _db.MediaItems.CountAsync(i => i.Purpose == MediaPurpose.Library && i.DeletedAt == null && i.FolderId != null && subtree.Contains(i.FolderId.Value));
+            var files = await VisibleLibrary().CountAsync(i => i.FolderId != null && subtree.Contains(i.FolderId.Value));
             return new MediaFolderSummaryDto(files, subtree.Count - 1);
         }
 
@@ -160,7 +167,9 @@ namespace Panoptes_v1.Api
 
             if ((items.Count > 0 || subtree.Count > 1) && !withContents)
                 return Problem(_t["The folder isn't empty."], statusCode: StatusCodes.Status409Conflict);
-            if (items.Any(i => !MediaAccess.CanDelete(User, i)))
+            // Κρυφά αρχεία (συνδέσεις με εγγραφές που δεν βλέπει ο χρήστης) δεν πάνε στον κάδο μαζί με τον φάκελο
+            var visible = await VisibleLibrary().CountAsync(i => i.FolderId != null && subtree.Contains(i.FolderId.Value));
+            if (visible != items.Count || items.Any(i => !MediaAccess.CanDelete(User, i)))
                 return Problem(_t["The folder contains files you can't delete."], statusCode: StatusCodes.Status403Forbidden);
             if (await _usage.BlockingUsageAsync(items.Select(i => i.Id).ToList()) is string used)
                 return Problem(used, statusCode: StatusCodes.Status409Conflict);
@@ -182,7 +191,7 @@ namespace Panoptes_v1.Api
             MediaAccess.CanDeleteFolder(User, folder));
 
         private Task<int> CountItemsAsync(Guid folderId) =>
-            _db.MediaItems.CountAsync(i => i.FolderId == folderId && i.DeletedAt == null && i.Purpose == MediaPurpose.Library);
+            VisibleLibrary().CountAsync(i => i.FolderId == folderId);
 
         private static string? CleanName(string name)
         {

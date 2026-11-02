@@ -12,15 +12,15 @@ namespace Panoptes_v1.Services
     public class AccountEmails
     {
         private readonly IEmailSender _emailSender;
-        private readonly IHttpContextAccessor _httpContextAccessor;
+        private readonly AppUrls _urls;
         private readonly ProfileService _profiles;
         private readonly IStringLocalizer<SharedResource> _t;
 
-        public AccountEmails(IEmailSender emailSender, IHttpContextAccessor httpContextAccessor, ProfileService profiles,
+        public AccountEmails(IEmailSender emailSender, AppUrls urls, ProfileService profiles,
             IStringLocalizer<SharedResource> localizer)
         {
             _emailSender = emailSender;
-            _httpContextAccessor = httpContextAccessor;
+            _urls = urls;
             _profiles = profiles;
             _t = localizer;
         }
@@ -61,12 +61,7 @@ namespace Panoptes_v1.Services
                 _t["Confirm new email"],
                 Link("/confirm-email-change", ("userId", userId), ("email", newEmail), ("code", EncodeToken(token)))));
 
-        private string Link(string path, params (string Key, string Value)[] query)
-        {
-            var request = _httpContextAccessor.HttpContext!.Request;
-            var queryString = string.Join("&", query.Select(q => $"{q.Key}={Uri.EscapeDataString(q.Value)}"));
-            return $"{request.Scheme}://{request.Host}{path}?{queryString}";
-        }
+        private string Link(string path, params (string Key, string Value)[] query) => _urls.Link(path, query);
 
         // Όπως το HtmlEncoder.Default, αλλά τα ελληνικά μένουν ως έχουν (όχι &#x...;)
         private static readonly HtmlEncoder TextEncoder = HtmlEncoder.Create(UnicodeRanges.All);

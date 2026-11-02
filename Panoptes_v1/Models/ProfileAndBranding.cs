@@ -9,6 +9,7 @@ namespace Panoptes_v1.Models
         public Guid? AvatarMediaId { get; set; }
         public MediaItem? Avatar { get; set; }
         public string? Language { get; set; } // null = η προεπιλογή της εφαρμογής (Settings → General)
+        public uint RowVersion { get; set; } // Έλεγχος ταυτόχρονων αλλαγών (xmin της Postgres)
     }
 
     // Η ταυτότητα της εφαρμογής: μία γραμμή (Id = 1)
@@ -24,5 +25,6 @@ namespace Panoptes_v1.Models
         public Guid? FaviconMediaId { get; set; }
         public MediaItem? Favicon { get; set; }
         public DateTime UpdatedAt { get; set; }
+        public uint RowVersion { get; set; } // Έλεγχος ταυτόχρονων αλλαγών (xmin της Postgres)
     }
 }

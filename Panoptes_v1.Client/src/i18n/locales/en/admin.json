@@ -86,6 +86,7 @@
     "detail": {
       "title": "Audit entry",
       "record": "Record",
+      "reference": "Reference",
       "changes": "Changes",
       "noChanges": "No field details were recorded.",
       "field": "Field",

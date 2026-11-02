@@ -6,6 +6,7 @@ namespace Panoptes_v1.Services.Media
 {
     // Πού χρησιμοποιείται ένα αρχείο της βιβλιοθήκης. Ό,τι χρησιμοποιείται (π.χ. το λογότυπο)
     // δεν πάει στον κάδο ούτε γίνεται ιδιωτικό, ώστε να μη "σπάσει" κάτι που φαίνεται στο site.
+    // Αρχεία συνδεδεμένα με εγγραφές (MediaAttachment) δεν πάνε στον κάδο, δεν σβήνονται και δεν γίνονται δημόσια.
     public class MediaUsage
     {
         private readonly ApplicationDbContext _db;
@@ -22,6 +23,9 @@ namespace Panoptes_v1.Services.Media
         public async Task<string?> BlockingUsageAsync(IReadOnlyCollection<Guid> ids, bool mustStayPublic = false)
         {
             if (ids.Count == 0) return null;
+
+            if (!mustStayPublic && await FirstAttachedTitleAsync(ids) is string attached)
+                return _t["“{0}” is attached to records. Remove it from them first.", attached];
 
             var branding = await _db.Branding.AsNoTracking().FirstOrDefaultAsync();
             if (branding == null) return null;
@@ -46,5 +50,17 @@ namespace Panoptes_v1.Services.Media
             }
             return null;
         }
+
+        // Μήνυμα αν κάποιο αρχείο δεν επιτρέπεται να γίνει δημόσιο (τα δημόσια σερβίρονται χωρίς έλεγχο), ή null
+        public async Task<string?> PublicBlockAsync(IReadOnlyCollection<Guid> ids) =>
+            await FirstAttachedTitleAsync(ids) is string attached
+                ? _t["“{0}” is attached to records and must stay private.", attached].Value
+                : null;
+
+        private Task<string?> FirstAttachedTitleAsync(IReadOnlyCollection<Guid> ids) =>
+            ids.Count == 0
+                ? Task.FromResult<string?>(null)
+                : _db.MediaItems.Where(i => ids.Contains(i.Id) && _db.MediaAttachments.Any(a => a.MediaItemId == i.Id))
+                    .OrderBy(i => i.Title).Select(i => (string?)i.Title).FirstOrDefaultAsync();
     }
 }

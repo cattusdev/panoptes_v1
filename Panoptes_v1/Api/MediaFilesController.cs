@@ -16,11 +16,13 @@ namespace Panoptes_v1.Api
     {
         private readonly ApplicationDbContext _db;
         private readonly IMediaStorage _storage;
+        private readonly MediaAttachments _attachments;
 
-        public MediaFilesController(ApplicationDbContext db, IMediaStorage storage)
+        public MediaFilesController(ApplicationDbContext db, IMediaStorage storage, MediaAttachments attachments)
         {
             _db = db;
             _storage = storage;
+            _attachments = attachments;
         }
 
         [HttpGet("{id:guid}/{version:int}/{variant}")]
@@ -29,6 +31,7 @@ namespace Panoptes_v1.Api
             // Χωρίς δικαίωμα: 404 (όχι 403), ώστε να μη φαίνεται ποια αρχεία υπάρχουν
             var item = await _db.MediaItems.AsNoTracking().FirstOrDefaultAsync(i => i.Id == id);
             if (item == null || !MediaAccess.CanView(User, item)) return NotFound();
+            if (item.Purpose == MediaPurpose.Library && !await _attachments.CanSeeAsync(User, id, HttpContext.RequestAborted)) return NotFound();
 
             var mediaVersion = await _db.MediaVersions.AsNoTracking().FirstOrDefaultAsync(v => v.MediaItemId == id && v.Number == version);
             var file = mediaVersion?.Variants.FirstOrDefault(v => v.Name == variant);

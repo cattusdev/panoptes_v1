@@ -23,15 +23,21 @@ namespace Panoptes_v1.Api
         private readonly ApplicationDbContext _db;
         private readonly MediaService _media;
         private readonly MediaUsage _usage;
+        private readonly MediaAttachments _attachments;
         private readonly IStringLocalizer<SharedResource> _t;
 
-        public MediaController(ApplicationDbContext db, MediaService media, MediaUsage usage, IStringLocalizer<SharedResource> localizer)
+        public MediaController(ApplicationDbContext db, MediaService media, MediaUsage usage, MediaAttachments attachments, IStringLocalizer<SharedResource> localizer)
         {
             _t = localizer;
             _db = db;
             _media = media;
             _usage = usage;
+            _attachments = attachments;
         }
+
+        // Τα αρχεία της βιβλιοθήκης που επιτρέπεται να δει ο χρήστης (οι συνδέσεις με εγγραφές μπορεί να τα κρύβουν)
+        private IQueryable<MediaItem> Library(IQueryable<MediaItem> source) =>
+            _attachments.VisibleTo(source.Where(i => i.Purpose == MediaPurpose.Library), User);
 
         // Τα όρια για τον client (ίδιος έλεγχος και στον browser, πριν ανέβει οτιδήποτε)
         [HttpGet("settings")]
@@ -55,7 +61,7 @@ namespace Panoptes_v1.Api
             limit = Math.Clamp(limit, 1, MaxPageSize);
             var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
 
-            var query = _db.MediaItems.AsNoTracking().Where(i => i.Purpose == MediaPurpose.Library);
+            var query = Library(_db.MediaItems.AsNoTracking());
             query = trash ? query.Where(i => i.DeletedAt != null) : query.Where(i => i.DeletedAt == null);
 
             if (!string.IsNullOrWhiteSpace(search))
@@ -106,7 +112,7 @@ namespace Panoptes_v1.Api
         [Authorize(Policy = Permissions.Media.View)]
         public async Task<ActionResult<MediaItemDto>> Get(Guid id)
         {
-            var row = await Project(_db.MediaItems.AsNoTracking().Where(i => i.Id == id && i.Purpose == MediaPurpose.Library)).FirstOrDefaultAsync();
+            var row = await Project(Library(_db.MediaItems.AsNoTracking()).Where(i => i.Id == id)).FirstOrDefaultAsync();
             if (row == null) return NotFound();
             return MediaDtos.Item(row.Item, row.Version, row.OwnerEmail, User, _media);
         }
@@ -115,8 +121,8 @@ namespace Panoptes_v1.Api
         [Authorize(Policy = Permissions.Media.Edit)]
         public async Task<ActionResult<MediaItemDto>> Update(Guid id, UpdateMediaRequest request)
         {
-            var item = await _db.MediaItems.Include(i => i.Versions)
-                .FirstOrDefaultAsync(i => i.Id == id && i.Purpose == MediaPurpose.Library && i.DeletedAt == null);
+            var item = await Library(_db.MediaItems.Include(i => i.Versions))
+                .FirstOrDefaultAsync(i => i.Id == id && i.DeletedAt == null);
             if (item == null) return NotFound();
             if (!MediaAccess.CanEdit(User, item))
                 return Problem(_t["You can only edit your own files."], statusCode: StatusCodes.Status403Forbidden);
@@ -124,6 +130,9 @@ namespace Panoptes_v1.Api
             if (request.Visibility == MediaVisibility.Private && item.Visibility == MediaVisibility.Public &&
                 await _usage.BlockingUsageAsync([item.Id], mustStayPublic: true) is string usedPrivate)
                 return Problem(usedPrivate, statusCode: StatusCodes.Status409Conflict);
+            if (request.Visibility == MediaVisibility.Public && item.Visibility == MediaVisibility.Private &&
+                await _usage.PublicBlockAsync([item.Id]) is string attached)
+                return Problem(attached, statusCode: StatusCodes.Status409Conflict);
 
             item.Title = request.Title.Trim();
             item.AltText = NullIfBlank(request.AltText);
@@ -193,8 +202,11 @@ namespace Panoptes_v1.Api
             if (items.Any(i => !MediaAccess.CanDelete(User, i)))
                 return Problem(_t["You can only delete your own files."], statusCode: StatusCodes.Status403Forbidden);
 
-            await _media.DeletePermanentlyAsync(items);
-            return Ok(new { deleted = items.Count });
+            if (await _usage.BlockingUsageAsync(items.Select(i => i.Id).ToList()) is string used)
+                return Problem(used, statusCode: StatusCodes.Status409Conflict);
+
+            var deleted = await _media.DeletePermanentlyAsync(items);
+            return Ok(new { deleted });
         }
 
         // Άδειασμα κάδου: ό,τι μπορείς να διαγράψεις (τα δικά σου, ή όλα με ManageAll)
@@ -202,21 +214,21 @@ namespace Panoptes_v1.Api
         [Authorize(Policy = Permissions.Media.Delete)]
         public async Task<IActionResult> EmptyTrash()
         {
-            var items = (await _db.MediaItems.Include(i => i.Versions)
-                    .Where(i => i.Purpose == MediaPurpose.Library && i.DeletedAt != null)
+            var items = (await Library(_db.MediaItems.Include(i => i.Versions))
+                    .Where(i => i.DeletedAt != null)
                     .ToListAsync())
                 .Where(i => MediaAccess.CanDelete(User, i))
                 .ToList();
 
-            await _media.DeletePermanentlyAsync(items);
-            return Ok(new { deleted = items.Count });
+            var deleted = await _media.DeletePermanentlyAsync(items);
+            return Ok(new { deleted });
         }
 
         [HttpGet("{id:guid}/versions")]
         [Authorize(Policy = Permissions.Media.View)]
         public async Task<ActionResult<IReadOnlyList<MediaVersionDto>>> Versions(Guid id)
         {
-            var item = await _db.MediaItems.AsNoTracking().FirstOrDefaultAsync(i => i.Id == id && i.Purpose == MediaPurpose.Library);
+            var item = await Library(_db.MediaItems.AsNoTracking()).FirstOrDefaultAsync(i => i.Id == id);
             if (item == null) return NotFound();
 
             var versions = await _db.MediaVersions.AsNoTracking()
@@ -232,8 +244,8 @@ namespace Panoptes_v1.Api
         [Authorize(Policy = Permissions.Media.Edit)]
         public async Task<ActionResult<MediaItemDto>> RestoreVersion(Guid id, Guid versionId)
         {
-            var item = await _db.MediaItems.Include(i => i.Versions)
-                .FirstOrDefaultAsync(i => i.Id == id && i.Purpose == MediaPurpose.Library && i.DeletedAt == null);
+            var item = await Library(_db.MediaItems.Include(i => i.Versions))
+                .FirstOrDefaultAsync(i => i.Id == id && i.DeletedAt == null);
             var version = item?.Versions.FirstOrDefault(v => v.Id == versionId);
             if (item == null || version == null) return NotFound();
             if (!MediaAccess.CanEdit(User, item))
@@ -247,8 +259,8 @@ namespace Panoptes_v1.Api
         [Authorize(Policy = Permissions.Media.Delete)]
         public async Task<IActionResult> DeleteVersion(Guid id, Guid versionId)
         {
-            var item = await _db.MediaItems.Include(i => i.Versions)
-                .FirstOrDefaultAsync(i => i.Id == id && i.Purpose == MediaPurpose.Library && i.DeletedAt == null);
+            var item = await Library(_db.MediaItems.Include(i => i.Versions))
+                .FirstOrDefaultAsync(i => i.Id == id && i.DeletedAt == null);
             var version = item?.Versions.FirstOrDefault(v => v.Id == versionId);
             if (item == null || version == null) return NotFound();
             if (!MediaAccess.CanDelete(User, item))
@@ -271,8 +283,8 @@ namespace Panoptes_v1.Api
         private Task<List<MediaItem>> LoadAsync(IEnumerable<Guid> ids, bool trashed)
         {
             var idList = ids.Distinct().ToList();
-            return _db.MediaItems.Include(i => i.Versions)
-                .Where(i => idList.Contains(i.Id) && i.Purpose == MediaPurpose.Library && (trashed ? i.DeletedAt != null : i.DeletedAt == null))
+            return Library(_db.MediaItems.Include(i => i.Versions))
+                .Where(i => idList.Contains(i.Id) && (trashed ? i.DeletedAt != null : i.DeletedAt == null))
                 .ToListAsync();
         }
 

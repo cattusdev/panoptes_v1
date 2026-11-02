@@ -228,6 +228,12 @@ namespace Panoptes_v1.Migrations
                         .HasMaxLength(100)
                         .HasColumnType("character varying(100)");
 
+                    b.Property<uint>("RowVersion")
+                        .IsConcurrencyToken()
+                        .ValueGeneratedOnAddOrUpdate()
+                        .HasColumnType("xid")
+                        .HasColumnName("xmin");
+
                     b.Property<string>("Secret")
                         .HasColumnType("text");
 
@@ -269,8 +275,16 @@ namespace Panoptes_v1.Migrations
                     b.Property<string>("PrimaryKey")
                         .HasColumnType("text");
 
+                    b.Property<string>("Source")
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)");
+
                     b.Property<string>("TableName")
                         .HasColumnType("text");
+
+                    b.Property<string>("TraceId")
+                        .HasMaxLength(64)
+                        .HasColumnType("character varying(64)");
 
                     b.Property<int>("Type")
                         .HasColumnType("integer");
@@ -280,7 +294,72 @@ namespace Panoptes_v1.Migrations
 
                     b.HasKey("Id");
 
+                    b.HasIndex("DateTime");
+
+                    b.HasIndex("UserId");
+
+                    b.HasIndex("TableName", "PrimaryKey");
+
                     b.ToTable("AuditLogs");
+                });
+
+            modelBuilder.Entity("Panoptes_v1.Models.BackgroundJob", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<int>("Attempts")
+                        .HasColumnType("integer");
+
+                    b.Property<DateTime?>("CompletedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("CreatedById")
+                        .HasColumnType("text");
+
+                    b.Property<string>("IdempotencyKey")
+                        .IsRequired()
+                        .HasMaxLength(200)
+                        .HasColumnType("character varying(200)");
+
+                    b.Property<string>("LastError")
+                        .HasColumnType("text");
+
+                    b.Property<DateTime?>("LockedUntil")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<int>("MaxAttempts")
+                        .HasColumnType("integer");
+
+                    b.Property<string>("Payload")
+                        .IsRequired()
+                        .HasColumnType("jsonb");
+
+                    b.Property<DateTime>("RunAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("Status")
+                        .IsRequired()
+                        .HasMaxLength(20)
+                        .HasColumnType("character varying(20)");
+
+                    b.Property<string>("Type")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("IdempotencyKey")
+                        .IsUnique();
+
+                    b.HasIndex("Status", "RunAt");
+
+                    b.ToTable("BackgroundJobs");
                 });
 
             modelBuilder.Entity("Panoptes_v1.Models.BrandingSettings", b =>
@@ -299,6 +378,12 @@ namespace Panoptes_v1.Migrations
                     b.Property<Guid?>("LogoMediaId")
                         .HasColumnType("uuid");
 
+                    b.Property<uint>("RowVersion")
+                        .IsConcurrencyToken()
+                        .ValueGeneratedOnAddOrUpdate()
+                        .HasColumnType("xid")
+                        .HasColumnName("xmin");
+
                     b.Property<DateTime>("UpdatedAt")
                         .HasColumnType("timestamp with time zone");
 
@@ -309,6 +394,51 @@ namespace Panoptes_v1.Migrations
                     b.HasIndex("LogoMediaId");
 
                     b.ToTable("BrandingSettings", (string)null);
+                });
+
+            modelBuilder.Entity("Panoptes_v1.Models.Media.MediaAttachment", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("CreatedById")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<string>("EntityId")
+                        .IsRequired()
+                        .HasMaxLength(64)
+                        .HasColumnType("character varying(64)");
+
+                    b.Property<string>("EntityType")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("character varying(50)");
+
+                    b.Property<Guid>("MediaItemId")
+                        .HasColumnType("uuid");
+
+                    b.Property<Guid?>("ProjectId")
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("RequiredPermission")
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("ProjectId");
+
+                    b.HasIndex("EntityType", "EntityId");
+
+                    b.HasIndex("MediaItemId", "EntityType", "EntityId")
+                        .IsUnique();
+
+                    b.ToTable("MediaAttachments");
                 });
 
             modelBuilder.Entity("Panoptes_v1.Models.Media.MediaFolder", b =>
@@ -336,6 +466,12 @@ namespace Panoptes_v1.Migrations
 
                     b.Property<Guid?>("ParentId")
                         .HasColumnType("uuid");
+
+                    b.Property<uint>("RowVersion")
+                        .IsConcurrencyToken()
+                        .ValueGeneratedOnAddOrUpdate()
+                        .HasColumnType("xid")
+                        .HasColumnName("xmin");
 
                     b.HasKey("Id");
 
@@ -388,6 +524,12 @@ namespace Panoptes_v1.Migrations
 
                     b.Property<int>("Purpose")
                         .HasColumnType("integer");
+
+                    b.Property<uint>("RowVersion")
+                        .IsConcurrencyToken()
+                        .ValueGeneratedOnAddOrUpdate()
+                        .HasColumnType("xid")
+                        .HasColumnName("xmin");
 
                     b.Property<long>("Sequence")
                         .ValueGeneratedOnAdd()
@@ -541,6 +683,12 @@ namespace Panoptes_v1.Migrations
                         .HasMaxLength(10)
                         .HasColumnType("character varying(10)");
 
+                    b.Property<uint>("RowVersion")
+                        .IsConcurrencyToken()
+                        .ValueGeneratedOnAddOrUpdate()
+                        .HasColumnType("xid")
+                        .HasColumnName("xmin");
+
                     b.HasKey("UserId");
 
                     b.HasIndex("AvatarMediaId");
@@ -614,6 +762,17 @@ namespace Panoptes_v1.Migrations
                     b.Navigation("Favicon");
 
                     b.Navigation("Logo");
+                });
+
+            modelBuilder.Entity("Panoptes_v1.Models.Media.MediaAttachment", b =>
+                {
+                    b.HasOne("Panoptes_v1.Models.Media.MediaItem", "MediaItem")
+                        .WithMany()
+                        .HasForeignKey("MediaItemId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.Navigation("MediaItem");
                 });
 
             modelBuilder.Entity("Panoptes_v1.Models.Media.MediaFolder", b =>

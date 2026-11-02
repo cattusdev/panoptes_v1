@@ -3,6 +3,7 @@ using System.Text.Encodings.Web;
 using Microsoft.AspNetCore.Diagnostics;
 using Microsoft.AspNetCore.Localization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Localization;
 using Panoptes_v1.Services.Localization;
 
@@ -25,17 +26,33 @@ namespace Panoptes_v1.Middlewares
             // 1. Παίρνουμε το μοναδικό ID της ταυτότητας αυτού του request
             var traceId = httpContext.TraceIdentifier;
 
+            // Η γλώσσα του request (το UseRequestLocalization την έχει βρει, αλλά η αλλαγή της κουλτούρας δεν φτάνει ως εδώ)
+            using var _ = AppLanguages.Use(httpContext.Features.Get<IRequestCultureFeature>()?.RequestCulture.UICulture.Name ?? AppLanguages.Default);
+
+            var isApi = httpContext.Request.Path.StartsWithSegments("/api") ||
+                        httpContext.Request.Headers.Accept.ToString().Contains("application/json");
+
+            // Κάποιος άλλος άλλαξε την ίδια εγγραφή στο μεταξύ (optimistic concurrency): δεν είναι crash, ο χρήστης ξαναφορτώνει
+            if (exception is DbUpdateConcurrencyException && isApi)
+            {
+                _logger.LogWarning("Concurrency conflict. TraceId: {TraceId}. Path: {Path}", traceId, httpContext.Request.Path);
+                httpContext.Response.StatusCode = StatusCodes.Status409Conflict;
+                await httpContext.Response.WriteAsJsonAsync(new ProblemDetails
+                {
+                    Status = StatusCodes.Status409Conflict,
+                    Title = _t["Conflict"],
+                    Detail = _t["Someone else changed this at the same time. Reload and try again."],
+                    Extensions = { ["traceId"] = traceId }
+                }, options: null, contentType: "application/problem+json", cancellationToken);
+                return true;
+            }
+
             // 2. Καταγράφουμε το FULL error στο Serilog (για τα μάτια του IT μόνο)
             _logger.LogError(exception, "🔥 System Crash! TraceId: {TraceId}. Message: {Message}", traceId, exception.Message);
 
             httpContext.Response.StatusCode = StatusCodes.Status500InternalServerError;
 
-            // Η γλώσσα του request (το UseRequestLocalization την έχει βρει, αλλά η αλλαγή της κουλτούρας δεν φτάνει ως εδώ)
-            using var _ = AppLanguages.Use(httpContext.Features.Get<IRequestCultureFeature>()?.RequestCulture.UICulture.Name ?? AppLanguages.Default);
-
             // 3. API (το React app) -> ProblemDetails JSON. Το "detail" εμφανίζεται στον χρήστη (toast) μαζί με το reference.
-            var isApi = httpContext.Request.Path.StartsWithSegments("/api") ||
-                        httpContext.Request.Headers.Accept.ToString().Contains("application/json");
             if (isApi)
             {
                 await httpContext.Response.WriteAsJsonAsync(new ProblemDetails

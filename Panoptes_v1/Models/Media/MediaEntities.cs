@@ -25,6 +25,7 @@ namespace Panoptes_v1.Models.Media
         public MediaFolder? Parent { get; set; }
         public string CreatedById { get; set; } = "";
         public DateTime CreatedAt { get; set; }
+        public uint RowVersion { get; set; } // Έλεγχος ταυτόχρονων αλλαγών (xmin της Postgres)
     }
 
     public class MediaItem
@@ -51,6 +52,8 @@ namespace Panoptes_v1.Models.Media
         // Κάδος: DeletedAt != null. Ο φάκελος κρατιέται για το Restore (ακόμα κι αν σβηστεί ο φάκελος)
         public DateTime? DeletedAt { get; set; }
         public Guid? OriginalFolderId { get; set; }
+
+        public uint RowVersion { get; set; } // Έλεγχος ταυτόχρονων αλλαγών (xmin της Postgres)
     }
 
     public class MediaVersion
@@ -99,5 +102,24 @@ namespace Panoptes_v1.Models.Media
         public Guid? ResultVersionId { get; set; }
         public DateTime CreatedAt { get; set; }
         public DateTime? CompletedAt { get; set; }
+    }
+
+    // Ένα αρχείο της βιβλιοθήκης συνδεδεμένο με μια εγγραφή (πελάτη, project, task, ticket, χρέωση...).
+    // Το ίδιο αρχείο μπορεί να έχει πολλές συνδέσεις. Ισχύει η πιο αυστηρή: για να δεις το αρχείο
+    // πρέπει να βλέπεις κάθε project (ProjectId) και να έχεις κάθε δικαίωμα (RequiredPermission) των συνδέσεών του.
+    public class MediaAttachment
+    {
+        public Guid Id { get; set; }
+        public Guid MediaItemId { get; set; }
+        public MediaItem? MediaItem { get; set; }
+
+        public string EntityType { get; set; } = ""; // π.χ. "project", "task", "charge"
+        public string EntityId { get; set; } = "";
+
+        public Guid? ProjectId { get; set; }             // Το project μέσα στο οποίο ζει η εγγραφή (όριο πρόσβασης)
+        public string? RequiredPermission { get; set; }  // π.χ. Permissions.Finance.View για αρχεία χρεώσεων
+
+        public string CreatedById { get; set; } = "";
+        public DateTime CreatedAt { get; set; }
     }
 }

@@ -222,13 +222,20 @@ namespace Panoptes_v1.Services.Media
         }
 
         // Οριστική διαγραφή: πρώτα η βάση, μετά τα αρχεία (ό,τι μείνει το καθαρίζει το cleanup)
-        public async Task DeletePermanentlyAsync(IReadOnlyList<MediaItem> items, CancellationToken cancellationToken = default)
+        // Αρχεία συνδεδεμένα με εγγραφές δεν σβήνονται ποτέ (πρώτα αποσυνδέονται). Επιστρέφει πόσα σβήστηκαν.
+        public async Task<int> DeletePermanentlyAsync(IReadOnlyList<MediaItem> items, CancellationToken cancellationToken = default)
         {
-            var keys = items.SelectMany(i => i.Versions).SelectMany(v => v.Variants).Select(v => v.StorageKey).ToList();
-            _db.MediaItems.RemoveRange(items);
+            var ids = items.Select(i => i.Id).ToList();
+            var attached = (await _db.MediaAttachments.Where(a => ids.Contains(a.MediaItemId)).Select(a => a.MediaItemId).ToListAsync(cancellationToken)).ToHashSet();
+            var deletable = items.Where(i => !attached.Contains(i.Id)).ToList();
+            if (deletable.Count == 0) return 0;
+
+            var keys = deletable.SelectMany(i => i.Versions).SelectMany(v => v.Variants).Select(v => v.StorageKey).ToList();
+            _db.MediaItems.RemoveRange(deletable);
             await _db.SaveChangesAsync(cancellationToken);
             foreach (var key in keys)
                 await _storage.DeleteAsync(key, cancellationToken);
+            return deletable.Count;
         }
 
         public async Task RestoreVersionAsync(MediaItem item, MediaVersion version, CancellationToken cancellationToken = default)

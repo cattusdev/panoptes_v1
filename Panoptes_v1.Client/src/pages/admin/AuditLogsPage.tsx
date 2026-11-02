@@ -58,7 +58,16 @@ export function AuditLogsPage() {
         <DateTime value={l.dateTime} mode="relative" className="whitespace-nowrap text-muted-foreground" />
       ),
     },
-    { key: 'user', header: t('audit.columns.user'), cell: (l) => <span className="font-medium">{l.userEmail ?? t('shared.system')}</span> },
+    {
+      key: 'user',
+      header: t('audit.columns.user'),
+      cell: (l) => (
+        <div className="min-w-0">
+          <div className="font-medium">{l.userEmail ?? t('shared.system')}</div>
+          {!l.userEmail && l.source && <div className="font-mono text-xs text-muted-foreground">{l.source}</div>}
+        </div>
+      ),
+    },
     { key: 'action', header: t('audit.columns.action'), cell: (l) => <Badge variant={typeBadge[l.type]}>{typeLabel(l.type)}</Badge> },
     {
       key: 'resource',
@@ -143,7 +152,7 @@ function AuditDetail({ log }: { log: AuditLogItem }) {
         </div>
         <SheetTitle className="sr-only">{t('audit.detail.title')}</SheetTitle>
         <SheetDescription>
-          {log.userEmail ?? t('shared.system')} · <DateTime value={log.dateTime} />
+          {log.userEmail ?? (log.source ? `${t('shared.system')} (${log.source})` : t('shared.system'))} · <DateTime value={log.dateTime} />
         </SheetDescription>
       </SheetHeader>
 
@@ -152,6 +161,12 @@ function AuditDetail({ log }: { log: AuditLogItem }) {
           <div className="mb-4 text-sm">
             <div className="text-xs text-muted-foreground">{t('audit.detail.record')}</div>
             <div className="font-mono text-xs break-all">{log.recordId}</div>
+          </div>
+        )}
+        {log.traceId && (
+          <div className="mb-4 text-sm">
+            <div className="text-xs text-muted-foreground">{t('audit.detail.reference')}</div>
+            <div className="font-mono text-xs break-all">{log.traceId}</div>
           </div>
         )}
 

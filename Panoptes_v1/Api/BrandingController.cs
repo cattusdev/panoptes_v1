@@ -32,11 +32,16 @@ namespace Panoptes_v1.Api
     {
         private readonly ApplicationDbContext _db;
         private readonly MediaService _media;
+        private readonly MediaUsage _usage;
+        private readonly MediaAttachments _attachments;
         private readonly IStringLocalizer<SharedResource> _t;
 
-        public BrandingController(ApplicationDbContext db, MediaService media, IStringLocalizer<SharedResource> localizer)
+        public BrandingController(ApplicationDbContext db, MediaService media, MediaUsage usage, MediaAttachments attachments,
+            IStringLocalizer<SharedResource> localizer)
         {
             _t = localizer;
+            _usage = usage;
+            _attachments = attachments;
             _db = db;
             _media = media;
         }
@@ -82,7 +87,7 @@ namespace Panoptes_v1.Api
             var images = new List<MediaItem>();
             foreach (var id in new[] { request.LogoMediaId, request.FaviconMediaId }.OfType<Guid>().Distinct())
             {
-                var item = await _db.MediaItems.Include(i => i.Versions)
+                var item = await _attachments.VisibleTo(_db.MediaItems.Include(i => i.Versions), User)
                     .FirstOrDefaultAsync(i => i.Id == id && i.Purpose == MediaPurpose.Library && i.DeletedAt == null);
                 if (item == null)
                     return Problem(_t["The selected image no longer exists."], statusCode: StatusCodes.Status400BadRequest);
@@ -90,6 +95,10 @@ namespace Panoptes_v1.Api
                     return Problem(_t["The logo and favicon must be images."], statusCode: StatusCodes.Status400BadRequest);
                 images.Add(item);
             }
+
+            // Λογότυπο/favicon γίνονται δημόσια: όχι αρχεία συνδεδεμένα με εγγραφές
+            if (await _usage.PublicBlockAsync(images.Where(i => i.Visibility != MediaVisibility.Public).Select(i => i.Id).ToList()) is string attached)
+                return Problem(attached, statusCode: StatusCodes.Status409Conflict);
 
             branding.AppName = request.AppName.Trim();
             branding.LogoMediaId = request.LogoMediaId;

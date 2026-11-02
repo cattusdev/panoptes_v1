@@ -17,6 +17,8 @@ namespace Panoptes_v1.Api
         string? RecordId,
         DateTime DateTime,
         string? UserEmail,
+        string? Source,   // Χωρίς χρήστη: ποιο κομμάτι του συστήματος (π.χ. "jobs:email.send")
+        string? TraceId,  // Το reference του request/job (ίδιο με αυτό των μηνυμάτων λάθους)
         IReadOnlyList<AuditChangeDto> Changes);
 
     [ApiController]
@@ -76,6 +78,8 @@ namespace Panoptes_v1.Api
                 FormatKey(l.PrimaryKey),
                 DateTime.SpecifyKind(l.DateTime, DateTimeKind.Utc),
                 l.UserId != null && emails.TryGetValue(l.UserId, out var email) ? email : null,
+                l.Source,
+                l.TraceId,
                 BuildChanges(l))).ToList();
 
             return new PagedResult<AuditLogDto>(items, total, page, pageSize);

@@ -174,6 +174,8 @@ export type AuditLogItem = {
   recordId: string | null
   dateTime: string
   userEmail: string | null
+  source: string | null // Χωρίς χρήστη: ποιο κομμάτι του συστήματος (π.χ. "jobs:email.send")
+  traceId: string | null
   changes: { field: string; oldValue: string | null; newValue: string | null }[]
 }
 

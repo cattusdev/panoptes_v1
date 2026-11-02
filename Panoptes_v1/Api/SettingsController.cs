@@ -123,7 +123,8 @@ namespace Panoptes_v1.Api
             if (!GeneralSettings.TimeFormats.Contains(request.TimeFormat))
                 ModelState.AddModelError(nameof(request.TimeFormat), _t["Choose 24-hour or 12-hour."]);
             var timeZone = string.IsNullOrWhiteSpace(request.TimeZone) ? null : request.TimeZone.Trim();
-            if (timeZone != null && !TimeZonePattern.IsMatch(timeZone))
+            // Και υπαρκτή ζώνη: ο server κάνει υπολογισμούς ημερομηνιών με αυτήν (BusinessClock)
+            if (timeZone != null && (!TimeZonePattern.IsMatch(timeZone) || !BusinessClock.TryFindTimeZone(timeZone, out _)))
                 ModelState.AddModelError(nameof(request.TimeZone), _t["Choose a time zone from the list."]);
             if (!ModelState.IsValid)
                 return ValidationProblem(ModelState);

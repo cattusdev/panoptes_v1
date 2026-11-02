@@ -55,6 +55,8 @@ public class AppFixture
         ["Media__MaxVersions"] = "3",                        // Για να ελέγχεται εύκολα το κλάδεμα των εκδόσεων
         ["Media__UploadsPerMinute"] = "1000",
         ["Media__CleanupIntervalMinutes"] = "0",             // Ο καθαρισμός τρέχει μόνο όταν τον ζητά ένα test
+        ["Jobs__PollSeconds"] = "0",                         // Οι δουλειές τρέχουν μόνο όταν τις ζητά ένα test (/api/test/jobs/run)
+        ["Jobs__RetryDelaySeconds"] = "0",                   // Επανάληψη αμέσως, για να μη περιμένουν τα tests
         ["Serilog__WriteTo__1__Args__path"] = Path.Combine(Path.GetTempPath(), "Panoptes_v1.E2E", "log-.txt"),
     };
 

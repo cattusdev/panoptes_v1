@@ -22,6 +22,7 @@ namespace Panoptes_v1.Services
 
         public static async Task<int> RunAsync(string command, string[] args, IServiceProvider services)
         {
+            using var audit = AuditContext.Use($"cli:{command}"); // Στο audit log: ποια εντολή έκανε τις αλλαγές
             using var scope = services.CreateScope();
             try
             {

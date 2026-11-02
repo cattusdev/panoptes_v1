@@ -49,4 +49,8 @@ The tests need PostgreSQL and the connection string in user secrets. They also h
 - **Emails:** without an SMTP server, Development writes them to `Panoptes_v1/App_Data/emails`. The tests use `Email:PickupDirectory`. Locally, point `SmtpSettings` (user secrets) or Settings → Email at Mailpit (`localhost:1025`, security `None`) and read them at http://localhost:8025.
 - **Dates:** show them with `<DateTime>` / `useDateFormat()`, never `toLocaleString()`, so they follow Settings → General.
 - **Text:** every UI string goes through `t()` with an entry in both `src/i18n/locales/en` and `el` (`tsc` fails if Greek is missing); server messages through `IStringLocalizer<SharedResource>` plus a Greek entry in `Resources/SharedResource.el.resx`. Keep the English wording stable: the E2E tests match on it.
+- **Files on records:** never query `MediaItems` for users without `MediaAttachments.VisibleTo(...)`, and never let an attached file become public. Files in restricted projects must stay invisible everywhere.
+- **Side effects (emails, charges, renewals, reminders):** go through `JobQueue` with a deterministic idempotency key, never fire-and-forget. Handlers re-check that the work is still needed.
+- **Audit:** code without an HTTP request wraps its work in `AuditContext.Use("<area>:<what>")`. Don't use `ExecuteUpdate`/`ExecuteDelete` on audited tables. New mutable entities get a `RowVersion` (`IsRowVersion()`).
+- **Running the tests while the app runs:** `dotnet test Panoptes_v1.E2E -c Release` builds to `bin/Release`, so it doesn't hit the locked Debug build.
 - **Git:** commit or push only when the user asks.
