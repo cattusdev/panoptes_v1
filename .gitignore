@@ -485,10 +485,10 @@ $RECYCLE.BIN/
 **/Logs/
 
 # The test project folder matches the *.e2e rule above (case-insensitive on Windows)
-!Panoptes.E2E/
+!Panoptes_v1.E2E/
 
-# React client build output (npm run build in Panoptes.Client)
-Panoptes/wwwroot/spa/
+# React client build output (npm run build in Panoptes_v1.Client)
+Panoptes_v1/wwwroot/spa/
 
 # Uploaded media (local storage)
 App_Data/
