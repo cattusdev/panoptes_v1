@@ -24,6 +24,12 @@ export type EmailSettings = {
 // password: null = κρατάμε το αποθηκευμένο
 export type EmailSettingsInput = Omit<EmailSettings, 'hasPassword' | 'status'> & { password: string | null; clearPassword: boolean }
 
+// Settings → Finance. trackingStartDate: DateOnly ("yyyy-MM-dd")
+export type FinanceSettings = { defaultVatRate: number; trackingStartDate: string }
+
+// reason: υποχρεωτικό μόνο όταν αλλάζει η ημερομηνία έναρξης
+export type FinanceSettingsInput = FinanceSettings & { reason: string | null }
+
 const storageKey = 'panoptes-v1.general-settings'
 
 // Όπως στο branding: οι τελευταίες ρυθμίσεις εμφανίζονται αμέσως (χωρίς να αλλάζει η μορφή των ημερομηνιών μετά το φόρτωμα)
@@ -79,5 +85,17 @@ export function useSendTestEmail() {
   return useMutation({
     mutationFn: (input: EmailSettingsInput & { to: string }) =>
       api<{ to: string }>('/api/settings/email/test', { method: 'POST', body: input }),
+  })
+}
+
+export function useFinanceSettings() {
+  return useQuery({ queryKey: ['finance-settings'], queryFn: () => api<FinanceSettings>('/api/settings/finance') })
+}
+
+export function useUpdateFinanceSettings() {
+  const queryClient = useQueryClient()
+  return useMutation({
+    mutationFn: (input: FinanceSettingsInput) => api<FinanceSettings>('/api/settings/finance', { method: 'PUT', body: input }),
+    onSuccess: (settings) => queryClient.setQueryData(['finance-settings'], settings),
   })
 }

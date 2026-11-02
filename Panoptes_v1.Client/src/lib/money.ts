@@ -10,6 +10,11 @@ export function formatAmount(amount: number, language: string = currentLanguage(
   return new Intl.NumberFormat(language, { minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(amount)
 }
 
+// Ποσοστό χωρίς το σύμβολο, για το πεδίο εισαγωγής: 24 / 13.5 / 13,5 (χωρίς άσκοπα μηδενικά)
+export function formatPercentNumber(value: number, language: string = currentLanguage()) {
+  return new Intl.NumberFormat(language, { maximumFractionDigits: 2, useGrouping: false }).format(value)
+}
+
 // Το σύμβολο του νομίσματος στη γλώσσα (€, $, ...)
 export function currencySymbol(currency: string, language: string = currentLanguage()) {
   return new Intl.NumberFormat(language, { style: 'currency', currency }).formatToParts(0).find((p) => p.type === 'currency')?.value ?? currency
@@ -23,7 +28,7 @@ function decimalSeparator(language: string) {
 //   κενό -> null · μη έγκυρο ή πάνω από 2 δεκαδικά -> NaN
 // Με ένα μόνο διαχωριστικό: αν είναι αυτό της γλώσσας είναι δεκαδικό, αλλιώς χιλιάδες μόνο αν ακολουθούν ακριβώς 3 ψηφία.
 export function parseAmount(text: string, language: string = currentLanguage()): number | null {
-  let value = text.replace(/[\s  €$£]/g, '').replace(/^[−–]/, '-')
+  let value = text.replace(/[\s  €$£%]/g, '').replace(/^[−–]/, '-')
   if (value === '') return null
 
   const negative = value.startsWith('-')

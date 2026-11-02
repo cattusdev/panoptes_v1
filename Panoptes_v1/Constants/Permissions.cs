@@ -81,6 +81,12 @@ namespace Panoptes_v1.Constants
             public const string Edit = "Permissions.Settings.Edit";
         }
 
+        // Module: Finance. Τα υπόλοιπα (View, Record, Adjust, Expenses) έρχονται με το module των οικονομικών.
+        public static class Finance
+        {
+            public const string Settings = "Permissions.Finance.Settings"; // Settings → Finance: ΦΠΑ και ημερομηνία έναρξης
+        }
+
         // Ίδιος έλεγχος με τα policies (Program.cs): ο Admin έχει τα πάντα
         public static bool Has(ClaimsPrincipal user, string permission) =>
             user.IsInRole(SystemRoles.Admin) || user.HasClaim("Permission", permission);

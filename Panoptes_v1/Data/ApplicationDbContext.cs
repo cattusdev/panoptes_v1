@@ -32,6 +32,7 @@ namespace Panoptes_v1.Data
         public DbSet<AppSetting> AppSettings { get; set; }
         public DbSet<MediaAttachment> MediaAttachments { get; set; }
         public DbSet<BackgroundJob> BackgroundJobs { get; set; }
+        public DbSet<Sequence> Sequences { get; set; }
 
         protected override void OnModelCreating(ModelBuilder builder)
         {
@@ -94,6 +95,15 @@ namespace Panoptes_v1.Data
                 setting.HasKey(s => s.Key);
                 setting.Property(s => s.Key).HasMaxLength(100);
                 setting.Property(s => s.Value).HasColumnType("jsonb");
+                setting.Property(s => s.CreatedById).HasMaxLength(450);
+                setting.Property(s => s.UpdatedById).HasMaxLength(450);
+            });
+
+            // Οι αριθμοί των κωδικών (CL-0042, CHG-2026-0153): μία γραμμή ανά σειρά, βλ. ReferenceGenerator
+            builder.Entity<Sequence>(sequence =>
+            {
+                sequence.HasKey(s => s.Name);
+                sequence.Property(s => s.Name).HasMaxLength(50);
             });
 
             builder.Entity<MediaUpload>(upload =>
@@ -181,13 +191,44 @@ namespace Panoptes_v1.Data
             [typeof(AppSetting)] = ["Secret"],                // κρυπτογραφημένα μυστικά (π.χ. SMTP password)
         };
 
+        // Τα IHasTimestamps τα έχει ήδη κάθε γραμμή του log (DateTime, UserId): δεν τα γράφουμε ξανά ως αλλαγές
+        private static readonly HashSet<string> TimestampColumns =
+            [nameof(IHasTimestamps.CreatedAt), nameof(IHasTimestamps.CreatedById), nameof(IHasTimestamps.UpdatedAt), nameof(IHasTimestamps.UpdatedById)];
+
         private static bool IsSensitive(PropertyEntry property, Type entityType)
         {
             if (property.Metadata.IsConcurrencyToken)
                 return true;
+            if (typeof(IHasTimestamps).IsAssignableFrom(entityType) && TimestampColumns.Contains(property.Metadata.Name))
+                return true;
             if (property.Metadata.PropertyInfo?.IsDefined(typeof(AuditIgnoreAttribute), inherit: true) == true)
                 return true;
             return SensitiveColumns.Any(s => s.Key.IsAssignableFrom(entityType) && s.Value.Contains(property.Metadata.Name));
+        }
+
+        // Created*/Updated* των IHasTimestamps: ο κώδικας δεν τα ορίζει ποτέ, και τα Created* δεν αλλάζουν μετά τη δημιουργία
+        private void StampTimestamps(string? userId)
+        {
+            var now = DateTime.UtcNow;
+            foreach (var entry in ChangeTracker.Entries<IHasTimestamps>())
+            {
+                if (entry.State == EntityState.Added)
+                {
+                    entry.Entity.CreatedAt = now;
+                    entry.Entity.CreatedById = userId;
+                }
+                else if (entry.State == EntityState.Modified)
+                {
+                    entry.Property(nameof(IHasTimestamps.CreatedAt)).IsModified = false;
+                    entry.Property(nameof(IHasTimestamps.CreatedById)).IsModified = false;
+                }
+                else
+                {
+                    continue;
+                }
+                entry.Entity.UpdatedAt = now;
+                entry.Entity.UpdatedById = userId;
+            }
         }
 
         // Γράφει τα logs που είναι έτοιμα· επιστρέφει όσα περιμένουν IDs από τη βάση
@@ -203,6 +244,7 @@ namespace Panoptes_v1.Data
             var userId = source == null ? httpContext?.User?.FindFirstValue(ClaimTypes.NameIdentifier) : null;
             if (source == null && userId == null && httpContext == null) source = AuditContext.DefaultSource;
             var traceId = httpContext?.TraceIdentifier ?? Activity.Current?.TraceId.ToString();
+            StampTimestamps(userId);
 
             foreach (var entry in ChangeTracker.Entries())
             {

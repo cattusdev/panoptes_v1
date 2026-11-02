@@ -1,4 +1,4 @@
-namespace Panoptes_v1.Constants
+﻿namespace Panoptes_v1.Constants
 {
     // Οι αρχικοί ρόλοι του Hankatt Operations (ARCHITECTURE §16 Q6). Τους φτιάχνει το `dotnet run -- roles:seed`
     // μόνο αν λείπουν· μετά αλλάζουν ελεύθερα από τους Ρόλους. Κάθε νέο module προσθέτει εδώ τα δικά του permissions.
@@ -25,7 +25,7 @@ namespace Panoptes_v1.Constants
             // Τα πάντα εκτός από ρυθμίσεις, διαχείριση χρηστών/ρόλων και (αργότερα) οικονομικές διορθώσεις
             (Manager, [.. OwnFiles, Permissions.Media.ManageAll, Permissions.Users.View, Permissions.AuditLogs.View]),
             (Staff, OwnFiles),
-            (Finance, OwnFiles),
+            (Finance, [.. OwnFiles, Permissions.Settings.View, Permissions.Finance.Settings]),
             (Support, OwnFiles),
         ];
     }

@@ -1,4 +1,4 @@
-using System.Security.Claims;
+﻿using System.Security.Claims;
 using System.Text;
 using System.Text.Json;
 using Panoptes_v1.Constants;
@@ -66,7 +66,7 @@ namespace Panoptes_v1.Api
 
             if (!string.IsNullOrWhiteSpace(search))
             {
-                var pattern = $"%{EscapeLike(search.Trim())}%";
+                var pattern = Like.Contains(search.Trim());
                 query = query.Where(i => EF.Functions.ILike(i.Title, pattern) ||
                     i.Versions.Any(v => v.Id == i.CurrentVersionId && EF.Functions.ILike(v.OriginalFileName, pattern)));
             }
@@ -289,9 +289,6 @@ namespace Panoptes_v1.Api
         }
 
         private static string? NullIfBlank(string? value) => string.IsNullOrWhiteSpace(value) ? null : value.Trim();
-
-        private static string EscapeLike(string value) =>
-            value.Replace("\\", "\\\\").Replace("%", "\\%").Replace("_", "\\_");
 
         // Η θέση στη λίστα (τελευταίο αρχείο της σελίδας), κωδικοποιημένη για το URL
         private record Cursor(string? Title, long Sequence)

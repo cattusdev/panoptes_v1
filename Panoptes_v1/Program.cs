@@ -1,4 +1,4 @@
-using Microsoft.Extensions.Localization;
+﻿using Microsoft.Extensions.Localization;
 using Panoptes_v1;
 using Panoptes_v1.Data;
 using Microsoft.AspNetCore.Identity;
@@ -112,6 +112,7 @@ builder.Services.AddSingleton<AppUrls>();
 builder.Services.AddScoped<AccountEmails>();
 builder.Services.AddSingleton(TimeProvider.System);
 builder.Services.AddScoped<BusinessClock>();
+builder.Services.AddScoped<ReferenceGenerator>();
 
 // --- ΔΟΥΛΕΙΕΣ ΠΑΡΑΣΚΗΝΙΟΥ ---
 // Ουρά στη βάση (BackgroundJobs): αντέχει restart, επαναλήψεις με καθυστέρηση, ποτέ διπλή δουλειά (IdempotencyKey)
@@ -300,6 +301,29 @@ if (app.Configuration.GetValue<bool>("Diagnostics:EnableTestEndpoints"))
         stale.NormalizedName = stale.Name.ToUpperInvariant();
         await db2.SaveChangesAsync(); // DbUpdateConcurrencyException -> 409
         return Results.Ok();
+    });
+
+    // Κωδικοί από ταυτόχρονα transactions: commit, rollback (ο αριθμός ξαναδίνεται) ή χωρίς transaction (απορρίπτεται)
+    app.MapPost("/api/test/references", async (string prefix, bool? yearly, int? count, string? mode, IServiceScopeFactory scopes) =>
+    {
+        var format = new ReferenceFormat(prefix, 4, yearly ?? false);
+        var refs = await Task.WhenAll(Enumerable.Range(0, Math.Clamp(count ?? 1, 1, 50)).Select(async _ =>
+        {
+            using var scope = scopes.CreateScope();
+            var db = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
+            var generator = scope.ServiceProvider.GetRequiredService<ReferenceGenerator>();
+            if (mode == "none")
+            {
+                try { return await generator.NextAsync(format); }
+                catch (InvalidOperationException) { return null; }
+            }
+            await using var transaction = await db.Database.BeginTransactionAsync();
+            var reference = await generator.NextAsync(format);
+            if (mode == "rollback") await transaction.RollbackAsync();
+            else await transaction.CommitAsync();
+            return reference;
+        }));
+        return new { refs };
     });
 
     // Σε ποια ημέρα της επιχείρησης πέφτει μια στιγμή (BusinessClock)

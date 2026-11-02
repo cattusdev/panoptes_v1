@@ -26,4 +26,7 @@ export const Permissions = {
     View: 'Permissions.Settings.View',
     Edit: 'Permissions.Settings.Edit',
   },
+  Finance: {
+    Settings: 'Permissions.Finance.Settings',
+  },
 } as const

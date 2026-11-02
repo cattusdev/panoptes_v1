@@ -1,4 +1,4 @@
-using System.Security.Claims;
+﻿using System.Security.Claims;
 using Panoptes_v1.Constants;
 using Panoptes_v1.Data;
 using Panoptes_v1.Models;
@@ -46,6 +46,8 @@ public static class TestData
     public const string AvatarUser = "avatar@e2e.test";
     public const string AvatarUser2 = "avatar2@e2e.test";
     public const string SettingsViewer = "settingsviewer@e2e.test";
+    public const string SettingsEditor = "settingseditor@e2e.test"; // Settings.Edit, χωρίς Finance.Settings
+    public const string FinanceSettings = "financesettings@e2e.test";
 
     // Γλώσσες: διαλέγει ελληνικά (δικός του χρήστης, για να μην επηρεάζει τα άλλα tests)
     public const string GreekUser = "greek@e2e.test";
@@ -66,6 +68,8 @@ public static class TestData
         ["MediaEditor"] = [Permissions.Media.View, Permissions.Media.Upload, Permissions.Media.Edit, Permissions.Media.Delete],
         ["MediaManager"] = [Permissions.Media.View, Permissions.Media.Upload, Permissions.Media.Edit, Permissions.Media.Delete, Permissions.Media.ManageAll],
         ["SettingsViewer"] = [Permissions.Settings.View],
+        ["SettingsEditor"] = [Permissions.Settings.View, Permissions.Settings.Edit],
+        ["FinanceSettings"] = [Permissions.Settings.View, Permissions.Finance.Settings],
     };
 
     private static readonly Dictionary<string, string?> SeedUsers = new()
@@ -97,6 +101,8 @@ public static class TestData
         [AvatarUser] = null,
         [AvatarUser2] = null,
         [SettingsViewer] = "SettingsViewer",
+        [SettingsEditor] = "SettingsEditor",
+        [FinanceSettings] = "FinanceSettings",
         [GreekUser] = null,
         [GreekUnconfirmed] = null,
     };

@@ -272,7 +272,8 @@
         "Roles": "Roles",
         "AuditLogs": "Audit Logs",
         "Media": "Media",
-        "Settings": "Settings"
+        "Settings": "Settings",
+        "Finance": "Finance"
       },
       "items": {
         "Users": {
@@ -299,7 +300,10 @@
         },
         "Settings": {
           "View": { "label": "View settings", "description": "See settings and their details." },
-          "Edit": { "label": "Edit settings", "description": "Change existing settings." }
+          "Edit": { "label": "Edit settings", "description": "Change the settings, except Finance." }
+        },
+        "Finance": {
+          "Settings": { "label": "Finance settings", "description": "Change the default VAT rate and the date financial tracking starts." }
         }
       }
     }

@@ -1,4 +1,4 @@
-using System.Text.Json;
+﻿using System.Text.Json;
 using Panoptes_v1.Constants;
 using Panoptes_v1.Data;
 using Panoptes_v1.Models;
@@ -21,6 +21,11 @@ namespace Panoptes_v1.Api
         string? TraceId,  // Το reference του request/job (ίδιο με αυτό των μηνυμάτων λάθους)
         IReadOnlyList<AuditChangeDto> Changes);
 
+    public class AuditLogListRequest : ListRequest
+    {
+        public AuditType? Type { get; set; }
+    }
+
     [ApiController]
     [Route("api/audit-logs")]
     [Authorize(Policy = Permissions.AuditLogs.View)]
@@ -33,49 +38,42 @@ namespace Panoptes_v1.Api
             _context = context;
         }
 
-        // GET /api/audit-logs?search=&type=Create|Update|Delete&page=&pageSize=
+        // GET /api/audit-logs?search=&type=Create|Update|Delete&sort=&page=&pageSize=
         // search: email του χρήστη ή όνομα πίνακα
         // Ταξινόμηση: time (προεπιλογή: η πιο πρόσφατη πρώτη) ή table
-        private static readonly SortMap<AuditLog> LogSort = new SortMap<AuditLog>("-time")
+        private static readonly SortMap<AuditLog> LogSort = new SortMap<AuditLog>("-time", a => a.Id, tieBreakerDescending: true)
             .Add("time", a => a.DateTime)
             .Add("table", a => a.TableName);
 
         [HttpGet]
-        public async Task<PagedResult<AuditLogDto>> List(string? search, string? type, string? sort, int page = 1, int pageSize = 25)
+        public async Task<PagedResult<AuditLogDto>> List([FromQuery] AuditLogListRequest request)
         {
-            (page, pageSize) = Paging.Normalize(page, pageSize);
             var query = _context.AuditLogs.AsQueryable();
 
-            if (Enum.TryParse<AuditType>(type, ignoreCase: true, out var auditType))
+            if (request.Type is AuditType auditType)
                 query = query.Where(a => a.Type == auditType);
 
-            if (!string.IsNullOrWhiteSpace(search))
+            if (request.SearchTerm is string term)
             {
-                var term = search.Trim();
-                var normalized = term.ToUpperInvariant();
-                var lower = term.ToLowerInvariant();
+                var pattern = Like.Contains(term);
                 var userIds = _context.Users
-                    .Where(u => u.NormalizedEmail != null && u.NormalizedEmail.Contains(normalized))
+                    .Where(u => u.Email != null && EF.Functions.ILike(u.Email, pattern))
                     .Select(u => u.Id);
 
                 query = query.Where(a =>
                     (a.UserId != null && userIds.Contains(a.UserId)) ||
-                    (a.TableName != null && a.TableName.ToLower().Contains(lower)));
+                    (a.TableName != null && EF.Functions.ILike(a.TableName, pattern)));
             }
 
-            var total = await query.CountAsync();
-            var logs = await LogSort.Apply(query, sort)
-                .ThenByDescending(a => a.Id)
-                .Skip((page - 1) * pageSize)
-                .Take(pageSize)
-                .ToListAsync();
+            var page = await LogSort.Apply(query, request.Sort).ToPagedAsync(request);
+            var logs = page.Items;
 
             var ids = logs.Where(l => l.UserId != null).Select(l => l.UserId).Distinct().ToList();
             var emails = await _context.Users
                 .Where(u => ids.Contains(u.Id))
                 .ToDictionaryAsync(u => u.Id, u => u.Email);
 
-            var items = logs.Select(l => new AuditLogDto(
+            return page.Map(l => new AuditLogDto(
                 l.Id,
                 l.Type.ToString(),
                 l.TableName,
@@ -84,9 +82,7 @@ namespace Panoptes_v1.Api
                 l.UserId != null && emails.TryGetValue(l.UserId, out var email) ? email : null,
                 l.Source,
                 l.TraceId,
-                BuildChanges(l))).ToList();
-
-            return new PagedResult<AuditLogDto>(items, total, page, pageSize);
+                BuildChanges(l)));
         }
 
         // {"Id":"abc"} -> "abc", {"UserId":"a","RoleId":"b"} -> "a, b"

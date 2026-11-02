@@ -1,4 +1,4 @@
-using System.Text.Json.Serialization;
+﻿using System.Text.Json.Serialization;
 
 namespace Panoptes_v1.Services.Settings
 {
@@ -38,5 +38,20 @@ namespace Panoptes_v1.Services.Settings
         public string Username { get; set; } = "";
         public string SenderName { get; set; } = "";
         public string SenderEmail { get; set; } = "";
+    }
+
+    // Οικονομικά (ARCHITECTURE §5.4, §5.9). Αλλάζουν μόνο με Finance.Settings (όχι με Settings.Edit).
+    public class FinanceSettings : ISettingsSection
+    {
+        public static string Key => "finance";
+
+        // Ο ΦΠΑ με τον οποίο ξεκινά μια νέα γραμμή χρέωσης (%). Αλλαγή εδώ δεν αγγίζει τις υπάρχουσες γραμμές.
+        public decimal DefaultVatRate { get; set; } = 24m;
+
+        // Από εδώ και πέρα όλα καταγράφονται ζωντανά (πληρωμές, χρεώσεις). Ό,τι ήταν πριν μπαίνει ως αρχικό υπόλοιπο.
+        public DateOnly TrackingStartDate { get; set; } = new(2026, 12, 1);
+
+        // Γιατί άλλαξε τελευταία η ημερομηνία έναρξης: φαίνεται μαζί με την αλλαγή στο audit log
+        public string? TrackingStartReason { get; set; }
     }
 }

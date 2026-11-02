@@ -1,4 +1,4 @@
-using Microsoft.Extensions.Localization;
+﻿using Microsoft.Extensions.Localization;
 using Panoptes_v1.Services.Localization;
 using System.ComponentModel.DataAnnotations;
 using System.Net.Sockets;
@@ -68,6 +68,20 @@ namespace Panoptes_v1.Api
         // Κενό επιτρέπεται όταν ο δικός μας server είναι κλειστός (ελέγχεται στο ValidateServer)
         [StringLength(255)]
         public string SenderEmail { get; set; } = "";
+    }
+
+    public record FinanceSettingsDto(decimal DefaultVatRate, DateOnly TrackingStartDate);
+
+    public class FinanceSettingsRequest
+    {
+        public decimal DefaultVatRate { get; set; }
+
+        [Required]
+        public DateOnly? TrackingStartDate { get; set; }
+
+        // Υποχρεωτικό μόνο όταν αλλάζει η ημερομηνία έναρξης
+        [StringLength(500)]
+        public string? Reason { get; set; }
     }
 
     public class TestEmailRequest : EmailSettingsRequest
@@ -214,6 +228,47 @@ namespace Panoptes_v1.Api
             }
 
             return Ok(new { to });
+        }
+
+        // Τα βλέπει όποιος βλέπει τις ρυθμίσεις ή τα αλλάζει
+        [HttpGet("finance")]
+        public async Task<ActionResult<FinanceSettingsDto>> Finance()
+        {
+            if (!Permissions.Has(User, Permissions.Settings.View) && !Permissions.Has(User, Permissions.Finance.Settings))
+                return Forbid();
+            var finance = await _settings.GetAsync<FinanceSettings>();
+            return new FinanceSettingsDto(finance.DefaultVatRate, finance.TrackingStartDate);
+        }
+
+        // ΦΠΑ: οι υπάρχουσες γραμμές κρατούν τον δικό τους. Ημερομηνία έναρξης: αλλάζει μόνο με αιτιολογία (μένει στο audit log).
+        [HttpPut("finance")]
+        [Authorize(Policy = Permissions.Finance.Settings)]
+        public async Task<ActionResult<FinanceSettingsDto>> UpdateFinance(FinanceSettingsRequest request)
+        {
+            var current = await _settings.GetAsync<FinanceSettings>();
+            var trackingStart = request.TrackingStartDate!.Value;
+            var reason = string.IsNullOrWhiteSpace(request.Reason) ? null : request.Reason.Trim();
+
+            if (request.DefaultVatRate is < 0 or > 100)
+                ModelState.AddModelError(nameof(request.DefaultVatRate), _t["Enter a VAT rate from 0 to 100."]);
+            else if (decimal.Round(request.DefaultVatRate, 2) != request.DefaultVatRate)
+                ModelState.AddModelError(nameof(request.DefaultVatRate), _t["Use at most two decimals."]);
+
+            var startChanges = trackingStart != current.TrackingStartDate;
+            if (startChanges && reason == null)
+                ModelState.AddModelError(nameof(request.Reason), _t["Say why the tracking start date changes."]);
+            if (!ModelState.IsValid)
+                return ValidationProblem(ModelState);
+
+            // Με το module των οικονομικών: η αλλαγή απορρίπτεται όσο υπάρχουν ζωντανές εγγραφές πριν από τη νέα ημερομηνία
+            // ή αρχικά υπόλοιπα μετά από αυτήν (ARCHITECTURE §5.4). Σήμερα δεν υπάρχουν ακόμα τέτοιες εγγραφές.
+            await _settings.SaveAsync(new FinanceSettings
+            {
+                DefaultVatRate = request.DefaultVatRate,
+                TrackingStartDate = trackingStart,
+                TrackingStartReason = startChanges ? reason : current.TrackingStartReason,
+            });
+            return await Finance();
         }
 
         private bool ValidateServer(EmailSettingsRequest request)

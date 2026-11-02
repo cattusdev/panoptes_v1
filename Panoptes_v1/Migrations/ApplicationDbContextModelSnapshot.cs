@@ -228,6 +228,13 @@ namespace Panoptes_v1.Migrations
                         .HasMaxLength(100)
                         .HasColumnType("character varying(100)");
 
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("CreatedById")
+                        .HasMaxLength(450)
+                        .HasColumnType("character varying(450)");
+
                     b.Property<uint>("RowVersion")
                         .IsConcurrencyToken()
                         .ValueGeneratedOnAddOrUpdate()
@@ -239,6 +246,10 @@ namespace Panoptes_v1.Migrations
 
                     b.Property<DateTime>("UpdatedAt")
                         .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("UpdatedById")
+                        .HasMaxLength(450)
+                        .HasColumnType("character varying(450)");
 
                     b.Property<string>("Value")
                         .IsRequired()
@@ -669,6 +680,20 @@ namespace Panoptes_v1.Migrations
                         .IsUnique();
 
                     b.ToTable("MediaVersions");
+                });
+
+            modelBuilder.Entity("Panoptes_v1.Models.Sequence", b =>
+                {
+                    b.Property<string>("Name")
+                        .HasMaxLength(50)
+                        .HasColumnType("character varying(50)");
+
+                    b.Property<long>("NextValue")
+                        .HasColumnType("bigint");
+
+                    b.HasKey("Name");
+
+                    b.ToTable("Sequences");
                 });
 
             modelBuilder.Entity("Panoptes_v1.Models.UserProfile", b =>

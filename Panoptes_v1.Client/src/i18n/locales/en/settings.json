@@ -6,7 +6,8 @@
   "sections": {
     "general": { "label": "General", "description": "Language, dates and times across the app." },
     "branding": { "label": "Branding", "description": "Your app's name, logo and browser icon, as everyone sees them." },
-    "email": { "label": "Email", "description": "The server that sends sign-up, password reset and other account emails." }
+    "email": { "label": "Email", "description": "The server that sends sign-up, password reset and other account emails." },
+    "finance": { "label": "Finance", "description": "VAT and the date financial tracking starts." }
   },
   "general": {
     "language": {
@@ -111,6 +112,32 @@
       "sent": "Test email sent to {{to}}",
       "sentDescription": "Check the inbox, and the spam folder if it isn't there.",
       "failed": "The test email wasn't sent"
+    }
+  },
+  "finance": {
+    "readOnly": "You can view these settings, but only people with the Finance · Settings permission can change them.",
+    "vat": {
+      "title": "VAT",
+      "description": "The rate new charge lines start with. Each line can still use its own rate, e.g. 0% for exempt work.",
+      "rate": "Default VAT rate",
+      "rateHint": "Existing charges keep the rate they were created with.",
+      "invalid": "Enter a rate, e.g. 24 or 13.5.",
+      "saved": "VAT rate saved",
+      "savedDescription": "New charge lines start at {{rate}}%."
+    },
+    "trackingStart": {
+      "title": "Financial tracking start",
+      "description": "From this date on, payments and charges are recorded as they happen. What was still owed on it is entered as opening balances.",
+      "date": "Tracking starts on",
+      "dateHint": "Payments must be received on or after this date.",
+      "changeTitle": "This moves the line between history and live records",
+      "changeText": "Live payments or charges dated before the new date, or opening balances after it, block the change until they're reclassified.",
+      "reason": "Reason for the change",
+      "reasonHint": "Saved in the audit log with the change.",
+      "reasonPlaceholder": "e.g. We started recording payments a month earlier",
+      "reasonRequired": "Say why the tracking start date changes.",
+      "saved": "Tracking start date saved",
+      "savedDescription": "Financial tracking now starts on {{date}}."
     }
   }
 }

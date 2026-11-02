@@ -1,4 +1,4 @@
-using System.ComponentModel.DataAnnotations;
+﻿using System.ComponentModel.DataAnnotations;
 using Panoptes_v1.Constants;
 using Panoptes_v1.Data;
 using Panoptes_v1.Services;
@@ -24,6 +24,16 @@ namespace Panoptes_v1.Api
         bool IsSelf,
         bool CanManage,
         string? AvatarUrl);
+
+    public enum UserStatusFilter { Active, Locked, Unconfirmed }
+
+    public class UserListRequest : ListRequest
+    {
+        public UserListRequest() => PageSize = 20;
+
+        public string? Role { get; set; }
+        public UserStatusFilter? Status { get; set; }
+    }
 
     public record RoleOptionsDto(IReadOnlyList<string> All, IReadOnlyList<string> Assignable);
 
@@ -84,48 +94,42 @@ namespace Panoptes_v1.Api
         }
 
         // Ταξινόμηση της λίστας: email (προεπιλογή)
-        private static readonly SortMap<IdentityUser> UserSort = new SortMap<IdentityUser>("email").Add("email", u => u.Email);
+        private static readonly SortMap<IdentityUser> UserSort = new SortMap<IdentityUser>("email", u => u.Id).Add("email", u => u.Email);
 
         // GET /api/users?search=&role=&status=active|locked|unconfirmed&sort=email|-email&page=&pageSize=
         [HttpGet]
         [Authorize(Policy = Permissions.Users.View)]
-        public async Task<ActionResult<PagedResult<UserListItemDto>>> List(
-            string? search, string? role, string? status, string? sort, int page = 1, int pageSize = 20)
+        public async Task<ActionResult<PagedResult<UserListItemDto>>> List([FromQuery] UserListRequest request)
         {
             var actor = await _userManager.GetUserAsync(User);
             if (actor == null) return Unauthorized();
 
-            (page, pageSize) = Paging.Normalize(page, pageSize);
             var now = DateTimeOffset.UtcNow;
             var query = _context.Users.AsQueryable();
 
-            if (!string.IsNullOrWhiteSpace(search))
+            if (request.SearchTerm is string term)
             {
-                var normalized = search.Trim().ToUpperInvariant();
-                query = query.Where(u => u.NormalizedEmail != null && u.NormalizedEmail.Contains(normalized));
+                var pattern = Like.Contains(term);
+                query = query.Where(u => u.Email != null && EF.Functions.ILike(u.Email, pattern));
             }
 
-            if (!string.IsNullOrWhiteSpace(role))
+            if (!string.IsNullOrWhiteSpace(request.Role))
             {
-                var roleEntity = await _roleManager.FindByNameAsync(role);
+                var roleEntity = await _roleManager.FindByNameAsync(request.Role);
                 var roleId = roleEntity?.Id ?? "";
                 query = query.Where(u => _context.UserRoles.Any(ur => ur.UserId == u.Id && ur.RoleId == roleId));
             }
 
-            query = status switch
+            query = request.Status switch
             {
-                "locked" => query.Where(u => u.LockoutEnd != null && u.LockoutEnd > now),
-                "unconfirmed" => query.Where(u => !u.EmailConfirmed),
-                "active" => query.Where(u => u.EmailConfirmed && (u.LockoutEnd == null || u.LockoutEnd <= now)),
+                UserStatusFilter.Locked => query.Where(u => u.LockoutEnd != null && u.LockoutEnd > now),
+                UserStatusFilter.Unconfirmed => query.Where(u => !u.EmailConfirmed),
+                UserStatusFilter.Active => query.Where(u => u.EmailConfirmed && (u.LockoutEnd == null || u.LockoutEnd <= now)),
                 _ => query
             };
 
-            var total = await query.CountAsync();
-            var users = await UserSort.Apply(query, sort)
-                .ThenBy(u => u.Id)
-                .Skip((page - 1) * pageSize)
-                .Take(pageSize)
-                .ToListAsync();
+            var page = await UserSort.Apply(query, request.Sort).ToPagedAsync(request);
+            var users = page.Items;
 
             var avatars = await _profiles.AvatarUrlsAsync(users.Select(u => u.Id));
             var items = new List<UserListItemDto>();
@@ -142,7 +146,7 @@ namespace Panoptes_v1.Api
                     avatars.GetValueOrDefault(user.Id)));
             }
 
-            return new PagedResult<UserListItemDto>(items, total, page, pageSize);
+            return new PagedResult<UserListItemDto>(items, page.Total, page.Page, page.PageSize);
         }
 
         // All: όλοι οι ρόλοι (για φίλτρα). Assignable: όσοι μπορεί να δώσει ο τρέχων χρήστης (για τα dropdowns)

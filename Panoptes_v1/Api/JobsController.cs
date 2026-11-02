@@ -1,4 +1,4 @@
-using Panoptes_v1.Constants;
+﻿using Panoptes_v1.Constants;
 using Panoptes_v1.Data;
 using Panoptes_v1.Models;
 using Microsoft.AspNetCore.Authorization;
@@ -21,6 +21,12 @@ namespace Panoptes_v1.Api
         DateTime? CompletedAt,
         string Payload);
 
+    public class JobListRequest : ListRequest
+    {
+        public BackgroundJobStatus? Status { get; set; }
+        public string? Type { get; set; }
+    }
+
     // Οι δουλειές του παρασκηνίου: τι περιμένει, τι απέτυχε και γιατί. Επανάληψη και ακύρωση. Μόνο ο Admin.
     [ApiController]
     [Route("api/jobs")]
@@ -36,19 +42,20 @@ namespace Panoptes_v1.Api
             _t = localizer;
         }
 
-        // GET /api/jobs?status=Failed&type=email.send&page=&pageSize=
-        [HttpGet]
-        public async Task<PagedResult<BackgroundJobDto>> List(BackgroundJobStatus? status, string? type, int page = 1, int pageSize = 25)
-        {
-            (page, pageSize) = Paging.Normalize(page, pageSize);
-            var query = _db.BackgroundJobs.AsNoTracking();
-            if (status != null) query = query.Where(j => j.Status == status);
-            if (!string.IsNullOrWhiteSpace(type)) query = query.Where(j => j.Type == type.Trim());
+        // Ταξινόμηση: created (προεπιλογή: η πιο πρόσφατη πρώτη) ή runAt
+        private static readonly SortMap<BackgroundJob> JobSort = new SortMap<BackgroundJob>("-created", j => j.Id)
+            .Add("created", j => j.CreatedAt)
+            .Add("runAt", j => j.RunAt);
 
-            var total = await query.CountAsync();
-            var jobs = await query.OrderByDescending(j => j.CreatedAt).ThenBy(j => j.Id)
-                .Skip((page - 1) * pageSize).Take(pageSize).ToListAsync();
-            return new PagedResult<BackgroundJobDto>(jobs.Select(ToDto).ToList(), total, page, pageSize);
+        // GET /api/jobs?status=Failed&type=email.send&sort=&page=&pageSize=
+        [HttpGet]
+        public async Task<PagedResult<BackgroundJobDto>> List([FromQuery] JobListRequest request)
+        {
+            var query = _db.BackgroundJobs.AsNoTracking();
+            if (request.Status != null) query = query.Where(j => j.Status == request.Status);
+            if (!string.IsNullOrWhiteSpace(request.Type)) query = query.Where(j => j.Type == request.Type.Trim());
+
+            return (await JobSort.Apply(query, request.Sort).ToPagedAsync(request)).Map(ToDto);
         }
 
         [HttpGet("{id:guid}")]

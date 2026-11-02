@@ -43,7 +43,6 @@ namespace Panoptes_v1.Services.Settings
         {
             var row = await TrackedRowAsync<T>();
             row.Value = JsonSerializer.Serialize(value, Json);
-            row.UpdatedAt = DateTime.UtcNow;
             await _db.SaveChangesAsync();
             _cache.Remove(CacheKey<T>());
         }
@@ -71,7 +70,6 @@ namespace Panoptes_v1.Services.Settings
         {
             var row = await TrackedRowAsync<T>();
             row.Secret = string.IsNullOrEmpty(plain) ? null : _protector.Protect(plain);
-            row.UpdatedAt = DateTime.UtcNow;
             await _db.SaveChangesAsync();
             _cache.Remove(CacheKey<T>());
         }
