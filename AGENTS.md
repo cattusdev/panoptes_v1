@@ -10,6 +10,7 @@ Panoptes_v1: an ASP.NET Core 8 JSON API (Identity, PostgreSQL, EF Core) with a R
 | `Panoptes_v1/` | Backend: `Api/` controllers, `Services/`, `Data/` (DbContext and audit log), `Migrations/` |
 | `Panoptes_v1.Client/` | React app, built into `Panoptes_v1/wwwroot/spa` |
 | `Panoptes_v1.E2E/` | Playwright + NUnit tests against the real app |
+| `Panoptes_v1.Tests/` | Domain and architecture tests (NUnit, real database, no browser) |
 
 ## Commands
 Run these from the repository root.
@@ -23,7 +24,8 @@ Run these from the repository root.
 | Build the client after changing it | `cd Panoptes_v1.Client; npm run build` |
 | Hot reload the client | `cd Panoptes_v1.Client; npm run dev` |
 | Lint the client | `cd Panoptes_v1.Client; npm run lint` |
-| Run the tests | `dotnet test Panoptes_v1.E2E` |
+| Run the E2E tests | `dotnet test Panoptes_v1.E2E` |
+| Run the domain tests | `dotnet test Panoptes_v1.Tests` (a few seconds) |
 | Add a migration | `dotnet ef migrations add <Name> --project Panoptes_v1` |
 
 The tests need PostgreSQL and the connection string in user secrets. They also have two opt-in groups:
@@ -31,15 +33,15 @@ The tests need PostgreSQL and the connection string in user secrets. They also h
 - `--filter "Category=S3"` for S3 storage (needs Docker).
 
 ## Before you call work done
-- Every feature or fix gets an E2E test in `Panoptes_v1.E2E`.
-- `dotnet test Panoptes_v1.E2E` passes.
+- Every feature or fix gets an E2E test in `Panoptes_v1.E2E`; backend rules (ledger, allocations, renewals, references...) also get domain tests in `Panoptes_v1.Tests`.
+- `dotnet test Panoptes_v1.Tests` and `dotnet test Panoptes_v1.E2E` pass.
 - `dotnet build` shows 0 warnings.
 - The client builds and lints.
 
 ## Traps
 - **A running app locks the build.** "File is locked by Panoptes_v1" means the app is running: stop it before building or testing.
 - **Secrets live only in user secrets:** `cd Panoptes_v1; dotnet user-secrets list`. Never put passwords or keys in `appsettings.json` or in commits.
-- **Never touch the dev database from tests or scripts.** The E2E database (`Panoptesv1_E2E`) is wiped on every run, and its name must contain `e2e` or `test`. Before running anything that writes, check which database the connection string points at.
+- **Never touch the dev database from tests or scripts.** The test databases (`Panoptesv1_E2E`, `Panoptesv1_Test`) are wiped on every run, and their names must contain `e2e` or `test`. Before running anything that writes, check which database the connection string points at.
 - **Don't run Prettier.** The project has no Prettier config, so it rewrites the style of whole files. Follow the existing style instead: single quotes, no semicolons in TypeScript, Greek code comments.
 - **Use existing shared pieces before building new ones:**
   - shadcn components in `src/components/ui` (`npx shadcn@latest add <name>`);
@@ -53,5 +55,6 @@ The tests need PostgreSQL and the connection string in user secrets. They also h
 - **Files on records:** never query `MediaItems` for users without `MediaAttachments.VisibleTo(...)`, and never let an attached file become public. Files in restricted projects must stay invisible everywhere.
 - **Side effects (emails, charges, renewals, reminders):** go through `JobQueue` with a deterministic idempotency key, never fire-and-forget. Handlers re-check that the work is still needed.
 - **Audit:** code without an HTTP request wraps its work in `AuditContext.Use("<area>:<what>")`. Don't use `ExecuteUpdate`/`ExecuteDelete` on audited tables. New mutable entities get a `RowVersion` (`IsRowVersion()`).
-- **Running the tests while the app runs:** `dotnet test Panoptes_v1.E2E -c Release` builds to `bin/Release`, so it doesn't hit the locked Debug build.
+- **Running the tests while the app runs:** `dotnet test Panoptes_v1.E2E -c Release` (or `Panoptes_v1.Tests -c Release`) builds to `bin/Release`, so it doesn't hit the locked Debug build.
+- **Search:** `EF.Functions.ILike(x, Like.Contains(term), Like.EscapeCharacter)`. Without the third argument Npgsql writes `ESCAPE ''` and a search for `50%` finds nothing (an architecture test checks this).
 - **Git:** commit or push only when the user asks.

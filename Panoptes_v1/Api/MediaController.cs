@@ -67,8 +67,8 @@ namespace Panoptes_v1.Api
             if (!string.IsNullOrWhiteSpace(search))
             {
                 var pattern = Like.Contains(search.Trim());
-                query = query.Where(i => EF.Functions.ILike(i.Title, pattern) ||
-                    i.Versions.Any(v => v.Id == i.CurrentVersionId && EF.Functions.ILike(v.OriginalFileName, pattern)));
+                query = query.Where(i => EF.Functions.ILike(i.Title, pattern, Like.EscapeCharacter) ||
+                    i.Versions.Any(v => v.Id == i.CurrentVersionId && EF.Functions.ILike(v.OriginalFileName, pattern, Like.EscapeCharacter)));
             }
             else if (!trash)
             {

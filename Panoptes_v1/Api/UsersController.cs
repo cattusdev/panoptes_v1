@@ -110,7 +110,7 @@ namespace Panoptes_v1.Api
             if (request.SearchTerm is string term)
             {
                 var pattern = Like.Contains(term);
-                query = query.Where(u => u.Email != null && EF.Functions.ILike(u.Email, pattern));
+                query = query.Where(u => u.Email != null && EF.Functions.ILike(u.Email, pattern, Like.EscapeCharacter));
             }
 
             if (!string.IsNullOrWhiteSpace(request.Role))

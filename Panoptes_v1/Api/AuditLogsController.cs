@@ -57,12 +57,12 @@ namespace Panoptes_v1.Api
             {
                 var pattern = Like.Contains(term);
                 var userIds = _context.Users
-                    .Where(u => u.Email != null && EF.Functions.ILike(u.Email, pattern))
+                    .Where(u => u.Email != null && EF.Functions.ILike(u.Email, pattern, Like.EscapeCharacter))
                     .Select(u => u.Id);
 
                 query = query.Where(a =>
                     (a.UserId != null && userIds.Contains(a.UserId)) ||
-                    (a.TableName != null && EF.Functions.ILike(a.TableName, pattern)));
+                    (a.TableName != null && EF.Functions.ILike(a.TableName, pattern, Like.EscapeCharacter)));
             }
 
             var page = await LogSort.Apply(query, request.Sort).ToPagedAsync(request);

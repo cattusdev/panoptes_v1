@@ -48,9 +48,12 @@ namespace Panoptes_v1.Api
     }
 
     // Αναζήτηση με ILIKE: τα %, _ και \ του χρήστη ψάχνονται ως χαρακτήρες, όχι ως wildcards.
-    //   query.Where(c => EF.Functions.ILike(c.Name, Like.Contains(term)))
+    //   query.Where(c => EF.Functions.ILike(c.Name, Like.Contains(term), Like.EscapeCharacter))
+    // Το EscapeCharacter χρειάζεται πάντα: χωρίς αυτό το Npgsql γράφει ESCAPE '' και η αναζήτηση "50%" δεν βρίσκει τίποτα.
     public static class Like
     {
+        public const string EscapeCharacter = "\\";
+
         public static string Escape(string value) =>
             value.Replace("\\", "\\\\").Replace("%", "\\%").Replace("_", "\\_");
 

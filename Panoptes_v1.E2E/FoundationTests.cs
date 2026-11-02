@@ -132,6 +132,21 @@ public class FoundationTests : MediaTest
         Assert.That((await GetJsonAsync("/api/audit-logs?search=aspnetusers")).GetProperty("total").GetInt32(), Is.Positive);
     }
 
+    // Το αντίστροφο: όποιος ψάχνει "50%_off" βρίσκει αυτό ακριβώς (με wildcards θα ταίριαζε και το "50x off")
+    [Test]
+    public async Task Lists_SearchFindsWildcardCharacters()
+    {
+        await LoginAsync(TestData.Admin);
+        var id = Guid.NewGuid().ToString("N")[..6];
+        foreach (var key in new[] { $"{id} 50%_off\\now", $"{id} 50x off\\now" })
+            Assert.That((await ApiAsync("POST", "/api/test/jobs", new { key })).Status, Is.EqualTo(200));
+
+        var found = await GetJsonAsync($"/api/jobs?search={Uri.EscapeDataString("50%_off\\now")}&pageSize=100");
+
+        Assert.That(found.GetProperty("items").EnumerateArray().Select(j => j.GetProperty("idempotencyKey").GetString()),
+            Is.EqualTo(new[] { $"test:{id} 50%_off\\now" }));
+    }
+
     [Test]
     public async Task Lists_TypedFilters_RejectUnknownValues()
     {

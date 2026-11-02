@@ -7,6 +7,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Panoptes_v1", "Panoptes_v1\
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Panoptes_v1.E2E", "Panoptes_v1.E2E\Panoptes_v1.E2E.csproj", "{7D89941D-B07E-4FA2-ACCA-6289C005E72C}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Panoptes_v1.Tests", "Panoptes_v1.Tests\Panoptes_v1.Tests.csproj", "{1B533796-9FBC-4D4F-B3E3-236344908C93}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -41,6 +43,18 @@ Global
 		{7D89941D-B07E-4FA2-ACCA-6289C005E72C}.Release|x64.Build.0 = Release|Any CPU
 		{7D89941D-B07E-4FA2-ACCA-6289C005E72C}.Release|x86.ActiveCfg = Release|Any CPU
 		{7D89941D-B07E-4FA2-ACCA-6289C005E72C}.Release|x86.Build.0 = Release|Any CPU
+		{1B533796-9FBC-4D4F-B3E3-236344908C93}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{1B533796-9FBC-4D4F-B3E3-236344908C93}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{1B533796-9FBC-4D4F-B3E3-236344908C93}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{1B533796-9FBC-4D4F-B3E3-236344908C93}.Debug|x64.Build.0 = Debug|Any CPU
+		{1B533796-9FBC-4D4F-B3E3-236344908C93}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{1B533796-9FBC-4D4F-B3E3-236344908C93}.Debug|x86.Build.0 = Debug|Any CPU
+		{1B533796-9FBC-4D4F-B3E3-236344908C93}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{1B533796-9FBC-4D4F-B3E3-236344908C93}.Release|Any CPU.Build.0 = Release|Any CPU
+		{1B533796-9FBC-4D4F-B3E3-236344908C93}.Release|x64.ActiveCfg = Release|Any CPU
+		{1B533796-9FBC-4D4F-B3E3-236344908C93}.Release|x64.Build.0 = Release|Any CPU
+		{1B533796-9FBC-4D4F-B3E3-236344908C93}.Release|x86.ActiveCfg = Release|Any CPU
+		{1B533796-9FBC-4D4F-B3E3-236344908C93}.Release|x86.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

@@ -70,7 +70,7 @@ namespace Panoptes_v1.Api
             if (request.SearchTerm is string term)
             {
                 var pattern = Like.Contains(term);
-                query = query.Where(j => EF.Functions.ILike(j.Type, pattern) || EF.Functions.ILike(j.IdempotencyKey, pattern));
+                query = query.Where(j => EF.Functions.ILike(j.Type, pattern, Like.EscapeCharacter) || EF.Functions.ILike(j.IdempotencyKey, pattern, Like.EscapeCharacter));
             }
 
             return (await JobSort.Apply(query, request.Sort).ToPagedAsync(request)).Map(job => ToDto(job, withPayload: false));
