@@ -1,5 +1,6 @@
 using System.Diagnostics;
 using System.Text.Json;
+using Panoptes_v1.Constants;
 using Panoptes_v1.Services;
 using Microsoft.Playwright;
 using Npgsql;
@@ -65,25 +66,54 @@ public class SetupCommandTests : E2ETest
         var teammate = await (await Browser.NewContextAsync(new() { BaseURL = app.BaseUrl })).NewPageAsync();
         await LoginAsync(teammate, Teammate);
         Assert.That(await IsAdminAsync(teammate), Is.True);
+
+        // Οι αρχικοί ρόλοι (ARCHITECTURE §16 Q6): ο Admin υπάρχει ήδη, φτιάχνονται μόνο όσοι λείπουν
+        (exitCode, output) = await RunAsync(SetupCommands.SeedRoles);
+        Assert.That(exitCode, Is.EqualTo(0), output);
+        Assert.That(output, Does.Contain("Created roles: Manager, Staff, Finance, Support."));
+        // Ο Admin εμφανίζεται με όλα τα permissions (superuser): συγκρίνουμε τους υπόλοιπους
+        var roles = await RolePermissionCountsAsync(page);
+        Assert.That(roles.Keys, Is.EquivalentTo(DefaultRoles.All.Select(r => r.Name)));
+        Assert.That(roles.Where(r => r.Key != SystemRoles.Admin),
+            Is.EquivalentTo(DefaultRoles.All.Where(r => r.Name != SystemRoles.Admin).ToDictionary(r => r.Name, r => r.Permissions.Count)));
+
+        // Ό,τι αλλάζει στους Ρόλους μένει: το seed δεν ξαναγράφει υπάρχοντες ρόλους
+        var staffId = (await GetJsonAsync(page, "/api/roles")).EnumerateArray()
+            .First(r => r.GetProperty("name").GetString() == DefaultRoles.Staff).GetProperty("id").GetString();
+        var edited = await ApiAsync(page, "PUT", $"/api/roles/{staffId}/permissions", new { permissions = new[] { Permissions.Media.View } });
+        Assert.That(edited.Status, Is.EqualTo(200), await edited.TextAsync());
+        (exitCode, output) = await RunAsync(SetupCommands.SeedRoles);
+        Assert.That(exitCode, Is.EqualTo(0), output);
+        Assert.That(output, Does.Contain("All default roles already exist."));
+        Assert.That((await RolePermissionCountsAsync(page))[DefaultRoles.Staff], Is.EqualTo(1));
+    }
+
+    private static async Task<Dictionary<string, int>> RolePermissionCountsAsync(IPage page) =>
+        (await GetJsonAsync(page, "/api/roles")).EnumerateArray()
+            .ToDictionary(r => r.GetProperty("name").GetString()!, r => r.GetProperty("permissionCount").GetInt32());
+
+    private static async Task<JsonElement> GetJsonAsync(IPage page, string url)
+    {
+        var response = await page.APIRequest.GetAsync(url);
+        Assert.That(response.Status, Is.EqualTo(200), $"GET {url}");
+        return (await response.JsonAsync())!.Value;
     }
 
     [Test]
     public async Task WithoutSmtp_DevelopmentWritesEmailsToAppData()
     {
-        var email = $"nosmtp-{Guid.NewGuid():N}@e2e.test";
         var environment = new Dictionary<string, string>(AppFixture.DefaultEnvironment()) { ["SmtpSettings__Server"] = "" };
         environment.Remove("Email__PickupDirectory");
         using var app = await AppProcess.StartAsync(environment);
 
         var page = await (await Browser.NewContextAsync(new() { BaseURL = app.BaseUrl })).NewPageAsync();
-        await page.GotoAsync("/register");
-        await page.Locator("#email").FillAsync(email);
-        await page.Locator("#password").FillAsync(TestData.Password);
-        await page.Locator("#register-submit").ClickAsync();
+        await page.GotoAsync("/resend-confirmation");
+        await page.Locator("#email").FillAsync(TestData.NoSmtpUnconfirmed);
+        await page.GetByRole(AriaRole.Button, new() { Name = "Send link" }).ClickAsync();
         await Expect(page.GetByRole(AriaRole.Heading, new() { Name = "Check your email" })).ToBeVisibleAsync();
 
         var folder = Path.Combine(AppFixture.WebProjectDir, "App_Data", "emails");
-        var files = Directory.GetFiles(folder, "*.json").Where(f => File.ReadAllText(f).Contains(email)).ToList();
+        var files = Directory.GetFiles(folder, "*.json").Where(f => File.ReadAllText(f).Contains(TestData.NoSmtpUnconfirmed)).ToList();
         try
         {
             Assert.That(files, Has.Count.EqualTo(1));

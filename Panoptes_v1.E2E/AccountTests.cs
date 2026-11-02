@@ -5,87 +5,9 @@ using Microsoft.Playwright;
 
 namespace Panoptes_v1.E2E;
 
-// Εγγραφή, επιβεβαίωση email, ξεχασμένος κωδικός (χωρίς login)
-public class SignUpAndRecoveryTests : E2ETest
+// Επιβεβαίωση email (χωρίς login): για λογαριασμούς που δεν έχουν επιβεβαιωθεί ακόμα
+public class EmailConfirmationTests : E2ETest
 {
-    [Test]
-    public async Task Register_ConfirmEmail_ThenSignIn()
-    {
-        const string email = "newcomer@e2e.test";
-        await Page.GotoAsync("/register");
-        await Page.Locator("#email").FillAsync(email);
-        await Page.Locator("#password").FillAsync(TestData.Password);
-        await Page.Locator("#register-submit").ClickAsync();
-
-        await Expect(Page.GetByRole(AriaRole.Heading, new() { Name = "Check your email" })).ToBeVisibleAsync();
-
-        // Ο σύνδεσμος του email
-        var mail = await Mailbox.WaitForAsync(email, "Confirm your email");
-        await Page.GotoAsync(mail.Link);
-        await Expect(Page.GetByRole(AriaRole.Heading, new() { Name = "Email confirmed" })).ToBeVisibleAsync();
-
-        await LoginAsync(email);
-        var session = await (await ApiAsync("GET", "/api/auth/session")).JsonAsync();
-        Assert.That(session?.GetProperty("user").GetProperty("email").GetString(), Is.EqualTo(email));
-    }
-
-    [Test]
-    public async Task Register_WithAnExistingEmail_ShowsTheErrorOnTheField()
-    {
-        await Page.GotoAsync("/register");
-        await Page.Locator("#email").FillAsync(TestData.Target);
-        await Page.Locator("#password").FillAsync(TestData.Password);
-        await Page.Locator("#register-submit").ClickAsync();
-
-        await Expect(Page.GetByText("is already taken")).ToBeVisibleAsync();
-    }
-
-    [Test]
-    public async Task Register_ShowsPasswordRequirementsLive()
-    {
-        await Page.GotoAsync("/register");
-        var requirements = Page.GetByRole(AriaRole.List, new() { Name = "Password requirements" });
-        await Expect(requirements).ToBeVisibleAsync();
-
-        await Page.Locator("#password").FillAsync("abc");
-        await Page.Locator("#email").FillAsync("weak@e2e.test");
-        await Page.Locator("#register-submit").ClickAsync();
-
-        await Expect(Page.GetByText("doesn't meet all the requirements")).ToBeVisibleAsync();
-        Assert.That(await TestData.FindUserAsync("weak@e2e.test"), Is.Null);
-    }
-
-    [Test]
-    public async Task ForgotPassword_EmailLink_SetsANewPassword()
-    {
-        const string newPassword = "Brand-New-Passw0rd!";
-        await Page.GotoAsync("/forgot-password");
-        await Page.Locator("#email").FillAsync(TestData.ResetPw);
-        await Page.GetByRole(AriaRole.Button, new() { Name = "Send reset link" }).ClickAsync();
-        await Expect(Page.GetByRole(AriaRole.Heading, new() { Name = "Check your email" })).ToBeVisibleAsync();
-
-        var mail = await Mailbox.WaitForAsync(TestData.ResetPw, "Reset your password");
-        await Page.GotoAsync(mail.Link);
-        await Page.Locator("#password").FillAsync(newPassword);
-        await Page.GetByRole(AriaRole.Button, new() { Name = "Update password" }).ClickAsync();
-        await Expect(Page.GetByRole(AriaRole.Heading, new() { Name = "Password updated" })).ToBeVisibleAsync();
-
-        await LoginAsync(TestData.ResetPw, newPassword);
-        await Expect(Page).Not.ToHaveURLAsync(new Regex("/login"));
-    }
-
-    [Test]
-    public async Task ForgotPassword_ForAnUnknownEmail_LooksTheSame_AndSendsNothing()
-    {
-        const string email = "nobody-here@e2e.test";
-        await Page.GotoAsync("/forgot-password");
-        await Page.Locator("#email").FillAsync(email);
-        await Page.GetByRole(AriaRole.Button, new() { Name = "Send reset link" }).ClickAsync();
-
-        await Expect(Page.GetByRole(AriaRole.Heading, new() { Name = "Check your email" })).ToBeVisibleAsync();
-        Assert.That(Mailbox.For(email), Is.Empty);
-    }
-
     [Test]
     public async Task ResendConfirmation_SendsANewLink()
     {
@@ -104,8 +26,8 @@ public class SignUpAndRecoveryTests : E2ETest
         await Page.GotoAsync("/Identity/Account/Login");
         await Expect(Page).ToHaveURLAsync(new Regex("/login$"));
 
-        await Page.GotoAsync("/Identity/Account/ForgotPassword");
-        await Expect(Page).ToHaveURLAsync(new Regex("/forgot-password$"));
+        await Page.GotoAsync("/Identity/Account/ResendEmailConfirmation");
+        await Expect(Page).ToHaveURLAsync(new Regex("/resend-confirmation$"));
     }
 }
 

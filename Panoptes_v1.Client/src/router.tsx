@@ -2,15 +2,12 @@ import type { ComponentType } from 'react'
 import { createBrowserRouter } from 'react-router'
 import { ConfirmEmailChangePage, ConfirmEmailPage, ResendConfirmationPage } from '@/pages/auth/EmailPages'
 import { LoginPage } from '@/pages/auth/LoginPage'
-import { ForgotPasswordPage, ResetPasswordPage } from '@/pages/auth/PasswordPages'
-import { RegisterPage } from '@/pages/auth/RegisterPage'
+import { HomeRedirect } from '@/pages/auth/HomeRedirect'
 import { AccessDeniedPage, LockoutPage, NotFoundPage, RouteErrorPage } from '@/pages/auth/StatusPages'
 import { TwoFactorPage } from '@/pages/auth/TwoFactorPage'
 import { BrandingRoot } from '@/components/brand/BrandingRoot'
-import { HomePage } from '@/pages/public/HomePage'
-import { PrivacyPage } from '@/pages/public/PrivacyPage'
 
-// Το console (admin + account) φορτώνεται μόνο όταν χρειαστεί: οι δημόσιες σελίδες και το login μένουν ελαφριές
+// Το console (admin + account) φορτώνεται μόνο όταν χρειαστεί: το login μένει ελαφρύ
 function lazyPage<M>(load: () => Promise<M>, pick: (module: M) => ComponentType) {
   return async () => ({ Component: pick(await load()) })
 }
@@ -23,19 +20,15 @@ export const router = createBrowserRouter([
     errorElement: <RouteErrorPage />,
     element: <BrandingRoot />,
     children: [
-      // Δημόσιες σελίδες (φωτεινό θέμα)
-      { path: '/', element: <HomePage /> },
-      { path: '/privacy', element: <PrivacyPage /> },
+      // Χωρίς δημόσιες σελίδες: το "/" πάει στο dashboard ή στη σύνδεση
+      { path: '/', element: <HomeRedirect /> },
 
       // Σελίδες λογαριασμού (φωτεινό AuthLayout)
       { path: '/login', element: <LoginPage /> },
       { path: '/login/2fa', element: <TwoFactorPage /> },
-      { path: '/register', element: <RegisterPage /> },
       { path: '/confirm-email', element: <ConfirmEmailPage /> },
       { path: '/confirm-email-change', element: <ConfirmEmailChangePage /> },
       { path: '/resend-confirmation', element: <ResendConfirmationPage /> },
-      { path: '/forgot-password', element: <ForgotPasswordPage /> },
-      { path: '/reset-password', element: <ResetPasswordPage /> },
       { path: '/lockout', element: <LockoutPage /> },
       { path: '/access-denied', element: <AccessDeniedPage /> },
 

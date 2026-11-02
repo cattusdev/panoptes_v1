@@ -175,7 +175,7 @@ if (args.Contains(MediaMigration.Command))
     return;
 }
 
-// dotnet run -- db:migrate | admin:create <email> : εγκατάσταση νέας βάσης και του πρώτου Admin
+// dotnet run -- db:migrate | admin:create <email> | roles:seed : εγκατάσταση νέας βάσης, του πρώτου Admin και των ρόλων
 if (SetupCommands.TryGet(args, out var setupCommand))
 {
     Environment.ExitCode = await SetupCommands.RunAsync(setupCommand, args, app.Services);
@@ -228,8 +228,6 @@ app.MapControllers();
 var legacyAccountPaths = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
 {
     ["Login"] = "/login",
-    ["Register"] = "/register",
-    ["ForgotPassword"] = "/forgot-password",
     ["ResendEmailConfirmation"] = "/resend-confirmation",
     ["Lockout"] = "/lockout",
     ["AccessDenied"] = "/access-denied",
@@ -240,7 +238,6 @@ app.MapGet("/Identity/Account/{**path}", (string? path) =>
     var first = (path ?? "").Split('/')[0];
     return Results.Redirect(legacyAccountPaths.TryGetValue(first, out var target) ? target : "/login");
 });
-app.MapGet("/Home/Privacy", () => Results.Redirect("/privacy"));
 
 // Μόνο για τα E2E tests: ελέγχει ότι ένα crash φτάνει σωστά στον χρήστη (JSON / σελίδα λάθους)
 if (app.Configuration.GetValue<bool>("Diagnostics:EnableTestEndpoints"))

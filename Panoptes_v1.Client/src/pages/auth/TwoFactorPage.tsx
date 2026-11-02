@@ -12,7 +12,7 @@ import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Spinner } from '@/components/ui/spinner'
 import { useTwoFactorLogin, useTwoFactorPending } from '@/lib/account-api'
-import { canAccessAdmin, safeReturnUrl } from '@/lib/auth'
+import { homePath, safeReturnUrl } from '@/lib/auth'
 import { StatusIcon } from './AuthStatus'
 
 // /login/2fa: το δεύτερο βήμα του login (όπως στο GitHub): κωδικός από το app ή recovery code
@@ -40,7 +40,7 @@ export function TwoFactorPage() {
     const input = mode === 'app' ? { code: value ?? code, rememberMe, rememberMachine } : { recoveryCode }
     try {
       const { result, user } = await login.mutateAsync(input)
-      if (result === 'success') navigate(returnUrl ?? (canAccessAdmin(user) ? '/admin' : '/'), { replace: true })
+      if (result === 'success') navigate(returnUrl ?? homePath(user), { replace: true })
       else if (result === 'lockedOut') navigate('/lockout', { replace: true })
       else if (result === 'expired') navigate('/login', { replace: true })
       else {

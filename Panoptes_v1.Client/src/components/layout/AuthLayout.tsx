@@ -36,10 +36,7 @@ export function AuthLayout({ children, below }: { children: ReactNode; below?: R
 
             <div className="mt-5 flex items-center justify-center gap-1 text-xs text-muted-foreground/80">
               <span>
-                © {year} {appName} ·{' '}
-                <a href="/" className="font-medium text-foreground">
-                  {t('authLayout.home')}
-                </a>
+                © {year} {appName}
               </span>
               <span aria-hidden>·</span>
               <LanguageSwitcher className="-ml-1" />

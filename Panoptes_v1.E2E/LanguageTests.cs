@@ -54,9 +54,9 @@ public class LanguageTests : MediaTest
         // Τα emails πάνε στη γλώσσα του παραλήπτη, ακόμα κι αν το ζήτησε κάποιος που βλέπει αγγλικά
         var visitor = await (await Browser.NewContextAsync(ContextOptions())).NewPageAsync();
         await ApiAsync(visitor, "GET", "/api/auth/session"); // Το antiforgery cookie
-        var forgot = await ApiAsync(visitor, "POST", "/api/account/forgot-password", new { email = TestData.GreekUser });
-        Assert.That(forgot.Ok, Is.True, $"forgot-password: {forgot.Status} {await forgot.TextAsync()}");
-        var mail = await Mailbox.WaitForAsync(TestData.GreekUser, "");
+        var resend = await ApiAsync(visitor, "POST", "/api/account/resend-confirmation", new { email = TestData.GreekUnconfirmed });
+        Assert.That(resend.Ok, Is.True, $"resend-confirmation: {resend.Status} {await resend.TextAsync()}");
+        var mail = await Mailbox.WaitForAsync(TestData.GreekUnconfirmed, "");
         Assert.That(mail.Subject, Does.Match(Greek), $"Subject: {mail.Subject}");
     }
 

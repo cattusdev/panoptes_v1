@@ -15,17 +15,14 @@ public class ScreenshotTests : E2ETest
     };
 
     [Test]
-    public async Task PublicAndAuthPages()
+    public async Task AuthPages()
     {
-        await Capture("/", "01-home", fullPage: true);
         await Capture("/login", "02-login");
 
         // Login με λάθος κωδικό για να φανεί το μήνυμα λάθους
         await LoginAsync(TestData.NoAccess, "Wrong-Passw0rd!");
         await Shot("03-login-error");
 
-        await Capture("/register", "04-register");
-        await Capture("/forgot-password", "05-forgot-password");
         await Capture("/lockout", "06-lockout");
     }
 

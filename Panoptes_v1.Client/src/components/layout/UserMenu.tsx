@@ -1,6 +1,6 @@
 import { useTranslation } from 'react-i18next'
 import { Link, useNavigate } from 'react-router'
-import { ExternalLink, LogOut, User } from 'lucide-react'
+import { LogOut, User } from 'lucide-react'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import {
   DropdownMenu,
@@ -48,11 +48,6 @@ export function UserMenu() {
         <DropdownMenuItem asChild>
           <Link to="/account">
             <User /> {t('nav.myAccount')}
-          </Link>
-        </DropdownMenuItem>
-        <DropdownMenuItem asChild>
-          <Link to="/">
-            <ExternalLink /> {t('nav.viewSite')}
           </Link>
         </DropdownMenuItem>
         <DropdownMenuSeparator />

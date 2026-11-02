@@ -1,3 +1,4 @@
+using System.Security.Claims;
 using Panoptes_v1.Constants;
 using Panoptes_v1.Data;
 using Microsoft.AspNetCore.Identity;
@@ -8,15 +9,17 @@ namespace Panoptes_v1.Services
     // Εντολές εγκατάστασης (τρέχουν και τελειώνουν, χωρίς web server)
     //   dotnet run -- db:migrate              εφαρμόζει τα migrations (φτιάχνει τη βάση αν λείπει)
     //   dotnet run -- admin:create <email>    ο πρώτος Admin: κωδικός από το ADMIN_PASSWORD ή κρυφή ερώτηση
+    //   dotnet run -- roles:seed              οι αρχικοί ρόλοι (DefaultRoles) που λείπουν· οι υπάρχοντες δεν αλλάζουν
     public static class SetupCommands
     {
         public const string Migrate = "db:migrate";
         public const string CreateAdmin = "admin:create";
+        public const string SeedRoles = "roles:seed";
         public const string PasswordVariable = "ADMIN_PASSWORD";
 
         public static bool TryGet(string[] args, out string command)
         {
-            command = args.FirstOrDefault(a => a is Migrate or CreateAdmin) ?? "";
+            command = args.FirstOrDefault(a => a is Migrate or CreateAdmin or SeedRoles) ?? "";
             return command != "";
         }
 
@@ -26,9 +29,12 @@ namespace Panoptes_v1.Services
             using var scope = services.CreateScope();
             try
             {
-                return command == Migrate
-                    ? await MigrateAsync(scope.ServiceProvider)
-                    : await CreateAdminAsync(scope.ServiceProvider, args.SkipWhile(a => a != CreateAdmin).Skip(1).FirstOrDefault());
+                return command switch
+                {
+                    Migrate => await MigrateAsync(scope.ServiceProvider),
+                    SeedRoles => await SeedRolesAsync(scope.ServiceProvider),
+                    _ => await CreateAdminAsync(scope.ServiceProvider, args.SkipWhile(a => a != CreateAdmin).Skip(1).FirstOrDefault()),
+                };
             }
             catch (Exception e) when (e is Npgsql.NpgsqlException or InvalidOperationException)
             {
@@ -45,6 +51,29 @@ namespace Panoptes_v1.Services
             Console.WriteLine(pending.Count == 0
                 ? "The database is up to date."
                 : $"Database ready: {pending.Count} migration{(pending.Count == 1 ? "" : "s")} applied.");
+            return 0;
+        }
+
+        // Μόνο όσοι ρόλοι λείπουν, με τα αρχικά τους permissions: ό,τι άλλαξε στους Ρόλους μένει όπως είναι
+        private static async Task<int> SeedRolesAsync(IServiceProvider services)
+        {
+            var roleManager = services.GetRequiredService<RoleManager<IdentityRole>>();
+            var created = new List<string>();
+
+            foreach (var (name, permissions) in DefaultRoles.All)
+            {
+                if (await roleManager.RoleExistsAsync(name)) continue;
+
+                var role = new IdentityRole(name);
+                Check(await roleManager.CreateAsync(role));
+                foreach (var permission in permissions)
+                    Check(await roleManager.AddClaimAsync(role, new Claim("Permission", permission)));
+                created.Add(name);
+            }
+
+            Console.WriteLine(created.Count == 0
+                ? "All default roles already exist."
+                : $"Created roles: {string.Join(", ", created)}.");
             return 0;
         }
 

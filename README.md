@@ -2,7 +2,7 @@
 
 An admin starter: ASP.NET Core 8 API with Identity and PostgreSQL, and a React + Tailwind + shadcn/ui front end.
 
-- **Accounts:** sign-up with email confirmation, password reset, two-factor authentication (authenticator app + recovery codes), account lockout, profile photo, data export/deletion.
+- **Accounts:** created by an administrator (no public sign-up or self-service password reset), two-factor authentication (authenticator app + recovery codes), account lockout, profile photo, data export/deletion.
 - **Admin console:** dashboard, users, roles with a permission hierarchy (nobody can grant more than they have), and an audit log of every change.
 - **Media library:** safe uploads (images resized, metadata removed), folders, versions, trash, a reusable picker; stored locally or on Cloudflare R2.
 - **Settings and languages:** general settings (default language, date and time format), branding, SMTP; English and Greek, per user.
@@ -18,6 +18,7 @@ cd Panoptes_v1
 dotnet user-secrets set ConnectionStrings:DefaultConnection "Host=localhost;Database=Panoptesv1;Username=postgres;Password=..."
 dotnet run -- db:migrate                        # creates or updates the database
 dotnet run -- admin:create you@example.com      # the first admin (asks for a password)
+dotnet run -- roles:seed                        # the default roles: Manager, Staff, Finance, Support
 dotnet run --launch-profile https
 ```
 Open https://localhost:7770. The React app is built automatically the first time. After changing it, run `npm run build` in `Panoptes_v1.Client`, or `npm run dev` for hot reload at http://localhost:5173.

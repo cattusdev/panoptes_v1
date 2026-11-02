@@ -336,20 +336,11 @@
   <data name="Confirm your email address" xml:space="preserve">
     <value>Επιβεβαιώστε τη διεύθυνση email σας</value>
   </data>
-  <data name="Thanks for signing up. Confirm your email address to activate your account." xml:space="preserve">
-    <value>Ευχαριστούμε για την εγγραφή σας. Επιβεβαιώστε τη διεύθυνση email σας για να ενεργοποιήσετε τον λογαριασμό σας.</value>
+  <data name="Confirm your email address to activate your account." xml:space="preserve">
+    <value>Επιβεβαιώστε τη διεύθυνση email σας για να ενεργοποιήσετε τον λογαριασμό σας.</value>
   </data>
   <data name="Confirm email" xml:space="preserve">
     <value>Επιβεβαίωση email</value>
-  </data>
-  <data name="Reset your password" xml:space="preserve">
-    <value>Επαναφέρετε τον κωδικό σας</value>
-  </data>
-  <data name="We received a request to reset your password. If it wasn't you, you can ignore this email." xml:space="preserve">
-    <value>Λάβαμε αίτημα επαναφοράς του κωδικού σας. Αν δεν ήσασταν εσείς, μπορείτε να αγνοήσετε αυτό το email.</value>
-  </data>
-  <data name="Reset password" xml:space="preserve">
-    <value>Επαναφορά κωδικού</value>
   </data>
   <data name="Confirm your new email" xml:space="preserve">
     <value>Επιβεβαιώστε το νέο σας email</value>

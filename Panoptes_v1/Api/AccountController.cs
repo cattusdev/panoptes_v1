@@ -47,15 +47,6 @@ namespace Panoptes_v1.Api
         public string Email { get; set; } = "";
     }
 
-    public class RegisterRequest
-    {
-        [Required, EmailAddress]
-        public string Email { get; set; } = "";
-
-        [Required]
-        public string Password { get; set; } = "";
-    }
-
     public class ConfirmEmailRequest
     {
         [Required] public string UserId { get; set; } = "";
@@ -67,13 +58,6 @@ namespace Panoptes_v1.Api
         [Required] public string UserId { get; set; } = "";
         [Required, EmailAddress] public string Email { get; set; } = "";
         [Required] public string Code { get; set; } = "";
-    }
-
-    public class ResetPasswordWithCodeRequest
-    {
-        [Required, EmailAddress] public string Email { get; set; } = "";
-        [Required] public string Code { get; set; } = "";
-        [Required] public string Password { get; set; } = "";
     }
 
     public class ProfileRequest
@@ -148,19 +132,6 @@ namespace Panoptes_v1.Api
             return new PasswordPolicyDto(p.RequiredLength, p.RequireUppercase, p.RequireLowercase, p.RequireDigit, p.RequireNonAlphanumeric);
         }
 
-        [HttpPost("register")]
-        [AllowAnonymous]
-        public async Task<IActionResult> Register(RegisterRequest request)
-        {
-            var user = new IdentityUser { UserName = request.Email, Email = request.Email };
-            var result = await _userManager.CreateAsync(user, request.Password);
-            if (!result.Succeeded) return IdentityValidationProblem(result);
-
-            _logger.LogInformation("User created a new account with password.");
-            await _emails.SendConfirmationAsync(user.Email!, user.Id, await _userManager.GenerateEmailConfirmationTokenAsync(user));
-            return NoContent();
-        }
-
         // Πάντα 204: δεν αποκαλύπτουμε αν υπάρχει λογαριασμός με αυτό το email
         [HttpPost("resend-confirmation")]
         [AllowAnonymous]
@@ -182,31 +153,6 @@ namespace Panoptes_v1.Api
 
             var result = await _userManager.ConfirmEmailAsync(user, token);
             return result.Succeeded ? NoContent() : InvalidLink();
-        }
-
-        // Πάντα 204: δεν αποκαλύπτουμε αν υπάρχει λογαριασμός με αυτό το email
-        [HttpPost("forgot-password")]
-        [AllowAnonymous]
-        public async Task<IActionResult> ForgotPassword(EmailRequest request)
-        {
-            var user = await _userManager.FindByEmailAsync(request.Email);
-            if (user != null && await _userManager.IsEmailConfirmedAsync(user))
-                await _emails.SendPasswordResetAsync(user.Email!, await _userManager.GeneratePasswordResetTokenAsync(user));
-            return NoContent();
-        }
-
-        [HttpPost("reset-password")]
-        [AllowAnonymous]
-        public async Task<IActionResult> ResetPassword(ResetPasswordWithCodeRequest request)
-        {
-            var user = await _userManager.FindByEmailAsync(request.Email);
-            var token = AccountEmails.DecodeToken(request.Code);
-            if (user == null || token == null) return InvalidLink();
-
-            var result = await _userManager.ResetPasswordAsync(user, token, request.Password);
-            if (result.Succeeded) return NoContent();
-            if (result.Errors.Any(e => e.Code == "InvalidToken")) return InvalidLink();
-            return IdentityValidationProblem(result);
         }
 
         // Το link έρχεται στο νέο email: δουλεύει και χωρίς να είσαι συνδεδεμένος

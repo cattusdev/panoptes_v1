@@ -78,8 +78,8 @@ public class AccessTests : E2ETest
         var sidebar = Page.Locator("nav[aria-label='Main navigation']");
         await Expect(sidebar.Locator("a[data-title='Users']")).ToBeVisibleAsync();
 
-        // Roles είναι tab του Users, My account / View site είναι στο μενού χρήστη
-        await Expect(sidebar.Locator("a[data-title='Roles'], a[data-title='My account'], a[data-title='View site']")).ToHaveCountAsync(0);
+        // Roles είναι tab του Users, το My account είναι στο μενού χρήστη
+        await Expect(sidebar.Locator("a[data-title='Roles'], a[data-title='My account']")).ToHaveCountAsync(0);
 
         // Το Users μένει ενεργό και στο tab Roles
         await sidebar.Locator("a[data-title='Users']").ClickAsync();
@@ -94,7 +94,8 @@ public class AccessTests : E2ETest
         await Expect(menu).Not.ToContainTextAsync(TestData.Admin);
         await menu.ClickAsync();
         await Expect(Page.GetByRole(AriaRole.Menu)).ToContainTextAsync(TestData.Admin);
-        await Expect(Page.GetByRole(AriaRole.Menuitem, new() { Name = "View site" })).ToBeVisibleAsync();
+        // Δεν υπάρχει δημόσιο site για να το "δεις"
+        await Expect(Page.GetByRole(AriaRole.Menuitem, new() { Name = "View site" })).ToHaveCountAsync(0);
         await Page.GetByRole(AriaRole.Menuitem, new() { Name = "My account" }).ClickAsync();
         await Expect(Page).ToHaveURLAsync(new Regex("/account$"));
     }
@@ -152,5 +153,10 @@ public class AccessTests : E2ETest
         await LoginAsync(TestData.Lockout);
 
         await Expect(Page).ToHaveURLAsync(new Regex("/lockout$"));
+        // Χωρίς self-service reset: ο διαχειριστής ξεκλειδώνει ή αλλάζει τον κωδικό
+        await Expect(Page.GetByText("Try again later, or contact your administrator.")).ToBeVisibleAsync();
+        await Expect(Page.GetByRole(AriaRole.Link, new() { Name = "Reset password" })).ToHaveCountAsync(0);
+        await Page.GetByRole(AriaRole.Link, new() { Name = "Back to sign in" }).ClickAsync();
+        await Expect(Page).ToHaveURLAsync(new Regex("/login$"));
     }
 }

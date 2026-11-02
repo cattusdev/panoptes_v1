@@ -36,6 +36,11 @@ export function canAccessAdmin(user: SessionUser | null) {
   return !!user && (user.isAdmin || user.permissions.length > 0)
 }
 
+// Η "αρχική" ενός συνδεδεμένου χρήστη: το dashboard, ή ο λογαριασμός του αν δεν έχει κανένα permission
+export function homePath(user: SessionUser | null) {
+  return canAccessAdmin(user) ? '/admin' : '/account'
+}
+
 export function useLogin() {
   const queryClient = useQueryClient()
   return useMutation({

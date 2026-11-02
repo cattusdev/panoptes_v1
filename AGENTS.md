@@ -19,6 +19,7 @@ Run these from the repository root.
 | Run the app | `cd Panoptes_v1; dotnet run --launch-profile https` (opens https://localhost:7770) |
 | Create or update the database | `cd Panoptes_v1; dotnet run -- db:migrate` |
 | Create the first admin | `cd Panoptes_v1; dotnet run -- admin:create you@example.com` |
+| Create the default roles | `cd Panoptes_v1; dotnet run -- roles:seed` |
 | Build the client after changing it | `cd Panoptes_v1.Client; npm run build` |
 | Hot reload the client | `cd Panoptes_v1.Client; npm run dev` |
 | Lint the client | `cd Panoptes_v1.Client; npm run lint` |

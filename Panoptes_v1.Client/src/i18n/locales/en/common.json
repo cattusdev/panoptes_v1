@@ -51,7 +51,6 @@
     "auditLogs": "Audit Logs",
     "media": "Media",
     "settings": "Settings",
-    "viewSite": "View site",
     "myAccount": "My account"
   },
   "userMenu": {
@@ -59,20 +58,7 @@
     "signedInAs": "Signed in as",
     "signOut": "Sign out"
   },
-  "public": {
-    "nav": "Main",
-    "features": "Features",
-    "privacy": "Privacy",
-    "signIn": "Sign in",
-    "getStarted": "Get started",
-    "createAccount": "Create account",
-    "tagline": "The foundation for your internal tools: users, roles, permissions and a full audit trail.",
-    "product": "Product",
-    "legal": "Legal",
-    "rights": "© {{year}} {{appName}}. All rights reserved."
-  },
   "authLayout": {
-    "home": "Home",
     "eyebrow": "Platform administration",
     "title": "One console. Full control.",
     "text": "Users, roles, permissions and a complete audit trail, secured and managed from a single place.",

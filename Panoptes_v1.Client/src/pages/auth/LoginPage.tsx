@@ -9,7 +9,7 @@ import { Button } from '@/components/ui/button'
 import { Checkbox } from '@/components/ui/checkbox'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
-import { canAccessAdmin, safeReturnUrl, useLogin, useSession, type SessionUser } from '@/lib/auth'
+import { homePath, safeReturnUrl, useLogin, useSession, type SessionUser } from '@/lib/auth'
 
 const fieldClass = 'h-11 rounded-lg bg-card px-3.5'
 
@@ -28,8 +28,8 @@ export function LoginPage() {
   // Το cookie middleware στέλνει "ReturnUrl", εμείς "returnUrl"
   const returnUrl = safeReturnUrl(params.get('returnUrl') ?? params.get('ReturnUrl'))
 
-  // Χωρίς returnUrl: όποιος έχει πρόσβαση πάει στο console, οι υπόλοιποι στην αρχική
-  const destinationFor = (u: SessionUser | null) => returnUrl ?? (canAccessAdmin(u) ? '/admin' : '/')
+  // Χωρίς returnUrl: όποιος έχει πρόσβαση πάει στο dashboard, οι υπόλοιποι στον λογαριασμό τους
+  const destinationFor = (u: SessionUser | null) => returnUrl ?? homePath(u)
 
   if (!sessionPending && user) return <Navigate to={destinationFor(user)} replace />
 
@@ -60,11 +60,8 @@ export function LoginPage() {
   }
 
   return (
-    <AuthLayout
-      below={
-        <Trans t={t} i18nKey="login.noAccount" components={{ link: <Link to="/register" className="font-semibold text-foreground" /> }} />
-      }
-    >
+    // Λογαριασμούς και νέους κωδικούς δίνει μόνο ο διαχειριστής (χωρίς εγγραφή ή "Ξέχασα τον κωδικό")
+    <AuthLayout below={t('login.askAdmin')}>
       <AuthEyebrow>{t('login.eyebrow')}</AuthEyebrow>
       <AuthHeading title={t('login.title')} description={t('login.description')} />
 
@@ -102,12 +99,7 @@ export function LoginPage() {
         </div>
 
         <div className="grid gap-2">
-          <div className="flex items-baseline justify-between">
-            <Label htmlFor="password">{t('passwordLabel')}</Label>
-            <Link to="/forgot-password" className="text-xs text-muted-foreground hover:text-foreground">
-              {t('login.forgot')}
-            </Link>
-          </div>
+          <Label htmlFor="password">{t('passwordLabel')}</Label>
           <PasswordInput
             id="password"
             autoComplete="current-password"

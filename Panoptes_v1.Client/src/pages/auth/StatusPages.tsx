@@ -18,9 +18,6 @@ export function LockoutPage() {
       <AuthHeading title={t('lockout.title')} description={t('lockout.text')} />
       <div className="grid gap-2">
         <Button asChild size="lg" className={authButtonClass}>
-          <a href="/forgot-password">{t('lockout.resetPassword')}</a>
-        </Button>
-        <Button asChild size="lg" variant="outline" className={authButtonClass}>
           <a href="/login">{t('backToSignIn')}</a>
         </Button>
       </div>

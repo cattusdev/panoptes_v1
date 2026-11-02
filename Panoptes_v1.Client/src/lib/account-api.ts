@@ -32,8 +32,6 @@ export function usePasswordPolicy() {
   })
 }
 
-export const useRegister = () => useMutation({ mutationFn: (input: { email: string; password: string }) => post('/api/account/register', input) })
-
 export const useResendConfirmation = () => useMutation({ mutationFn: (email: string) => post('/api/account/resend-confirmation', { email }) })
 
 export const useConfirmEmail = () =>
@@ -46,11 +44,6 @@ export const useConfirmEmailChange = () => {
     onSuccess: () => Promise.all([queryClient.invalidateQueries({ queryKey: ['account'] }), queryClient.invalidateQueries({ queryKey: sessionQueryKey })]),
   })
 }
-
-export const useForgotPassword = () => useMutation({ mutationFn: (email: string) => post('/api/account/forgot-password', { email }) })
-
-export const useResetPassword = () =>
-  useMutation({ mutationFn: (input: { email: string; code: string; password: string }) => post('/api/account/reset-password', input) })
 
 // ---------- 2FA βήμα στο login ----------
 type LoginResponse = { result: LoginResult | 'expired'; user: SessionUser | null }

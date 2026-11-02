@@ -1,6 +1,7 @@
 using System.Security.Claims;
 using Panoptes_v1.Constants;
 using Panoptes_v1.Data;
+using Panoptes_v1.Models;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
@@ -25,11 +26,11 @@ public static class TestData
     public const string Promote = "promote@e2e.test";
     public const string TwoFactor = "twofactor@e2e.test";
     public const string Unconfirmed = "unconfirmed@e2e.test"; // Δεν έχει επιβεβαιώσει το email
+    public const string NoSmtpUnconfirmed = "nosmtp@e2e.test"; // Το ίδιο, για το email χωρίς SMTP (App_Data/emails)
     public const string Locked = "locked@e2e.test";           // Ήδη κλειδωμένος (για το φίλτρο Status)
     public const string UnlockMe = "unlockme@e2e.test";       // Ήδη κλειδωμένος (για το Unlock)
     public const string DeleteMe = "deleteme@e2e.test";       // Σβήνεται από τα tests
     // Λογαριασμός (Φάση 3): ένας χρήστης ανά σενάριο
-    public const string ResetPw = "resetpw@e2e.test";
     public const string ChangePw = "changepw@e2e.test";
     public const string ChangeEmail = "changeemail@e2e.test";
     public const string Phone = "phone@e2e.test";
@@ -48,6 +49,7 @@ public static class TestData
 
     // Γλώσσες: διαλέγει ελληνικά (δικός του χρήστης, για να μην επηρεάζει τα άλλα tests)
     public const string GreekUser = "greek@e2e.test";
+    public const string GreekUnconfirmed = "greek-unconfirmed@e2e.test"; // Έχει ήδη διαλέξει ελληνικά, δεν έχει επιβεβαιώσει το email
 
     public static string TwoFaKey { get; private set; } = "";
     public static IReadOnlyList<string> TwoFaRecoveryCodes { get; private set; } = [];
@@ -78,10 +80,10 @@ public static class TestData
         [Promote] = null,
         [TwoFactor] = null,
         [Unconfirmed] = null,
+        [NoSmtpUnconfirmed] = null,
         [Locked] = null,
         [UnlockMe] = null,
         [DeleteMe] = null,
-        [ResetPw] = null,
         [ChangePw] = null,
         [ChangeEmail] = null,
         [Phone] = null,
@@ -96,7 +98,10 @@ public static class TestData
         [AvatarUser2] = null,
         [SettingsViewer] = "SettingsViewer",
         [GreekUser] = null,
+        [GreekUnconfirmed] = null,
     };
+
+    private static readonly HashSet<string> UnconfirmedUsers = [Unconfirmed, NoSmtpUnconfirmed, GreekUnconfirmed];
 
     public static string ConnectionString { get; private set; } = "";
     public static Dictionary<string, string> UserIds { get; } = new();
@@ -153,12 +158,15 @@ public static class TestData
             var userManager = services.GetRequiredService<UserManager<IdentityUser>>();
             foreach (var (email, roleName) in SeedUsers)
             {
-                var user = new IdentityUser { UserName = email, Email = email, EmailConfirmed = email != Unconfirmed };
+                var user = new IdentityUser { UserName = email, Email = email, EmailConfirmed = !UnconfirmedUsers.Contains(email) };
                 Check(await userManager.CreateAsync(user, Password));
                 if (roleName != null)
                     Check(await userManager.AddToRoleAsync(user, roleName));
                 UserIds[email] = user.Id;
             }
+
+            db.UserProfiles.Add(new UserProfile { UserId = UserIds[GreekUnconfirmed], Language = "el" });
+            await db.SaveChangesAsync();
 
             // 2FA secret: γράφεται στο AspNetUserTokens μέσα από το δικό μας DbContext (άρα περνάει από το audit)
             var twoFactorUser = await userManager.FindByEmailAsync(TwoFactor);

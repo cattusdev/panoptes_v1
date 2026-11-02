@@ -7,7 +7,7 @@ using Panoptes_v1.Services.Localization;
 
 namespace Panoptes_v1.Services
 {
-    // Τα emails του λογαριασμού (επιβεβαίωση, reset, αλλαγή email). Τα links δείχνουν στις React σελίδες.
+    // Τα emails του λογαριασμού (επιβεβαίωση, αλλαγή email). Τα links δείχνουν στις React σελίδες.
     // Στέλνονται στη γλώσσα του παραλήπτη (αν έχει λογαριασμό με προτίμηση), αλλιώς σε αυτή του request.
     public class AccountEmails
     {
@@ -43,16 +43,9 @@ namespace Panoptes_v1.Services
         public Task SendConfirmationAsync(string email, string userId, string token) =>
             SendAsync(email, () => new(_t["Confirm your email"],
                 _t["Confirm your email address"],
-                _t["Thanks for signing up. Confirm your email address to activate your account."],
+                _t["Confirm your email address to activate your account."],
                 _t["Confirm email"],
                 Link("/confirm-email", ("userId", userId), ("code", EncodeToken(token)))));
-
-        public Task SendPasswordResetAsync(string email, string token) =>
-            SendAsync(email, () => new(_t["Reset your password"],
-                _t["Reset your password"],
-                _t["We received a request to reset your password. If it wasn't you, you can ignore this email."],
-                _t["Reset password"],
-                Link("/reset-password", ("email", email), ("code", EncodeToken(token)))));
 
         public Task SendEmailChangeAsync(string newEmail, string userId, string token) =>
             SendAsync(newEmail, () => new(_t["Confirm your new email"],
