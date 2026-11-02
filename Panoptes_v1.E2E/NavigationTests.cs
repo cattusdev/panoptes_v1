@@ -31,10 +31,11 @@ public class NavigationTests : E2ETest
         await LoginAsync(TestData.Admin);
         await ExpandSidebarAsync();
         await Expect(GroupHeading("overview")).ToHaveTextAsync("Overview");
+        await Expect(GroupHeading("relationships")).ToHaveTextAsync("Relationships");
         await Expect(GroupHeading("workspace")).ToHaveTextAsync("Workspace");
         await Expect(GroupHeading("administration")).ToHaveTextAsync("Administration");
-        // Ομάδες χωρίς σελίδες ακόμα (CRM, έργα, οικονομικά) δεν εμφανίζονται: όχι κενοί τίτλοι
-        await Expect(Sidebar.Locator("button[data-group]")).ToHaveCountAsync(3);
+        // Ομάδες χωρίς σελίδες ακόμα (έργα, οικονομικά) δεν εμφανίζονται: όχι κενοί τίτλοι
+        await Expect(Sidebar.Locator("button[data-group]")).ToHaveCountAsync(4);
         // Το παλιό ψεύτικο "v2.3" στο κάτω μέρος δεν υπάρχει πια
         await Expect(Sidebar).Not.ToContainTextAsync("v2.3");
 

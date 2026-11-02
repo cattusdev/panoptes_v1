@@ -1,0 +1,303 @@
+{
+  "kinds": {
+    "Organization": "Organization",
+    "Individual": "Individual"
+  },
+  "status": {
+    "active": "Active",
+    "inactive": "Inactive",
+    "archived": "Archived"
+  },
+  "origin": {
+    "Live": "Live",
+    "Historical": "Registered via onboarding · Historical",
+    "Import": "Imported"
+  },
+  "contactKinds": {
+    "Email": "Email",
+    "Phone": "Phone",
+    "Mobile": "Mobile",
+    "Website": "Website"
+  },
+  "addressKinds": {
+    "Billing": "Billing",
+    "Office": "Office",
+    "Shipping": "Shipping",
+    "Other": "Other"
+  },
+  "address": {
+    "line1": "Street and number",
+    "line2": "Floor, building (optional)",
+    "city": "City",
+    "postalCode": "Postal code",
+    "region": "Region",
+    "country": "Country"
+  },
+  "list": {
+    "title": "Clients",
+    "description": "Every company or person you bill. Each one keeps its own balance.",
+    "newClient": "New client",
+    "search": "Search name, reference or tax ID…",
+    "filterByStatus": "Filter by status",
+    "statusCurrent": "Active and inactive",
+    "statusFilter": {
+      "Active": "Active",
+      "Inactive": "Inactive",
+      "Archived": "Archived",
+      "All": "All, incl. archived"
+    },
+    "filterByKind": "Filter by type",
+    "allKinds": "All types",
+    "filterByTag": "Filter by tag",
+    "allTags": "All tags",
+    "columns": {
+      "client": "Client",
+      "ref": "Ref",
+      "primaryContact": "Primary contact",
+      "tags": "Tags",
+      "status": "Status"
+    },
+    "empty": {
+      "title": "No clients yet",
+      "description": "Add your first client to start tracking work, services and balances.",
+      "filteredTitle": "No matching clients",
+      "filteredDescription": "Try another search or clear the filters. Archived clients show under the Archived filter."
+    }
+  },
+  "form": {
+    "createTitle": "New client",
+    "createDescription": "The legal entity you bill. Contacts can be added after saving.",
+    "editTitle": "Edit client details",
+    "editDescription": "Changes are kept in the client's activity.",
+    "kind": "Type",
+    "displayName": "Name",
+    "displayNameHint": "The name you use every day, e.g. \"Beta\".",
+    "legalName": "Legal name",
+    "taxId": "Tax ID (ΑΦΜ)",
+    "taxOffice": "Tax office (ΔΟΥ)",
+    "contactMethods": "Email, phone and website",
+    "contactKind": "Type",
+    "contactValue": "Email, number or address",
+    "contactLabel": "Label (optional)",
+    "removeContact": "Remove this line",
+    "addEmail": "Email",
+    "addPhone": "Phone",
+    "addresses": "Addresses",
+    "addressKind": "Address type",
+    "removeAddress": "Remove this address",
+    "addAddress": "Address",
+    "tags": "Tags",
+    "tagsHint": "Press Enter after each tag.",
+    "status": "Status",
+    "currency": "Default currency",
+    "currencyHint": "Three letters, e.g. EUR.",
+    "notes": "Notes",
+    "create": "Create client",
+    "save": "Save changes",
+    "created": "{{name}} created as {{ref}}",
+    "saved": "{{name}} saved",
+    "reload": "Reload"
+  },
+  "duplicates": {
+    "taxIdTitle": "Another client has this tax ID",
+    "taxIdDescription": "Open it to check. If this really is a separate client, saving asks why.",
+    "reason": "Why is this a separate client?",
+    "reasonPlaceholder": "e.g. a branch billed separately",
+    "reasonRequired": "Write a short reason to save anyway.",
+    "saveAnyway": "Save anyway",
+    "similarTitle": "Similar clients already exist",
+    "similarDescription": "Check that you're not adding the same client twice.",
+    "reasons": {
+      "taxId": "same tax ID",
+      "name": "similar name",
+      "email": "same email",
+      "phone": "same phone"
+    }
+  },
+  "header": {
+    "back": "Clients",
+    "new": "New",
+    "newContact": "Contact",
+    "edit": "Edit details",
+    "more": "More actions",
+    "copyRef": "Copy reference",
+    "refCopied": "Reference copied",
+    "taxId": "ΑΦΜ {{value}}",
+    "copyTaxId": "Copy tax ID",
+    "taxIdCopied": "Tax ID copied",
+    "taxOffice": "ΔΟΥ {{value}}",
+    "copyFailed": "Couldn't copy. Select the text and copy it instead.",
+    "call": "Call {{name}}",
+    "email": "Email {{name}}"
+  },
+  "archive": {
+    "archive": "Archive",
+    "unarchive": "Unarchive",
+    "confirmTitle": "Archive {{name}}?",
+    "confirmDescription": "The client is hidden from the default list. Nothing else changes: services, balances and projects stay as they are.",
+    "archived": "{{name}} archived",
+    "unarchived": "{{name}} is active again",
+    "banner": "Archived on {{date}}. Services and balances are unaffected."
+  },
+  "notFound": {
+    "title": "This client doesn't exist or you don't have access",
+    "description": "Check the link, or find the client in the list."
+  },
+  "tabs": {
+    "label": "Client sections",
+    "overview": "Overview",
+    "activity": "Activity"
+  },
+  "about": {
+    "title": "About & contacts",
+    "contacts": "Contacts",
+    "noContacts": "No contacts yet.",
+    "showAll": "Show all ({{count}})",
+    "showFewer": "Show fewer",
+    "reachClient": "Company contact details",
+    "addresses": "Addresses",
+    "noAddresses": "No address yet.",
+    "tags": "Tags",
+    "details": "Details",
+    "currency": "Currency",
+    "created": "Created",
+    "origin": "Origin"
+  },
+  "contacts": {
+    "primary": "Primary",
+    "billing": "Billing",
+    "role": "Role",
+    "roles": {
+      "owner": "Owner",
+      "ceo": "CEO",
+      "accounting": "Accounting",
+      "it": "IT",
+      "marketing": "Marketing",
+      "projectManager": "Project manager"
+    },
+    "makePrimaryHint": "Primary contact (the one shown first)",
+    "billingHint": "Billing contact (receives invoices)",
+    "alsoContactFor": "Also contact for",
+    "actionsFor": "Actions for {{name}}",
+    "editRelation": "Edit role",
+    "editPerson": "Edit contact details",
+    "makePrimary": "Make primary",
+    "madePrimary": "{{name}} is now the primary contact",
+    "remove": "Remove from client",
+    "removed": "{{name}} removed from this client",
+    "removeConfirm": {
+      "title": "Remove this contact?",
+      "description": "This removes <strong>{{name}}</strong> from <strong>{{client}}</strong> only. The person stays in Contacts and in any other clients."
+    },
+    "add": {
+      "button": "Add",
+      "title": "Add contact",
+      "description": "A person at {{client}}. The same person can be a contact of several clients; their balances never mix.",
+      "mode": "New or existing person",
+      "newPerson": "New person",
+      "existingPerson": "Existing person",
+      "searchLabel": "Find a person",
+      "searchPlaceholder": "Name, email or phone…",
+      "results": "People",
+      "noResults": "No one found. Switch to New person to add them.",
+      "pickPerson": "Choose a person from the list.",
+      "submit": "Add contact",
+      "added": "{{name}} added"
+    },
+    "edit": {
+      "title": "{{name}} at this client",
+      "description": "Role and flags for this client only. Name, email and phone are changed from Edit contact details.",
+      "saved": "{{name}} saved"
+    }
+  },
+  "people": {
+    "title": "Contacts",
+    "description": "The people you work with. One person can be a contact of several clients.",
+    "newPerson": "New contact",
+    "search": "Search name, email or phone…",
+    "columns": {
+      "name": "Name",
+      "email": "Email",
+      "phone": "Phone",
+      "clients": "Clients"
+    },
+    "empty": {
+      "title": "No contacts yet",
+      "description": "Add people here or from a client's page.",
+      "filteredTitle": "No matching contacts",
+      "filteredDescription": "Try another name, a full email address or a phone number."
+    },
+    "form": {
+      "createTitle": "New contact",
+      "createDescription": "A person you work with. Link them to clients from the client's page.",
+      "editTitle": "Edit contact details",
+      "editDescription": "These details are the same for every client this person belongs to.",
+      "firstName": "First name",
+      "lastName": "Last name",
+      "create": "Create contact",
+      "created": "{{name}} created",
+      "saved": "{{name}} saved"
+    },
+    "duplicates": {
+      "title": "This person may already exist",
+      "use": "Use this person"
+    },
+    "detail": {
+      "title": "Contact",
+      "clientCount_one": "Contact of {{count}} client",
+      "clientCount_other": "Contact of {{count}} clients",
+      "noContactMethods": "No email or phone yet.",
+      "clients": "Clients",
+      "noClients": "Not linked to any client yet.",
+      "edit": "Edit details"
+    }
+  },
+  "overview": {
+    "getStarted": "Get started",
+    "getStartedDescription": "A few things that make this client easier to work with.",
+    "steps": {
+      "contact": "Add a contact"
+    },
+    "stepActions": {
+      "contact": "Add contact"
+    },
+    "recentActivity": "Recent activity",
+    "viewAll": "View all"
+  },
+  "activity": {
+    "fields": {
+      "kind": "type",
+      "displayName": "name",
+      "legalName": "legal name",
+      "taxId": "tax ID",
+      "taxOffice": "tax office",
+      "status": "status",
+      "defaultCurrency": "currency",
+      "tags": "tags",
+      "addresses": "addresses",
+      "contactMethods": "contact details",
+      "notes": "notes",
+      "role": "role",
+      "isPrimary": "primary contact",
+      "isBillingContact": "billing contact"
+    },
+    "verbs": {
+      "created": "<strong>{{actor}}</strong> created the client as {{ref}}",
+      "updated": "<strong>{{actor}}</strong> changed the {{fields}}",
+      "archived": "<strong>{{actor}}</strong> archived the client",
+      "unarchived": "<strong>{{actor}}</strong> unarchived the client",
+      "duplicateConfirmed": "<strong>{{actor}}</strong> kept the same tax ID as {{matches}}: “{{reason}}”",
+      "contactAdded": "<strong>{{actor}}</strong> added <strong>{{person}}</strong> as a contact",
+      "contactAddedWithRole": "<strong>{{actor}}</strong> added <strong>{{person}}</strong> as a contact ({{role}})",
+      "contactUpdated": "<strong>{{actor}}</strong> changed the {{fields}} of <strong>{{person}}</strong>",
+      "contactRemoved": "<strong>{{actor}}</strong> removed <strong>{{person}}</strong> from the contacts",
+      "unknown": "<strong>{{actor}}</strong> made a change"
+    },
+    "empty": {
+      "title": "No activity yet",
+      "description": "Changes to this client and its contacts show up here."
+    },
+    "loadOlder": "Load older",
+    "loadFailed": "Couldn't load the activity. {{message}}"
+  }
+}

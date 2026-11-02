@@ -1,8 +1,10 @@
+using System.Text.Json.Serialization;
 using Panoptes_v1.Data;
 using Panoptes_v1.Models;
 
 namespace Panoptes_v1.Modules.Crm.Entities
 {
+    [JsonConverter(typeof(JsonStringEnumConverter<ClientKind>))]
     public enum ClientKind
     {
         Organization,
@@ -11,6 +13,7 @@ namespace Panoptes_v1.Modules.Crm.Entities
 
     // Active/Inactive τα ορίζει ο χρήστης· η αρχειοθέτηση είναι ξεχωριστή (ArchivedAt) και δεν αλλάζει το Status,
     // ώστε το Unarchive να γυρίζει τον πελάτη όπως ήταν.
+    [JsonConverter(typeof(JsonStringEnumConverter<ClientStatus>))]
     public enum ClientStatus
     {
         Active,

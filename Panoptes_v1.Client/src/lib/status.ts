@@ -47,6 +47,13 @@ export function userStatus(user: { isLockedOut: boolean; emailConfirmed: boolean
   return { key: 'active', tone: 'success' } as const
 }
 
+// Πελάτης: η αρχειοθέτηση υπερισχύει της κατάστασης (ο αρχειοθετημένος κρατάει το Active/Inactive του για το Unarchive)
+export function clientStatus(client: { status: string; isArchived?: boolean; archivedAt?: string | null }) {
+  if (client.isArchived || client.archivedAt) return { key: 'archived', tone: 'neutral' } as const
+  if (client.status === 'Inactive') return { key: 'inactive', tone: 'neutral' } as const
+  return { key: 'active', tone: 'success' } as const
+}
+
 // Δουλειές παρασκηνίου: αποτυχία θέλει ενέργεια, η αναμονή είναι αναμενόμενη (όχι προειδοποίηση)
 export function jobStatusTone(status: string): StatusTone {
   if (status === 'Failed') return 'danger'

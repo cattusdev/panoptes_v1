@@ -1,5 +1,8 @@
+using System.Text.Json.Serialization;
+
 namespace Panoptes_v1.Modules.Crm.Entities
 {
+    [JsonConverter(typeof(JsonStringEnumConverter<AddressKind>))]
     public enum AddressKind
     {
         Billing,
@@ -20,6 +23,7 @@ namespace Panoptes_v1.Modules.Crm.Entities
         public string? Country { get; init; }
     }
 
+    [JsonConverter(typeof(JsonStringEnumConverter<ContactMethodKind>))]
     public enum ContactMethodKind
     {
         Email,

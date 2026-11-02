@@ -1,4 +1,4 @@
-﻿using System.Security.Claims;
+using System.Security.Claims;
 using Panoptes_v1.Constants;
 using Panoptes_v1.Data;
 using Panoptes_v1.Models;
@@ -48,6 +48,9 @@ public static class TestData
     public const string SettingsViewer = "settingsviewer@e2e.test";
     public const string SettingsEditor = "settingseditor@e2e.test"; // Settings.Edit, χωρίς Finance.Settings
     public const string FinanceSettings = "financesettings@e2e.test";
+    // CRM: όλα τα Clients.* / μόνο Clients.View
+    public const string ClientsManager = "clientsmanager@e2e.test";
+    public const string ClientsViewer = "clientsviewer@e2e.test";
 
     // Γλώσσες: διαλέγει ελληνικά (δικός του χρήστης, για να μην επηρεάζει τα άλλα tests)
     public const string GreekUser = "greek@e2e.test";
@@ -70,6 +73,8 @@ public static class TestData
         ["SettingsViewer"] = [Permissions.Settings.View],
         ["SettingsEditor"] = [Permissions.Settings.View, Permissions.Settings.Edit],
         ["FinanceSettings"] = [Permissions.Settings.View, Permissions.Finance.Settings],
+        ["ClientsManager"] = [Permissions.Clients.View, Permissions.Clients.Create, Permissions.Clients.Edit, Permissions.Clients.Archive],
+        ["ClientsViewer"] = [Permissions.Clients.View],
     };
 
     private static readonly Dictionary<string, string?> SeedUsers = new()
@@ -103,6 +108,8 @@ public static class TestData
         [SettingsViewer] = "SettingsViewer",
         [SettingsEditor] = "SettingsEditor",
         [FinanceSettings] = "FinanceSettings",
+        [ClientsManager] = "ClientsManager",
+        [ClientsViewer] = "ClientsViewer",
         [GreekUser] = null,
         [GreekUnconfirmed] = null,
     };

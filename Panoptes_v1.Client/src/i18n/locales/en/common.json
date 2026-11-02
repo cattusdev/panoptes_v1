@@ -48,6 +48,8 @@
       "administration": "Administration"
     },
     "dashboard": "Dashboard",
+    "clients": "Clients",
+    "contacts": "Contacts",
     "users": "Users",
     "roles": "Roles",
     "auditLogs": "Audit Logs",
@@ -60,6 +62,14 @@
     "open": "Account menu",
     "signedInAs": "Signed in as",
     "signOut": "Sign out"
+  },
+  "tags": {
+    "placeholder": "Add a tag…",
+    "selected": "Selected tags",
+    "remove": "Remove tag {{tag}}"
+  },
+  "activity": {
+    "system": "System"
   },
   "palette": {
     "open": "Search or jump to…",

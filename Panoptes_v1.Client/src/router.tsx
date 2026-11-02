@@ -60,6 +60,27 @@ export const router = createBrowserRouter([
               { path: 'data', lazy: lazyPage(() => import('@/pages/account/DataPage'), (m) => m.DataPage) },
             ],
           },
+          // Business modules (ARCHITECTURE §1.3): στο πρώτο επίπεδο, όχι κάτω από το /admin
+          {
+            path: '/clients',
+            lazy: requires(Permissions.Clients.View),
+            children: [
+              { index: true, lazy: lazyPage(() => import('@/modules/crm/pages/ClientsPage'), (m) => m.ClientsPage) },
+              {
+                path: ':id',
+                lazy: lazyPage(() => import('@/modules/crm/pages/ClientLayout'), (m) => m.ClientLayout),
+                children: [
+                  { index: true, lazy: lazyPage(() => import('@/modules/crm/pages/ClientTabs'), (m) => m.ClientOverviewTab) },
+                  { path: 'activity', lazy: lazyPage(() => import('@/modules/crm/pages/ClientTabs'), (m) => m.ClientActivityTab) },
+                ],
+              },
+            ],
+          },
+          {
+            path: '/contacts',
+            lazy: requires(Permissions.Clients.View),
+            children: [{ index: true, lazy: lazyPage(() => import('@/modules/crm/pages/PeoplePage'), (m) => m.PeoplePage) }],
+          },
           {
             path: '/admin',
             lazy: lazyPage(consoleLayout, (m) => m.RequireAdminArea),

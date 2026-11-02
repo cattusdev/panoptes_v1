@@ -1,3 +1,4 @@
+using System.Text.Json.Serialization;
 using System.ComponentModel.DataAnnotations;
 using Panoptes_v1.Api;
 using Panoptes_v1.Models;
@@ -109,6 +110,7 @@ namespace Panoptes_v1.Modules.Crm.Api
         public uint? Version { get; set; }
     }
 
+    [JsonConverter(typeof(JsonStringEnumConverter<ClientListStatus>))]
     public enum ClientListStatus
     {
         Active,

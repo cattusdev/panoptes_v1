@@ -1,5 +1,5 @@
 import type { ComponentType } from 'react'
-import { House, Images, NotebookText, ServerCog, Settings, Users } from 'lucide-react'
+import { Building2, Contact, House, Images, NotebookText, ServerCog, Settings, Users } from 'lucide-react'
 import type { Resources } from '@/i18n/locales/en'
 import { canAccessAdmin, hasPermission, type SessionUser } from '@/lib/auth'
 import { Permissions } from '@/lib/permissions'
@@ -38,6 +38,8 @@ export type NavItem = {
 // Νέο module = μια γραμμή εδώ + το label στο common:nav.* (en και el) + το route (με RequirePermission) στο router.tsx.
 export const navItems: NavItem[] = [
   { id: 'Dashboard', label: 'dashboard', icon: House, group: 'overview', routes: [{ to: '/admin' }], adminArea: true },
+  { id: 'Clients', label: 'clients', icon: Building2, group: 'relationships', routes: [{ to: '/clients', permission: Permissions.Clients.View }] },
+  { id: 'Contacts', label: 'contacts', icon: Contact, group: 'relationships', routes: [{ to: '/contacts', permission: Permissions.Clients.View }] },
   { id: 'Media', label: 'media', icon: Images, group: 'workspace', routes: [{ to: '/admin/media', permission: Permissions.Media.View }] },
   {
     id: 'Users',
