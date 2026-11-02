@@ -1,0 +1,102 @@
+{
+  "actions": {
+    "save": "Save",
+    "saveChanges": "Save changes",
+    "cancel": "Cancel",
+    "close": "Close",
+    "delete": "Delete",
+    "remove": "Remove",
+    "edit": "Edit",
+    "create": "Create",
+    "retry": "Retry",
+    "back": "Back",
+    "viewAll": "View all",
+    "undo": "Undo",
+    "select": "Select",
+    "copy": "Copy",
+    "download": "Download",
+    "upload": "Upload",
+    "continue": "Continue",
+    "show": "Show",
+    "hide": "Hide"
+  },
+  "status": {
+    "loading": "Loading…",
+    "none": "None"
+  },
+  "errors": {
+    "generic": "Something went wrong. Please try again.",
+    "forbidden": "You don't have permission to do that.",
+    "notFound": "It no longer exists. It may have been deleted."
+  },
+  "time": {
+    "justNow": "Just now"
+  },
+  "language": {
+    "label": "Language",
+    "choose": "Choose language"
+  },
+  "nav": {
+    "main": "Main navigation",
+    "toggleSidebar": "Toggle sidebar",
+    "groups": {
+      "main": "Main",
+      "management": "Management",
+      "content": "Content",
+      "system": "System"
+    },
+    "dashboard": "Dashboard",
+    "users": "Users",
+    "roles": "Roles",
+    "auditLogs": "Audit Logs",
+    "media": "Media",
+    "settings": "Settings",
+    "viewSite": "View site",
+    "myAccount": "My account"
+  },
+  "userMenu": {
+    "open": "Account menu",
+    "signedInAs": "Signed in as",
+    "signOut": "Sign out"
+  },
+  "public": {
+    "nav": "Main",
+    "features": "Features",
+    "privacy": "Privacy",
+    "signIn": "Sign in",
+    "getStarted": "Get started",
+    "createAccount": "Create account",
+    "tagline": "The foundation for your internal tools: users, roles, permissions and a full audit trail.",
+    "product": "Product",
+    "legal": "Legal",
+    "rights": "© {{year}} {{appName}}. All rights reserved."
+  },
+  "authLayout": {
+    "home": "Home",
+    "eyebrow": "Platform administration",
+    "title": "One console. Full control.",
+    "text": "Users, roles, permissions and a complete audit trail, secured and managed from a single place.",
+    "highlight1": "Role-based access with a strict permission hierarchy",
+    "highlight2": "Audit trail for every change",
+    "highlight3": "Account lockout and two-factor authentication"
+  },
+  "table": {
+    "range": "{{from}}–{{to}} of {{total}}",
+    "page": "Page {{page}} of {{last}}",
+    "previousPage": "Previous page",
+    "nextPage": "Next page"
+  },
+  "password": {
+    "showPassword": "Show password",
+    "hidePassword": "Hide password",
+    "requirements": "Password requirements",
+    "minLength": "At least {{count}} characters",
+    "uppercase": "An uppercase letter",
+    "lowercase": "A lowercase letter",
+    "digit": "A number",
+    "symbol": "A symbol (e.g. ! ? #)"
+  },
+  "code": {
+    "label": "6-digit code"
+  }
+}

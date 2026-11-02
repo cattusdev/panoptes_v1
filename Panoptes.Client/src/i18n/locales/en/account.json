@@ -1,0 +1,156 @@
+{
+  "layout": {
+    "title": "My account",
+    "description": "Your profile, sign-in security and personal data.",
+    "tabsLabel": "Account settings",
+    "tabs": {
+      "profile": "Profile",
+      "security": "Security",
+      "data": "Data & privacy"
+    }
+  },
+  "profile": {
+    "verify": {
+      "title": "Verify your email",
+      "description": "Until you do, you won't be able to sign in again after you sign out.",
+      "send": "Send email",
+      "resendIn": "Resend in {{seconds}}s",
+      "sent": "Verification email sent to {{email}}"
+    },
+    "email": {
+      "title": "Email",
+      "description": "The address you sign in with and where we send account emails.",
+      "verified": "Verified",
+      "unverified": "Unverified",
+      "change": "Change email"
+    },
+    "details": {
+      "title": "Profile",
+      "description": "Optional contact details.",
+      "phone": "Phone number",
+      "phoneHint": "Only visible to administrators.",
+      "saved": "Profile updated"
+    },
+    "changeEmail": {
+      "title": "Change email",
+      "description": "We'll send a confirmation link to the new address. Until you confirm it, you keep signing in with {{email}}.",
+      "newEmail": "New email address",
+      "submit": "Send confirmation link",
+      "sent": "Check your inbox",
+      "sentDescription": "We sent a confirmation link to {{email}}. Your email changes once you click it."
+    }
+  },
+  "language": {
+    "title": "Language",
+    "description": "The language of the app for you. Emails we send you use it too.",
+    "label": "Preferred language",
+    "hint": "Applies on every device you sign in on.",
+    "appDefault": "Use app default ({{language}})",
+    "saved": "Language updated"
+  },
+  "photo": {
+    "title": "Profile photo",
+    "description": "Shown next to your name across the app.",
+    "change": "Change photo",
+    "upload": "Upload photo",
+    "hint": "JPG, PNG, GIF or WebP. It's cropped to a square.",
+    "dialogDescription": "Choose a photo. The center is cropped to a square.",
+    "drop": "Drop your photo or <span class=\"filepond--label-action\">browse</span>",
+    "removed": "Profile photo removed",
+    "updated": "Profile photo updated"
+  },
+  "security": {
+    "password": {
+      "title": "Password",
+      "description": "Changing it signs you out on your other devices.",
+      "current": "Current password",
+      "new": "New password",
+      "notValid": "Your new password doesn't meet all the requirements yet.",
+      "submit": "Update password",
+      "updated": "Password updated",
+      "updatedDescription": "Other devices have been signed out."
+    },
+    "twoFactor": {
+      "title": "Two-factor authentication",
+      "description": "Require a code from your phone in addition to your password.",
+      "off": "Off",
+      "offHint": "Add an extra layer of security to your account.",
+      "setUp": "Set up authenticator app",
+      "on": "On",
+      "onHint": "You'll be asked for a code when you sign in.",
+      "app": "Authenticator app",
+      "appConfigured": "Configured.",
+      "reset": "Reset",
+      "recoveryCodes": "Recovery codes",
+      "codesLow_one": "Only {{count}} left. Generate new ones soon.",
+      "codesLow_other": "Only {{count}} left. Generate new ones soon.",
+      "codesLeft": "{{left}} unused codes left.",
+      "generateNew": "Generate new codes",
+      "thisDevice": "This device",
+      "thisDeviceHint": "You won't be asked for a code on this device.",
+      "forgetDevice": "Forget this device",
+      "deviceForgotten": "We'll ask for a code next time on this device",
+      "turnOff": "Turn off",
+      "turnOffHint": "Sign in with your password only."
+    },
+    "confirm": {
+      "regenerate": {
+        "title": "Generate new recovery codes?",
+        "description": "Your old recovery codes will stop working.",
+        "confirm": "Generate new codes"
+      },
+      "reset": {
+        "title": "Reset authenticator app?",
+        "description": "Your current app stops working and two-factor authentication turns off until you set it up again.",
+        "confirm": "Reset",
+        "success": "Authenticator reset",
+        "successDescription": "Set it up again to turn two-factor authentication back on."
+      },
+      "disable": {
+        "title": "Turn off two-factor authentication?",
+        "description": "Your account will be protected by your password only.",
+        "confirm": "Turn off",
+        "success": "Two-factor authentication is off"
+      }
+    },
+    "newCodes": {
+      "title": "Your new recovery codes",
+      "description": "Save them somewhere safe. Each code works once and you won't see them again."
+    }
+  },
+  "recoveryCodes": {
+    "copied": "Recovery codes copied",
+    "copyFailed": "Couldn't copy. Select the codes and copy them manually.",
+    "fileHeader": "{{appName}} recovery codes",
+    "saved": "I've saved them"
+  },
+  "setup": {
+    "enabled": "Two-factor authentication is on",
+    "keyCopied": "Key copied",
+    "saveTitle": "Save your recovery codes",
+    "saveDescription": "If you lose access to your authenticator app, you can sign in with one of these. Each code works once. You won't see them again.",
+    "title": "Set up authenticator app",
+    "description": "Scan the QR code with an app like Google Authenticator, 1Password or Microsoft Authenticator.",
+    "cantScan": "Can't scan? Enter this key instead",
+    "copyKey": "Copy key",
+    "enterCode": "Enter the 6-digit code from the app",
+    "submit": "Verify and turn on"
+  },
+  "data": {
+    "download": {
+      "title": "Download your data",
+      "description": "A JSON file with the personal data we store about you.",
+      "button": "Download my data"
+    },
+    "delete": {
+      "title": "Delete your account",
+      "description": "Permanently removes your account and signs you out. This can't be undone.",
+      "button": "Delete account",
+      "dialogTitle": "Delete your account?",
+      "dialogDescription": "This permanently deletes your account. Enter your password to confirm.",
+      "password": "Password",
+      "submit": "Delete my account",
+      "deleted": "Your account was deleted"
+    }
+  }
+}

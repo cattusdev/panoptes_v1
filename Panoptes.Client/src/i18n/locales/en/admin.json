@@ -1,0 +1,306 @@
+{
+  "shared": {
+    "system": "System",
+    "administrator": "Administrator",
+    "you": "You",
+    "dangerZone": "Danger zone",
+    "actions": "Actions",
+    "actionsFor": "Actions for {{name}}"
+  },
+  "status": {
+    "active": "Active",
+    "locked": "Locked",
+    "unconfirmed": "Unconfirmed"
+  },
+  "access": {
+    "title": "Access management",
+    "description": "People who can sign in, and the roles that grant them permissions."
+  },
+  "dashboard": {
+    "loadError": "Couldn't load the dashboard",
+    "loadErrorHint": "Check your connection and try again.",
+    "loading": "Loading dashboard",
+    "description": "Monitor users, roles, activity and security posture from one clean control center.",
+    "keyMetrics": "Key metrics",
+    "metrics": {
+      "users_one": "User",
+      "users_other": "Users",
+      "roles_one": "Role",
+      "roles_other": "Roles",
+      "admins_one": "Admin",
+      "admins_other": "Admins",
+      "audits_one": "Audit (24h)",
+      "audits_other": "Audits (24h)"
+    },
+    "systemStatus": "System status",
+    "status": "Status",
+    "responseTime": "Database response time · updated {{time}}",
+    "healthy": "Healthy",
+    "unavailable": "Unavailable",
+    "security": "Security",
+    "noIssues": "No issues",
+    "toReview": "{{count}} to review",
+    "failedLogins": "Failed logins",
+    "lockedAccounts": "Locked accounts",
+    "unconfirmedEmails": "Unconfirmed emails",
+    "twoFactor": "Two-factor",
+    "twoFactorOf_one": "of {{count}} user",
+    "twoFactorOf_other": "of {{count}} users",
+    "recentActivity": "Recent activity",
+    "recentActivityDescription": "The latest changes recorded in the audit log.",
+    "noActivity": "No activity recorded yet.",
+    "changed": "<user>{{user}}</user><muted> changed </muted><table>{{table}}</table>"
+  },
+  "audit": {
+    "title": "Audit logs",
+    "description": "Every create, update and delete, with who did it and what changed.",
+    "types": {
+      "Create": "Create",
+      "Update": "Update",
+      "Delete": "Delete",
+      "Manual": "Manual",
+      "None": "None"
+    },
+    "filter": {
+      "Create": "Created",
+      "Update": "Updated",
+      "Delete": "Deleted"
+    },
+    "search": "Search by user or table…",
+    "filterByAction": "Filter by action",
+    "allActions": "All actions",
+    "columns": {
+      "time": "Time",
+      "user": "User",
+      "action": "Action",
+      "resource": "Resource",
+      "details": "Details"
+    },
+    "rowLabel": "{{type}} {{table}}",
+    "empty": {
+      "filteredTitle": "No entries match your filters",
+      "filteredDescription": "Try a different search or action.",
+      "title": "No activity yet",
+      "description": "Changes will appear here as they happen."
+    },
+    "detail": {
+      "title": "Audit entry",
+      "record": "Record",
+      "changes": "Changes",
+      "noChanges": "No field details were recorded.",
+      "field": "Field",
+      "before": "Before",
+      "after": "After"
+    }
+  },
+  "users": {
+    "list": {
+      "totalCount_one": "{{count}} total users",
+      "totalCount_other": "{{count}} total users",
+      "matchingCount_one": "{{count}} matching users",
+      "matchingCount_other": "{{count}} matching users",
+      "newUser": "New user",
+      "search": "Search by email…",
+      "filterByRole": "Filter by role",
+      "allRoles": "All roles",
+      "filterByStatus": "Filter by status",
+      "allStatuses": "All statuses",
+      "columns": {
+        "user": "User",
+        "role": "Role",
+        "status": "Status"
+      },
+      "noAccess": "No access",
+      "view": "View",
+      "editUser": "Edit user",
+      "viewUser": "View user",
+      "promote": "Promote to Admin",
+      "deleteUser": "Delete user",
+      "empty": {
+        "filteredTitle": "No users match your filters",
+        "filteredDescription": "Try a different search or clear the filters.",
+        "title": "No users yet",
+        "description": "Create the first user to get started."
+      },
+      "promoteConfirm": {
+        "title": "Promote to administrator?",
+        "description": "<strong>{{email}}</strong> will get full access to everything, including managing other administrators.",
+        "confirm": "Promote"
+      },
+      "deleteConfirm": {
+        "title": "Delete this user?",
+        "description": "<strong>{{email}}</strong> will be removed permanently and signed out everywhere. This can't be undone."
+      },
+      "promoted": "{{email}} is now an administrator",
+      "deleted": "{{email}} was deleted"
+    },
+    "create": {
+      "title": "New user",
+      "description": "The account is confirmed immediately. Share the password securely.",
+      "email": "Email address",
+      "password": "Password",
+      "passwordHint": "At least 6 characters, with upper and lower case, a number and a symbol.",
+      "role": "Role",
+      "noRole": "No role",
+      "roleHint": "Only roles you're allowed to grant are listed.",
+      "submit": "Create user",
+      "created": "{{email}} was created",
+      "createdDescription": "They can sign in right away."
+    },
+    "detail": {
+      "title": "User",
+      "loadError": "Couldn't load this user",
+      "viewOnly": "View only",
+      "viewOnlyDescription": "You don't have enough privileges to manage this user.",
+      "account": {
+        "title": "Account",
+        "description": "Sign-in email and the role that grants permissions.",
+        "email": "Email address",
+        "role": "Role",
+        "noRole": "No role",
+        "roleHint": "Only roles you're allowed to grant can be selected.",
+        "discard": "Discard",
+        "updated": "User updated"
+      },
+      "security": {
+        "title": "Security",
+        "description": "Sign-in status and password.",
+        "signInStatus": "Sign-in status",
+        "lockedUntil": "Locked after too many failed attempts until {{date}}.",
+        "locked": "Locked after too many failed attempts.",
+        "canSignIn": "Can sign in normally.",
+        "notConfirmed": "Hasn't confirmed their email yet.",
+        "unlock": "Unlock",
+        "unlocked": "Account unlocked",
+        "twoFactor": "Two-factor authentication",
+        "twoFactorHint": "Managed by the user from their profile.",
+        "enabled": "Enabled",
+        "off": "Off",
+        "newPassword": "Set a new password",
+        "setPassword": "Set password",
+        "newPasswordHint": "Takes effect immediately.",
+        "passwordUpdated": "Password updated",
+        "passwordUpdatedDescription": "The user has been signed out of other sessions."
+      },
+      "delete": {
+        "title": "Delete this user",
+        "description": "Removes the account permanently and signs them out everywhere.",
+        "button": "Delete user",
+        "confirmTitle": "Delete this user?",
+        "confirmDescription": "<strong>{{email}}</strong> will be removed permanently. This can't be undone.",
+        "deleted": "{{email}} was deleted"
+      }
+    }
+  },
+  "roles": {
+    "list": {
+      "totalCount_one": "{{count}} total roles",
+      "totalCount_other": "{{count}} total roles",
+      "newRole": "New role",
+      "columns": {
+        "role": "Role",
+        "permissions": "Permissions",
+        "members": "Members"
+      },
+      "allPermissions": "All permissions",
+      "permissionCount": "{{count}} of {{total}}",
+      "protected": "Protected",
+      "manage": "Manage",
+      "permissions": "Permissions",
+      "deleteRole": "Delete role",
+      "empty": {
+        "title": "No roles yet",
+        "description": "Create a role, then choose what it can do."
+      },
+      "create": {
+        "title": "New role",
+        "description": "Next you'll choose which permissions it grants.",
+        "submit": "Create role",
+        "created": "Role \"{{name}}\" created"
+      },
+      "deleteConfirm": {
+        "title": "Delete this role?",
+        "description_one": "<strong>{{name}}</strong> will be deleted. Its {{count}} member(s) lose its permissions immediately.",
+        "description_other": "<strong>{{name}}</strong> will be deleted. Its {{count}} member(s) lose its permissions immediately.",
+        "confirm": "Delete role"
+      },
+      "deleted": "Role \"{{name}}\" deleted"
+    },
+    "detail": {
+      "title": "Role",
+      "loadError": "Couldn't load this role",
+      "system": "System",
+      "members_one": "{{count}} member",
+      "members_other": "{{count}} members",
+      "rename": "Rename",
+      "readOnly": "Read only",
+      "permissionsTitle": "Permissions",
+      "permissionsDescription": "What members of this role can do in the admin console.",
+      "cantGrant": "You don't have this permission, so you can't grant it.",
+      "membersTitle": "Members",
+      "membersDescription": "Users who currently have this role.",
+      "noMembers": "No one has this role yet.",
+      "delete": {
+        "title": "Delete this role",
+        "description": "Members lose its permissions immediately.",
+        "button": "Delete role",
+        "confirmTitle": "Delete this role?",
+        "confirmDescription_one": "<strong>{{name}}</strong> will be deleted and its {{count}} member(s) lose its permissions. This can't be undone.",
+        "confirmDescription_other": "<strong>{{name}}</strong> will be deleted and its {{count}} member(s) lose its permissions. This can't be undone.",
+        "deleted": "Role \"{{name}}\" deleted"
+      },
+      "unsaved": "You have unsaved changes",
+      "reset": "Reset",
+      "saved": "Permissions updated for {{name}}",
+      "savedDescription": "Members get the change right away.",
+      "renameDialog": {
+        "title": "Rename role",
+        "description": "Members keep their permissions.",
+        "submit": "Rename",
+        "renamed": "Role renamed to \"{{name}}\""
+      }
+    },
+    "nameDialog": {
+      "label": "Role name",
+      "placeholder": "e.g. Support",
+      "hint": "Use a short, descriptive name."
+    },
+    "catalog": {
+      "modules": {
+        "Users": "Users",
+        "Roles": "Roles",
+        "AuditLogs": "Audit Logs",
+        "Media": "Media",
+        "Settings": "Settings"
+      },
+      "items": {
+        "Users": {
+          "View": { "label": "View users", "description": "See users and their details." },
+          "Create": { "label": "Create users", "description": "Add new users." },
+          "Edit": { "label": "Edit users", "description": "Change existing users." },
+          "Delete": { "label": "Delete users", "description": "Remove users permanently." }
+        },
+        "Roles": {
+          "View": { "label": "View roles", "description": "See roles and their details." },
+          "Create": { "label": "Create roles", "description": "Add new roles." },
+          "Edit": { "label": "Edit roles", "description": "Change existing roles." },
+          "Delete": { "label": "Delete roles", "description": "Remove roles permanently." }
+        },
+        "AuditLogs": {
+          "View": { "label": "View audit logs", "description": "See audit logs and their details." }
+        },
+        "Media": {
+          "View": { "label": "View media", "description": "See media and their details." },
+          "Upload": { "label": "Upload media", "description": "Upload files to the media library." },
+          "Edit": { "label": "Edit media", "description": "Change existing media." },
+          "Delete": { "label": "Delete media", "description": "Remove media permanently." },
+          "ManageAll": { "label": "Manage all media", "description": "Edit and delete files uploaded by anyone." }
+        },
+        "Settings": {
+          "View": { "label": "View settings", "description": "See settings and their details." },
+          "Edit": { "label": "Edit settings", "description": "Change existing settings." }
+        }
+      }
+    }
+  }
+}

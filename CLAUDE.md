@@ -1,0 +1,47 @@
+# Panoptes
+
+ASP.NET Core 8 **JSON API** (Identity + PostgreSQL + EF Core) with a **React + Tailwind + shadcn/ui** single-page app (`Panoptes.Client`). There are no Razor views. Commands, the definition of done and common traps: [AGENTS.md](AGENTS.md).
+
+## Structure
+- `Panoptes/` backend: `Api/` controllers (`/api/auth`, `/api/account`, `/api/users`, `/api/roles`, `/api/audit-logs`, `/api/dashboard`, `/api/media`, `/api/branding`, `/api/settings`), `Services/` (`AdminGuard`, `AccountEmails`, `EmailSender`, `Media/`, `Settings/`), `Data/` (DbContext with audit logging), `Middlewares/GlobalExceptionHandler`. Serves the built client from `wwwroot/spa` as the fallback for every non-API route.
+- `Panoptes.Client/` React app: `src/pages/{public,auth,account,admin}`, layouts in `src/components/layout` (PublicLayout, AuthLayout, ConsoleLayout + our own AdminSidebar), shared admin pieces in `src/components/admin` (DataTable, TablePagination, ConfirmDialog, OptionSelect, PageHeader/RouteTabs, SettingsCard, DangerZone, StatCard...), form pieces in `src/components/form`, media pieces in `src/components/media` (`MediaBrowser` + `browser-state` for URL or local state, `FolderTree`, `MediaUploader` = our FilePond wrapper, lazy via `LazyMediaUploader`, `MediaDetailsSheet`, `UploadDialog`; reusable in any form: `MediaPicker` dialog, `MediaField` form control, `MediaImage` responsive image), API hooks in `src/lib/*-api.ts` (uploads: `lib/media-upload.ts`). Console routes are lazy-loaded in `src/router.tsx`.
+- Media (`Services/Media`, `Api/Media*`): every file enters through `MediaService.IngestAsync` (sniff real type, limits, NetVips re-encode + thumb/medium/large WebP, metadata stripped) and is stored via `IMediaStorage` (`FileSystemMediaStorage` = local `App_Data/media`, or `S3MediaStorage` = Cloudflare R2/S3 with a public and a private bucket; `Media:Provider`; never in `wwwroot`). Uploads use our chunk protocol (`/api/media/uploads`: POST, PATCH with `Upload-Offset`, HEAD, DELETE). Public files are served from `/media/p/...` (static, immutable cache) or straight from the public bucket (`Media:S3:PublicBaseUrl`); private ones from `/media/{id}/{version}/{variant}` after `MediaAccess` checks (404 when not allowed). Limits live in `MediaOptions` (`Media` section). `MediaCleanup` (run hourly by `MediaCleanupService`, `Media:CleanupIntervalMinutes`, 0 = off) removes stale upload sessions/temp files, trash older than `TrashRetentionDays`, versions over `MaxVersions`, unused avatars and orphan files, and moves files left in the wrong public/private area back.
+- Settings (`/admin/settings`, `Settings.*` permissions): one layout with a vertical section nav. Sections live in the client registry `pages/admin/settings/sections.ts` (+ one route in `router.tsx`); pieces are `SettingsNav` and `SettingsCard` (with `footer`) in `components/admin`. Backend values are stored as JSON per section in the `AppSettings` table through `Services/Settings/SettingsService` (`GetAsync<T>`/`SaveAsync<T>`; a new section is just a new `ISettingsSection` class, no migration). Secrets (the SMTP password) are encrypted with Data Protection (keys in `App_Data/keys`), stored in the `Secret` column, never returned to the client and never audited.
+- Dates: always display them with `<DateTime value mode="date|dateTime|relative" />` (`components/admin/DateTime`) or `useDateFormat()` (`lib/dates.ts`), never `toLocaleString()`: they follow Settings → General (date format, 12/24h, time zone).
+- Languages (English, Greek; English is the source and fallback): **no hard-coded UI text**.
+  - Client: react-i18next (`src/i18n`). One JSON per namespace and language in `src/i18n/locales/{en,el}/` (`common`, `auth`, `account`, `admin`, `media`, `settings`); `el` is typed against `en`, so a missing Greek key fails `tsc`, and keys are typed in `t()`. English ships in the bundle, Greek loads as its own chunk. Components use `useTranslation('<ns>')`; non-component code stores keys or calls `i18n.t` at use time (never at module load). Whole sentences with `{{vars}}`, `_one`/`_other` plurals, `<Trans>` for links inside text.
+  - Which language: the user's choice (`UserProfile.Language`, My account → Profile, `PUT /api/account/language`) → a visitor's choice (footer `LanguageSwitcher`, localStorage) → the app default (Settings → General, `GeneralSettings.DefaultLanguage`). `useLanguageSync` applies it; `lib/api.ts` sends it as `Accept-Language`.
+  - Server: `IStringLocalizer<SharedResource>` with the English text as key and Greek in `Resources/SharedResource.el.resx` (API messages, validation, Identity errors via `LocalizedIdentityErrorDescriber`). `UseRequestLocalization`: Accept-Language, then the app default. Emails go out in the recipient's language (`AppLanguages.Use(...)`).
+  - Dates/numbers follow the language (`Intl`): month names, AM/PM, relative times.
+- Profile photos: uploaded with purpose `Avatar` (any signed-in user, square crop) then set via `PUT /api/account/avatar` (`Services/ProfileService`); DTOs expose `avatarUrl`. Branding (`/api/branding`, `Settings.*` permissions): app name, logo and favicon picked from the library (made public, protected from trash/private by `MediaUsage`); the client reads it with `useBranding()`.
+- `Panoptes.E2E/` Playwright + NUnit tests against the real app and a throwaway `Panoptes_E2E` database.
+
+<!-- template -->
+## Template
+`init.ps1` turns a new copy of this repo into another project (renames, new user-secrets id and ports, database, first admin). `Panoptes` → C# name, `panoptes` → kebab-case; the database and display-name spots are matched by the rules at the top of the script, so keep new occurrences in those forms (details in [AGENTS.md](AGENTS.md)). The script removes this section.
+
+<!-- /template -->
+## Running
+- First time: connection string in user secrets (`dotnet user-secrets set ConnectionStrings:DefaultConnection "..."` in `Panoptes/`), then `dotnet run -- db:migrate` and `dotnet run -- admin:create you@example.com` (`Services/SetupCommands`; password from `ADMIN_PASSWORD` or asked for). Passwords and keys never go in `appsettings.json`.
+- Backend: `dotnet run --launch-profile https` in `Panoptes/` → https://localhost:7222 (builds the client automatically if `wwwroot/spa` is missing).
+- After client changes: `npm run build` in `Panoptes.Client/`, or for hot reload `npm run dev` → http://localhost:5173 (proxies `/api` and `/img` to the backend).
+- Media on Cloudflare R2: fill `Media:S3` (keys in user secrets / env vars, e.g. `Media__S3__SecretKey`), run `dotnet run -- media:migrate` in `Panoptes/` (copies local files to the buckets, safe to re-run), then set `Media:Provider` to `S3` and restart.
+- Emails: `Services/AccountEmails` builds the account emails (links point to React pages). `EmailSender` (MailKit) picks, in order: `Email:PickupDirectory` (JSON files, the E2E tests use it) → the custom SMTP from Settings → Email → `SmtpSettings` (user secrets; `Security` = `None`/`StartTls`/`SslOnConnect`/`Auto`) → in Development `App_Data/emails`. For local mail use Mailpit (SMTP `localhost:1025`, `Security` `None`, inbox at http://localhost:8025).
+
+## UI / UX: think before designing
+For any UI decision, and especially for **UX flows** (sign-in, onboarding, multi-step forms, tables with actions, settings, destructive actions, empty/error states):
+1. **Stop and think first.** Don't jump straight to markup.
+2. **Look at how well-known apps with clean, modern design solve the same problem** (e.g. Linear, Vercel, Stripe Dashboard, GitHub, Clerk, Supabase, Notion). Note what they do for layout, flow, wording, and feedback.
+3. Then decide and apply, briefly stating which references informed the choice.
+
+Design language: light public/auth pages (off-white, near-black primary, lavender pills, mauve accent, dark brand panel); dark neutral console with mauve primary and tinted status badges. Use shadcn components (`src/components/ui`, add more with `npx shadcn@latest add <name>`) instead of hand-rolled ones; build shared pieces once and reuse them. The admin **sidebar is our own component**, not shadcn's. No dead links or controls that do nothing.
+
+## Security rules
+- Admin = superuser; every user/role action goes through `Services/AdminGuard` (never manage or grant above your own permissions).
+- State-changing requests require an antiforgery token (the client's `lib/api.ts` sends `X-XSRF-TOKEN` from the `XSRF-TOKEN` cookie).
+- Any Identity call that rotates the security stamp for the *current* user (2FA changes, password, email, phone) must be followed by `RefreshSignInAsync`, or the user gets signed out.
+- Media: shared library (`Media.View` sees all); edit/delete only your own files unless `Media.ManageAll`. Never trust file names or browser-side checks; validation and resizing happen on the server.
+- Errors never leak internals: `GlobalExceptionHandler` returns ProblemDetails with a reference id (API) or a plain error page.
+
+## Testing
+Every feature/fix gets Playwright E2E coverage in `Panoptes.E2E`; run `dotnet test Panoptes.E2E` before calling work done. Screenshots for a visual check: `dotnet test Panoptes.E2E --filter "Category=Screenshots"`. S3 storage (needs Docker, runs Adobe S3Mock): `--filter "Category=S3"`.

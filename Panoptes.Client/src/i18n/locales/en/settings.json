@@ -1,0 +1,116 @@
+{
+  "title": "Settings",
+  "description": "Configuration that applies to the whole app and everyone using it.",
+  "sectionsNav": "Settings sections",
+  "readOnly": "You can view these settings, but only people with the Settings · Edit permission can change them.",
+  "sections": {
+    "general": { "label": "General", "description": "Language, dates and times across the app." },
+    "branding": { "label": "Branding", "description": "Your app's name, logo and browser icon, as everyone sees them." },
+    "email": { "label": "Email", "description": "The server that sends sign-up, password reset and other account emails." }
+  },
+  "general": {
+    "language": {
+      "title": "Language",
+      "description": "The language for visitors and for people who haven't picked their own in My account.",
+      "default": "Default language",
+      "defaultHint": "Everyone can still choose their own language.",
+      "saved": "Language settings saved",
+      "savedDescription": "New visitors and people without a preference now see this language."
+    },
+    "dateTime": {
+      "title": "Date & time",
+      "description": "Used everywhere dates appear: tables, details, activity and history.",
+      "preview": "Preview:",
+      "dateFormat": "Date format",
+      "dateFormatHint": "How days, months and years are written.",
+      "timeFormat": "Time format",
+      "timeFormatHint": "24-hour clock or AM/PM.",
+      "hours24": "24-hour",
+      "hours12": "12-hour",
+      "timeZone": "Time zone",
+      "timeZoneHint": "Show everyone the same clock, or each person their own local time.",
+      "viewerTimeZone": "Each viewer's local time",
+      "saved": "Date & time settings saved",
+      "savedDescription": "Dates across the app now use this format."
+    },
+    "formats": {
+      "dayMonthYear": "Day Month Year",
+      "monthDayYear": "Month Day, Year",
+      "iso": "ISO 8601"
+    }
+  },
+  "branding": {
+    "appName": "App name",
+    "appNameHint": "Shown in the browser tab, the sidebar and on the public and sign-in pages.",
+    "logo": "Logo",
+    "logoHint": "Shown in the sidebar and on the public and sign-in pages. A transparent PNG about 200 × 64 px works best.",
+    "chooseLogo": "Choose a logo",
+    "favicon": "Favicon",
+    "faviconHint": "The small icon in the browser tab. Use a square image, at least 64 × 64 px.",
+    "chooseFavicon": "Choose a favicon",
+    "makesPublic": "The selected images will be made public, so visitors can see them.",
+    "saved": "Branding updated",
+    "savedDescription": "Everyone sees the changes on their next page load.",
+    "preview": "Preview",
+    "previewLabel": "Branding preview",
+    "browserTab": "Browser tab",
+    "sidebar": "Sidebar",
+    "publicPages": "Public pages"
+  },
+  "email": {
+    "sentThrough": "Emails are sent through",
+    "status": {
+      "Custom": "Custom SMTP",
+      "Configuration": "Server configuration",
+      "Pickup": "Saved as files",
+      "DevelopmentFolder": "Not configured",
+      "NotConfigured": "Not configured"
+    },
+    "statusDetail": {
+      "Pickup": "Emails are saved as files (Email:PickupDirectory) instead of being sent.",
+      "DevelopmentFolder": "Emails are saved to App_Data/emails instead of being sent.",
+      "NotConfigured": "Emails can't be sent until an SMTP server is set up."
+    },
+    "smtp": {
+      "title": "SMTP server",
+      "description": "Use your own mail provider (for example Postmark, Amazon SES, Mailgun or Resend) for account emails.",
+      "enabled": "Use a custom SMTP server",
+      "enabledHint": "When this is off, emails go through the server set in the host configuration (SmtpSettings), if there is one.",
+      "incomplete": "Enter the host, port and sender address to save.",
+      "sender": "Sender",
+      "senderHint": "Who the emails come from. Most providers require a verified address or domain.",
+      "fromEmail": "From email",
+      "fromName": "From name",
+      "fromNamePlaceholder": "Your app",
+      "server": "Server",
+      "serverHint": "The connection details from your mail provider.",
+      "host": "Host",
+      "port": "Port",
+      "security": "Security",
+      "username": "Username",
+      "usernameHint": "Leave empty if the server doesn't need a sign-in.",
+      "password": "Password",
+      "passwordSaved": "A password is saved. Leave this empty to keep it.",
+      "removePassword": "Remove it",
+      "passwordRemoved": "The saved password will be removed when you save.",
+      "saved": "Email settings saved",
+      "savedOn": "Account emails are now sent through your SMTP server.",
+      "savedOff": "Custom SMTP is off."
+    },
+    "securityOptions": {
+      "StartTls": "STARTTLS (usually port 587)",
+      "SslOnConnect": "SSL/TLS (usually port 465)",
+      "None": "None (local servers only)",
+      "Auto": "Automatic"
+    },
+    "test": {
+      "title": "Send a test email",
+      "description": "Uses the values above, even before you save them, so you can check they work first.",
+      "to": "Send to",
+      "send": "Send test email",
+      "sent": "Test email sent to {{to}}",
+      "sentDescription": "Check the inbox, and the spam folder if it isn't there.",
+      "failed": "The test email wasn't sent"
+    }
+  }
+}

@@ -1,0 +1,161 @@
+@import "tailwindcss";
+@import "tw-animate-css";
+@import "shadcn/tailwind.css";
+@import "@fontsource-variable/geist";
+
+@custom-variant dark (&:is(.dark *));
+
+@theme inline {
+    --font-heading: var(--font-sans);
+    --font-sans: 'Geist Variable', sans-serif;
+    --color-sidebar-ring: var(--sidebar-ring);
+    --color-sidebar-border: var(--sidebar-border);
+    --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
+    --color-sidebar-accent: var(--sidebar-accent);
+    --color-sidebar-primary-foreground: var(--sidebar-primary-foreground);
+    --color-sidebar-primary: var(--sidebar-primary);
+    --color-sidebar-foreground: var(--sidebar-foreground);
+    --color-sidebar: var(--sidebar);
+    --color-chart-5: var(--chart-5);
+    --color-chart-4: var(--chart-4);
+    --color-chart-3: var(--chart-3);
+    --color-chart-2: var(--chart-2);
+    --color-chart-1: var(--chart-1);
+    --color-ring: var(--ring);
+    --color-input: var(--input);
+    --color-border: var(--border);
+    --color-destructive: var(--destructive);
+    --color-accent-foreground: var(--accent-foreground);
+    --color-accent: var(--accent);
+    --color-muted-foreground: var(--muted-foreground);
+    --color-muted: var(--muted);
+    --color-secondary-foreground: var(--secondary-foreground);
+    --color-secondary: var(--secondary);
+    --color-primary-foreground: var(--primary-foreground);
+    --color-primary: var(--primary);
+    --color-popover-foreground: var(--popover-foreground);
+    --color-popover: var(--popover);
+    --color-card-foreground: var(--card-foreground);
+    --color-card: var(--card);
+    --color-foreground: var(--foreground);
+    --color-background: var(--background);
+    /* Panoptes: brand (mauve) + status colors */
+    --color-brand: var(--brand);
+    --color-brand-foreground: var(--brand-foreground);
+    --color-success: var(--success);
+    --color-warning: var(--warning);
+    --color-info: var(--info);
+    --color-purple: var(--purple);
+    --color-panel: var(--panel);
+    --radius-sm: calc(var(--radius) * 0.6);
+    --radius-md: calc(var(--radius) * 0.8);
+    --radius-lg: var(--radius);
+    --radius-xl: calc(var(--radius) * 1.4);
+    --radius-2xl: calc(var(--radius) * 1.8);
+    --radius-3xl: calc(var(--radius) * 2.2);
+    --radius-4xl: calc(var(--radius) * 2.6);
+}
+
+/* LIGHT: public site + auth pages (off-white, near-black primary, lavender accent, mauve brand) */
+:root {
+    --background: #f6f7f6;
+    --foreground: #111214;
+    --card: #ffffff;
+    --card-foreground: #111214;
+    --popover: #ffffff;
+    --popover-foreground: #111214;
+    --primary: #0e0e10;
+    --primary-foreground: #ffffff;
+    --secondary: #f0f1f3;
+    --secondary-foreground: #111214;
+    --muted: #f0f1f3;
+    --muted-foreground: #6b7076;
+    --accent: #eef0fa;
+    --accent-foreground: #23262f;
+    --destructive: #b3261e;
+    --border: #e4e6ea;
+    --input: #d8dbe0;
+    --ring: #9a9ea5;
+    --brand: #7f5a6c;
+    --brand-foreground: #ffffff;
+    --success: #1d7a45;
+    --warning: #a16207;
+    --info: #2563eb;
+    --purple: #7c3aed;
+    --panel: #0a0a0b;
+    --chart-1: #7f5a6c;
+    --chart-2: #4ade80;
+    --chart-3: #93c5fd;
+    --chart-4: #facc15;
+    --chart-5: #c084fc;
+    --radius: 0.625rem;
+    --sidebar: #181818;
+    --sidebar-foreground: #a1a1aa;
+    --sidebar-primary: #6b4757;
+    --sidebar-primary-foreground: #ffffff;
+    --sidebar-accent: #262626;
+    --sidebar-accent-foreground: #f4f4f5;
+    --sidebar-border: #2a2a2a;
+    --sidebar-ring: #8b6577;
+}
+
+/* DARK: admin console (neutral surfaces, mauve primary, tinted status) */
+.dark {
+    --background: #111111;
+    --foreground: #f4f4f5;
+    --card: #1a1a1a;
+    --card-foreground: #f4f4f5;
+    --popover: #1c1c1c;
+    --popover-foreground: #f4f4f5;
+    --primary: #6b4757;
+    --primary-foreground: #ffffff;
+    --secondary: #262626;
+    --secondary-foreground: #f4f4f5;
+    --muted: #222222;
+    --muted-foreground: #a1a1aa;
+    --accent: #262626;
+    --accent-foreground: #f4f4f5;
+    --destructive: #f87171;
+    --border: #2a2a2a;
+    --input: #2e2e2e;
+    --ring: #8b6577;
+    --brand: #c9a3b5;
+    --brand-foreground: #111111;
+    --success: #4ade80;
+    --warning: #facc15;
+    --info: #93c5fd;
+    --purple: #c084fc;
+    --panel: #0a0a0b;
+}
+
+@layer base {
+  * {
+    @apply border-border outline-ring/50;
+  }
+  body {
+    @apply bg-background text-foreground antialiased;
+  }
+  button:not(:disabled), [role="button"]:not(:disabled) {
+    cursor: pointer;
+  }
+  html {
+    @apply font-sans;
+  }
+}
+
+@layer utilities {
+  /* Το σκούρο brand panel (login δεξιά, preview στην αρχική) */
+  .bg-brand-panel {
+    background:
+      radial-gradient(60% 45% at 92% 8%, rgb(70 72 140 / 0.38) 0%, transparent 70%),
+      radial-gradient(55% 40% at 8% 100%, rgb(52 54 110 / 0.32) 0%, transparent 70%),
+      var(--panel);
+  }
+
+  /* Hero κάρτα του dashboard */
+  .bg-hero {
+    background:
+      radial-gradient(70% 120% at 0% 0%, rgb(40 46 82 / 0.55) 0%, transparent 60%),
+      linear-gradient(135deg, #161a2a 0%, #17181f 45%, #1a1a1a 100%);
+  }
+}

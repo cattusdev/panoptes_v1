@@ -1,0 +1,489 @@
+<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <resheader name="resmimetype">
+    <value>text/microsoft-resx</value>
+  </resheader>
+  <resheader name="version">
+    <value>2.0</value>
+  </resheader>
+  <resheader name="reader">
+    <value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <resheader name="writer">
+    <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <data name="Choose a language from the list." xml:space="preserve">
+    <value>Επιλέξτε μια γλώσσα από τη λίστα.</value>
+  </data>
+  <data name="Choose one of the available date formats." xml:space="preserve">
+    <value>Επιλέξτε μία από τις διαθέσιμες μορφές ημερομηνίας.</value>
+  </data>
+  <data name="Choose 24-hour or 12-hour." xml:space="preserve">
+    <value>Επιλέξτε 24ωρη ή 12ωρη μορφή.</value>
+  </data>
+  <data name="Choose a time zone from the list." xml:space="preserve">
+    <value>Επιλέξτε μια ζώνη ώρας από τη λίστα.</value>
+  </data>
+  <data name="Enter the address to send the test email to." xml:space="preserve">
+    <value>Συμπληρώστε τη διεύθυνση στην οποία θα σταλεί το δοκιμαστικό email.</value>
+  </data>
+  <data name="Test email from {0}" xml:space="preserve">
+    <value>Δοκιμαστικό email από {0}</value>
+  </data>
+  <data name="Your email settings work" xml:space="preserve">
+    <value>Οι ρυθμίσεις email σας λειτουργούν</value>
+  </data>
+  <data name="This test email was sent from {0} through {1}." xml:space="preserve">
+    <value>Αυτό το δοκιμαστικό email στάλθηκε από την εφαρμογή {0} μέσω του {1}.</value>
+  </data>
+  <data name="The test email wasn't sent" xml:space="preserve">
+    <value>Το δοκιμαστικό email δεν στάλθηκε</value>
+  </data>
+  <data name="Enter the SMTP host." xml:space="preserve">
+    <value>Συμπληρώστε τον SMTP host.</value>
+  </data>
+  <data name="Enter the address emails are sent from." xml:space="preserve">
+    <value>Συμπληρώστε τη διεύθυνση από την οποία στέλνονται τα emails.</value>
+  </data>
+  <data name="Enter a valid email address." xml:space="preserve">
+    <value>Συμπληρώστε μια έγκυρη διεύθυνση email.</value>
+  </data>
+  <data name="The SMTP server rejected the username or password." xml:space="preserve">
+    <value>Ο SMTP server απέρριψε το όνομα χρήστη ή τον κωδικό.</value>
+  </data>
+  <data name="Couldn't set up a secure connection with {0}. Check the security setting and the port." xml:space="preserve">
+    <value>Δεν ήταν δυνατή η ασφαλής σύνδεση με τον {0}. Ελέγξτε τη ρύθμιση ασφάλειας και το port.</value>
+  </data>
+  <data name="Couldn't connect to {0}. Check the host and the port." xml:space="preserve">
+    <value>Δεν ήταν δυνατή η σύνδεση με τον {0}. Ελέγξτε τον host και το port.</value>
+  </data>
+  <data name="{0} didn't answer in time." xml:space="preserve">
+    <value>Ο {0} δεν απάντησε εγκαίρως.</value>
+  </data>
+  <data name="The SMTP server refused the email: {0}" xml:space="preserve">
+    <value>Ο SMTP server απέρριψε το email: {0}</value>
+  </data>
+  <data name="{0} didn't respond like an SMTP server." xml:space="preserve">
+    <value>Ο {0} δεν απάντησε όπως ένας SMTP server.</value>
+  </data>
+  <data name="{0} doesn't support this security setting. Try another one." xml:space="preserve">
+    <value>Ο {0} δεν υποστηρίζει αυτή τη ρύθμιση ασφάλειας. Δοκιμάστε κάποια άλλη.</value>
+  </data>
+  <data name="One of the email addresses isn't valid." xml:space="preserve">
+    <value>Μία από τις διευθύνσεις email δεν είναι έγκυρη.</value>
+  </data>
+  <data name="The connection to {0} was closed unexpectedly." xml:space="preserve">
+    <value>Η σύνδεση με τον {0} έκλεισε απροσδόκητα.</value>
+  </data>
+  <data name="This is already your email address." xml:space="preserve">
+    <value>Αυτή είναι ήδη η διεύθυνση email σας.</value>
+  </data>
+  <data name="This email address is already in use." xml:space="preserve">
+    <value>Αυτή η διεύθυνση email χρησιμοποιείται ήδη.</value>
+  </data>
+  <data name="Your current password is incorrect." xml:space="preserve">
+    <value>Ο τρέχων κωδικός σας είναι λάθος.</value>
+  </data>
+  <data name="That code isn't valid. Check your app and try again." xml:space="preserve">
+    <value>Ο κωδικός δεν είναι έγκυρος. Ελέγξτε την εφαρμογή σας και δοκιμάστε ξανά.</value>
+  </data>
+  <data name="Turn on two-factor authentication first." xml:space="preserve">
+    <value>Ενεργοποιήστε πρώτα τον έλεγχο ταυτότητας δύο παραγόντων (2FA).</value>
+  </data>
+  <data name="Couldn't turn off two-factor authentication." xml:space="preserve">
+    <value>Δεν ήταν δυνατή η απενεργοποίηση του ελέγχου ταυτότητας δύο παραγόντων (2FA).</value>
+  </data>
+  <data name="That photo isn't available. Upload it again." xml:space="preserve">
+    <value>Η φωτογραφία δεν είναι διαθέσιμη. Μεταφορτώστε την ξανά.</value>
+  </data>
+  <data name="Incorrect password." xml:space="preserve">
+    <value>Λάθος κωδικός.</value>
+  </data>
+  <data name="You're the only administrator. Make someone else an administrator before deleting your account." xml:space="preserve">
+    <value>Είστε ο μόνος διαχειριστής. Ορίστε κάποιον άλλον ως διαχειριστή πριν διαγράψετε τον λογαριασμό σας.</value>
+  </data>
+  <data name="Couldn't delete your account." xml:space="preserve">
+    <value>Δεν ήταν δυνατή η διαγραφή του λογαριασμού σας.</value>
+  </data>
+  <data name="This link is invalid or has expired. Request a new one." xml:space="preserve">
+    <value>Ο σύνδεσμος δεν είναι έγκυρος ή έχει λήξει. Ζητήστε νέο.</value>
+  </data>
+  <data name="You don't have enough privileges to manage this user." xml:space="preserve">
+    <value>Δεν έχετε επαρκή δικαιώματα για να διαχειριστείτε αυτόν τον χρήστη.</value>
+  </data>
+  <data name="You cannot assign a role with permissions you don't have." xml:space="preserve">
+    <value>Δεν μπορείτε να αναθέσετε ρόλο με δικαιώματα που δεν έχετε.</value>
+  </data>
+  <data name="You cannot remove the Administrator role from your own account." xml:space="preserve">
+    <value>Δεν μπορείτε να αφαιρέσετε τον ρόλο του Διαχειριστή από τον δικό σας λογαριασμό.</value>
+  </data>
+  <data name="You cannot delete your own account." xml:space="preserve">
+    <value>Δεν μπορείτε να διαγράψετε τον δικό σας λογαριασμό.</value>
+  </data>
+  <data name="You cannot grant permissions you don't have yourself." xml:space="preserve">
+    <value>Δεν μπορείτε να δώσετε δικαιώματα που δεν έχετε οι ίδιοι.</value>
+  </data>
+  <data name="Administrator is a protected system role. It always has every permission and cannot be changed." xml:space="preserve">
+    <value>Ο Διαχειριστής είναι προστατευμένος ρόλος συστήματος. Έχει πάντα όλα τα δικαιώματα και δεν μπορεί να αλλάξει.</value>
+  </data>
+  <data name="You can't change a role you belong to." xml:space="preserve">
+    <value>Δεν μπορείτε να αλλάξετε έναν ρόλο στον οποίο ανήκετε.</value>
+  </data>
+  <data name="This role has permissions you don't have, so you can't change it." xml:space="preserve">
+    <value>Αυτός ο ρόλος έχει δικαιώματα που δεν έχετε, γι' αυτό δεν μπορείτε να τον αλλάξετε.</value>
+  </data>
+  <data name="A role with this name already exists." xml:space="preserve">
+    <value>Υπάρχει ήδη ρόλος με αυτό το όνομα.</value>
+  </data>
+  <data name="You need access to the media library to choose images." xml:space="preserve">
+    <value>Χρειάζεστε πρόσβαση στη βιβλιοθήκη πολυμέσων για να επιλέξετε εικόνες.</value>
+  </data>
+  <data name="The selected image no longer exists." xml:space="preserve">
+    <value>Η εικόνα που επιλέξατε δεν υπάρχει πια.</value>
+  </data>
+  <data name="The logo and favicon must be images." xml:space="preserve">
+    <value>Το λογότυπο και το favicon πρέπει να είναι εικόνες.</value>
+  </data>
+  <data name="“{0}” is used as the app logo. Choose another one in Settings → Branding first." xml:space="preserve">
+    <value>Το «{0}» χρησιμοποιείται ως λογότυπο της εφαρμογής. Επιλέξτε πρώτα άλλο στις Ρυθμίσεις → Ταυτότητα.</value>
+  </data>
+  <data name="“{0}” is used as the favicon. Choose another one in Settings → Branding first." xml:space="preserve">
+    <value>Το «{0}» χρησιμοποιείται ως favicon. Επιλέξτε πρώτα άλλο στις Ρυθμίσεις → Ταυτότητα.</value>
+  </data>
+  <data name="“{0}” is used as the app logo. It must stay public. Choose another one in Settings → Branding first." xml:space="preserve">
+    <value>Το «{0}» χρησιμοποιείται ως λογότυπο της εφαρμογής και πρέπει να μείνει δημόσιο. Επιλέξτε πρώτα άλλο στις Ρυθμίσεις → Ταυτότητα.</value>
+  </data>
+  <data name="“{0}” is used as the favicon. It must stay public. Choose another one in Settings → Branding first." xml:space="preserve">
+    <value>Το «{0}» χρησιμοποιείται ως favicon και πρέπει να μείνει δημόσιο. Επιλέξτε πρώτα άλλο στις Ρυθμίσεις → Ταυτότητα.</value>
+  </data>
+  <data name="You can only edit your own files." xml:space="preserve">
+    <value>Μπορείτε να επεξεργαστείτε μόνο τα δικά σας αρχεία.</value>
+  </data>
+  <data name="The folder no longer exists." xml:space="preserve">
+    <value>Ο φάκελος δεν υπάρχει πια.</value>
+  </data>
+  <data name="You can only move your own files." xml:space="preserve">
+    <value>Μπορείτε να μετακινήσετε μόνο τα δικά σας αρχεία.</value>
+  </data>
+  <data name="You can only delete your own files." xml:space="preserve">
+    <value>Μπορείτε να διαγράψετε μόνο τα δικά σας αρχεία.</value>
+  </data>
+  <data name="You can only restore your own files." xml:space="preserve">
+    <value>Μπορείτε να επαναφέρετε μόνο τα δικά σας αρχεία.</value>
+  </data>
+  <data name="The current version can't be deleted. Restore another version first." xml:space="preserve">
+    <value>Η τρέχουσα έκδοση δεν μπορεί να διαγραφεί. Επαναφέρετε πρώτα άλλη έκδοση.</value>
+  </data>
+  <data name="The parent folder no longer exists." xml:space="preserve">
+    <value>Ο γονικός φάκελος δεν υπάρχει πια.</value>
+  </data>
+  <data name="Folders can be nested up to {0} levels." xml:space="preserve">
+    <value>Οι φάκελοι μπορούν να έχουν έως {0} επίπεδα υποφακέλων.</value>
+  </data>
+  <data name="You can only rename your own folders." xml:space="preserve">
+    <value>Μπορείτε να μετονομάσετε μόνο τους δικούς σας φακέλους.</value>
+  </data>
+  <data name="You can only move your own folders." xml:space="preserve">
+    <value>Μπορείτε να μετακινήσετε μόνο τους δικούς σας φακέλους.</value>
+  </data>
+  <data name="The destination folder no longer exists." xml:space="preserve">
+    <value>Ο φάκελος προορισμού δεν υπάρχει πια.</value>
+  </data>
+  <data name="A folder can't be moved into itself or one of its subfolders." xml:space="preserve">
+    <value>Ένας φάκελος δεν μπορεί να μετακινηθεί μέσα στον εαυτό του ή σε κάποιον υποφάκελό του.</value>
+  </data>
+  <data name="You can only delete your own folders." xml:space="preserve">
+    <value>Μπορείτε να διαγράψετε μόνο τους δικούς σας φακέλους.</value>
+  </data>
+  <data name="The folder isn't empty." xml:space="preserve">
+    <value>Ο φάκελος δεν είναι άδειος.</value>
+  </data>
+  <data name="The folder contains files you can't delete." xml:space="preserve">
+    <value>Ο φάκελος περιέχει αρχεία που δεν μπορείτε να διαγράψετε.</value>
+  </data>
+  <data name="Folder names must be 1–100 characters and can't contain / \ : * ? &quot; &lt; &gt; |" xml:space="preserve">
+    <value>Τα ονόματα φακέλων πρέπει να έχουν 1–100 χαρακτήρες και δεν μπορούν να περιέχουν / \ : * ? " &lt; &gt; |</value>
+  </data>
+  <data name="A folder with this name already exists here." xml:space="preserve">
+    <value>Υπάρχει ήδη φάκελος με αυτό το όνομα εδώ.</value>
+  </data>
+  <data name="Profile photos can't replace library files." xml:space="preserve">
+    <value>Οι φωτογραφίες προφίλ δεν μπορούν να αντικαταστήσουν αρχεία της βιβλιοθήκης.</value>
+  </data>
+  <data name="This kind of upload isn't supported." xml:space="preserve">
+    <value>Αυτό το είδος μεταφόρτωσης δεν υποστηρίζεται.</value>
+  </data>
+  <data name="You can only replace your own files." xml:space="preserve">
+    <value>Μπορείτε να αντικαταστήσετε μόνο τα δικά σας αρχεία.</value>
+  </data>
+  <data name="You don't have permission to upload files." xml:space="preserve">
+    <value>Δεν έχετε δικαίωμα μεταφόρτωσης αρχείων.</value>
+  </data>
+  <data name="Profile photos must be JPG, PNG, GIF or WebP images." xml:space="preserve">
+    <value>Οι φωτογραφίες προφίλ πρέπει να είναι εικόνες JPG, PNG, GIF ή WebP.</value>
+  </data>
+  <data name="The file is empty." xml:space="preserve">
+    <value>Το αρχείο είναι κενό.</value>
+  </data>
+  <data name="The server is running out of storage space. Please contact an administrator." xml:space="preserve">
+    <value>Ο αποθηκευτικός χώρος του server εξαντλείται. Επικοινωνήστε με έναν διαχειριστή.</value>
+  </data>
+  <data name="Missing or invalid Upload-Offset header." xml:space="preserve">
+    <value>Το header Upload-Offset λείπει ή δεν είναι έγκυρο.</value>
+  </data>
+  <data name="The upload is out of sync. It will resume from the last received byte." xml:space="preserve">
+    <value>Η μεταφόρτωση δεν είναι συγχρονισμένη. Θα συνεχιστεί από το τελευταίο byte που ελήφθη.</value>
+  </data>
+  <data name="The file is larger than announced." xml:space="preserve">
+    <value>Το αρχείο είναι μεγαλύτερο από το μέγεθος που δηλώθηκε.</value>
+  </data>
+  <data name="The chunk was incomplete." xml:space="preserve">
+    <value>Το τμήμα του αρχείου δεν ελήφθη ολόκληρο.</value>
+  </data>
+  <data name="The server is busy processing other images. Please try again in a moment." xml:space="preserve">
+    <value>Ο server επεξεργάζεται άλλες εικόνες αυτή τη στιγμή. Δοκιμάστε ξανά σε λίγο.</value>
+  </data>
+  <data name="The file is too large. Images can be up to {0}." xml:space="preserve">
+    <value>Το αρχείο είναι πολύ μεγάλο. Οι εικόνες μπορούν να είναι έως {0}.</value>
+  </data>
+  <data name="The file is too large. Documents can be up to {0}." xml:space="preserve">
+    <value>Το αρχείο είναι πολύ μεγάλο. Τα έγγραφα μπορούν να είναι έως {0}.</value>
+  </data>
+  <data name="The file is too large. Archives can be up to {0}." xml:space="preserve">
+    <value>Το αρχείο είναι πολύ μεγάλο. Τα συμπιεσμένα αρχεία μπορούν να είναι έως {0}.</value>
+  </data>
+  <data name="The file you're replacing no longer exists." xml:space="preserve">
+    <value>Το αρχείο που αντικαθιστάτε δεν υπάρχει πια.</value>
+  </data>
+  <data name="Image can only be replaced with another image." xml:space="preserve">
+    <value>Μια εικόνα μπορεί να αντικατασταθεί μόνο με άλλη εικόνα.</value>
+  </data>
+  <data name="Document can only be replaced with another document." xml:space="preserve">
+    <value>Ένα έγγραφο μπορεί να αντικατασταθεί μόνο με άλλο έγγραφο.</value>
+  </data>
+  <data name="Archive can only be replaced with another archive." xml:space="preserve">
+    <value>Ένα συμπιεσμένο αρχείο μπορεί να αντικατασταθεί μόνο με άλλο συμπιεσμένο αρχείο.</value>
+  </data>
+  <data name="HEIC photos aren't supported. Export the photo as JPEG and try again." xml:space="preserve">
+    <value>Οι φωτογραφίες HEIC δεν υποστηρίζονται. Εξαγάγετε τη φωτογραφία ως JPEG και δοκιμάστε ξανά.</value>
+  </data>
+  <data name="Office files with macros aren't allowed." xml:space="preserve">
+    <value>Δεν επιτρέπονται αρχεία Office με macros.</value>
+  </data>
+  <data name="Old Office formats (.doc, .xls, .ppt) aren't allowed. Save the file as .docx, .xlsx or .pptx." xml:space="preserve">
+    <value>Δεν επιτρέπονται οι παλιές μορφές Office (.doc, .xls, .ppt). Αποθηκεύστε το αρχείο ως .docx, .xlsx ή .pptx.</value>
+  </data>
+  <data name="SVG files aren't allowed." xml:space="preserve">
+    <value>Δεν επιτρέπονται αρχεία SVG.</value>
+  </data>
+  <data name="Files without an extension aren't allowed." xml:space="preserve">
+    <value>Δεν επιτρέπονται αρχεία χωρίς κατάληξη.</value>
+  </data>
+  <data name="This file type (.{0}) isn't allowed." xml:space="preserve">
+    <value>Αυτός ο τύπος αρχείου (.{0}) δεν επιτρέπεται.</value>
+  </data>
+  <data name="The file's content doesn't match its .{0} extension." xml:space="preserve">
+    <value>Το περιεχόμενο του αρχείου δεν αντιστοιχεί στην κατάληξη .{0}.</value>
+  </data>
+  <data name="The archive is damaged or isn't a valid zip file." xml:space="preserve">
+    <value>Το συμπιεσμένο αρχείο είναι κατεστραμμένο ή δεν είναι έγκυρο zip.</value>
+  </data>
+  <data name="The archive has too many files (more than {0:N0})." xml:space="preserve">
+    <value>Το συμπιεσμένο αρχείο περιέχει πάρα πολλά αρχεία (περισσότερα από {0:N0}).</value>
+  </data>
+  <data name="Password-protected archives aren't allowed." xml:space="preserve">
+    <value>Δεν επιτρέπονται συμπιεσμένα αρχεία με κωδικό.</value>
+  </data>
+  <data name="The archive contains unsafe file paths." xml:space="preserve">
+    <value>Το συμπιεσμένο αρχείο περιέχει μη ασφαλείς διαδρομές αρχείων.</value>
+  </data>
+  <data name="The archive expands to an unsafe size." xml:space="preserve">
+    <value>Το συμπιεσμένο αρχείο αποσυμπιέζεται σε μη ασφαλές μέγεθος.</value>
+  </data>
+  <data name="The image couldn't be read. It may be damaged." xml:space="preserve">
+    <value>Δεν ήταν δυνατή η ανάγνωση της εικόνας. Μπορεί να είναι κατεστραμμένη.</value>
+  </data>
+  <data name="The animation has too many frames ({0:N0}). The limit is {1:N0}." xml:space="preserve">
+    <value>Η κινούμενη εικόνα έχει πάρα πολλά καρέ ({0:N0}). Το όριο είναι {1:N0}.</value>
+  </data>
+  <data name="The image is too large ({0:N0} × {1:N0}). The limit is {2:0.#} megapixels." xml:space="preserve">
+    <value>Η εικόνα είναι πολύ μεγάλη ({0:N0} × {1:N0}). Το όριο είναι {2:0.#} megapixels.</value>
+  </data>
+  <data name="The image is too large ({0:N0} × {1:N0}, {2} frames). The limit is {3:0.#} megapixels." xml:space="preserve">
+    <value>Η εικόνα είναι πολύ μεγάλη ({0:N0} × {1:N0}, {2} καρέ). Το όριο είναι {3:0.#} megapixels.</value>
+  </data>
+  <data name="The file isn't a valid SVG image." xml:space="preserve">
+    <value>Το αρχείο δεν είναι έγκυρη εικόνα SVG.</value>
+  </data>
+  <data name="Server error" xml:space="preserve">
+    <value>Σφάλμα server</value>
+  </data>
+  <data name="Something went wrong on our side. Reference: {0}" xml:space="preserve">
+    <value>Κάτι πήγε στραβά από τη μεριά μας. Κωδικός αναφοράς: {0}</value>
+  </data>
+  <data name="Something went wrong" xml:space="preserve">
+    <value>Κάτι πήγε στραβά</value>
+  </data>
+  <data name="An unexpected error occurred on our side. If it keeps happening, contact support with this reference: {0}" xml:space="preserve">
+    <value>Προέκυψε ένα απρόσμενο σφάλμα από τη μεριά μας. Αν συνεχίσει να συμβαίνει, επικοινωνήστε με την υποστήριξη αναφέροντας αυτόν τον κωδικό: {0}</value>
+  </data>
+  <data name="Return home" xml:space="preserve">
+    <value>Επιστροφή στην αρχική</value>
+  </data>
+  <data name="Confirm your email" xml:space="preserve">
+    <value>Επιβεβαιώστε το email σας</value>
+  </data>
+  <data name="Confirm your email address" xml:space="preserve">
+    <value>Επιβεβαιώστε τη διεύθυνση email σας</value>
+  </data>
+  <data name="Thanks for signing up. Confirm your email address to activate your account." xml:space="preserve">
+    <value>Ευχαριστούμε για την εγγραφή σας. Επιβεβαιώστε τη διεύθυνση email σας για να ενεργοποιήσετε τον λογαριασμό σας.</value>
+  </data>
+  <data name="Confirm email" xml:space="preserve">
+    <value>Επιβεβαίωση email</value>
+  </data>
+  <data name="Reset your password" xml:space="preserve">
+    <value>Επαναφέρετε τον κωδικό σας</value>
+  </data>
+  <data name="We received a request to reset your password. If it wasn't you, you can ignore this email." xml:space="preserve">
+    <value>Λάβαμε αίτημα επαναφοράς του κωδικού σας. Αν δεν ήσασταν εσείς, μπορείτε να αγνοήσετε αυτό το email.</value>
+  </data>
+  <data name="Reset password" xml:space="preserve">
+    <value>Επαναφορά κωδικού</value>
+  </data>
+  <data name="Confirm your new email" xml:space="preserve">
+    <value>Επιβεβαιώστε το νέο σας email</value>
+  </data>
+  <data name="Confirm your new email address" xml:space="preserve">
+    <value>Επιβεβαιώστε τη νέα διεύθυνση email σας</value>
+  </data>
+  <data name="Confirm this address to start using it to sign in." xml:space="preserve">
+    <value>Επιβεβαιώστε αυτή τη διεύθυνση για να τη χρησιμοποιείτε στη σύνδεση.</value>
+  </data>
+  <data name="Confirm new email" xml:space="preserve">
+    <value>Επιβεβαίωση νέου email</value>
+  </data>
+  <data name="If the button doesn't work, copy this link: {0}" xml:space="preserve">
+    <value>Αν το κουμπί δεν λειτουργεί, αντιγράψτε αυτόν τον σύνδεσμο: {0}</value>
+  </data>
+  <data name="An unknown failure has occurred." xml:space="preserve">
+    <value>Προέκυψε άγνωστο σφάλμα.</value>
+  </data>
+  <data name="Optimistic concurrency failure, object has been modified." xml:space="preserve">
+    <value>Τα δεδομένα άλλαξαν στο μεταξύ. Ανανεώστε τη σελίδα και δοκιμάστε ξανά.</value>
+  </data>
+  <data name="Invalid token." xml:space="preserve">
+    <value>Μη έγκυρο token.</value>
+  </data>
+  <data name="Recovery code redemption failed." xml:space="preserve">
+    <value>Ο κωδικός ανάκτησης δεν έγινε δεκτός.</value>
+  </data>
+  <data name="A user with this login already exists." xml:space="preserve">
+    <value>Υπάρχει ήδη χρήστης με αυτά τα στοιχεία σύνδεσης.</value>
+  </data>
+  <data name="Username '{0}' is invalid, can only contain letters or digits." xml:space="preserve">
+    <value>Το όνομα χρήστη '{0}' δεν είναι έγκυρο. Μπορεί να περιέχει μόνο γράμματα ή ψηφία.</value>
+  </data>
+  <data name="Email '{0}' is invalid." xml:space="preserve">
+    <value>Το email '{0}' δεν είναι έγκυρο.</value>
+  </data>
+  <data name="Username '{0}' is already taken." xml:space="preserve">
+    <value>Το όνομα χρήστη '{0}' χρησιμοποιείται ήδη.</value>
+  </data>
+  <data name="Email '{0}' is already taken." xml:space="preserve">
+    <value>Το email '{0}' χρησιμοποιείται ήδη.</value>
+  </data>
+  <data name="Role name '{0}' is invalid." xml:space="preserve">
+    <value>Το όνομα ρόλου '{0}' δεν είναι έγκυρο.</value>
+  </data>
+  <data name="Role name '{0}' is already taken." xml:space="preserve">
+    <value>Το όνομα ρόλου '{0}' χρησιμοποιείται ήδη.</value>
+  </data>
+  <data name="User already has a password set." xml:space="preserve">
+    <value>Ο χρήστης έχει ήδη κωδικό.</value>
+  </data>
+  <data name="Lockout is not enabled for this user." xml:space="preserve">
+    <value>Το κλείδωμα δεν είναι ενεργό για αυτόν τον χρήστη.</value>
+  </data>
+  <data name="User already in role '{0}'." xml:space="preserve">
+    <value>Ο χρήστης έχει ήδη τον ρόλο '{0}'.</value>
+  </data>
+  <data name="User is not in role '{0}'." xml:space="preserve">
+    <value>Ο χρήστης δεν έχει τον ρόλο '{0}'.</value>
+  </data>
+  <data name="Passwords must be at least {0} characters." xml:space="preserve">
+    <value>Ο κωδικός πρέπει να έχει τουλάχιστον {0} χαρακτήρες.</value>
+  </data>
+  <data name="Passwords must use at least {0} different characters." xml:space="preserve">
+    <value>Ο κωδικός πρέπει να έχει τουλάχιστον {0} διαφορετικούς χαρακτήρες.</value>
+  </data>
+  <data name="Passwords must have at least one non alphanumeric character." xml:space="preserve">
+    <value>Ο κωδικός πρέπει να έχει τουλάχιστον ένα σύμβολο (χαρακτήρα που δεν είναι γράμμα ή ψηφίο).</value>
+  </data>
+  <data name="Passwords must have at least one digit ('0'-'9')." xml:space="preserve">
+    <value>Ο κωδικός πρέπει να έχει τουλάχιστον ένα ψηφίο ('0'-'9').</value>
+  </data>
+  <data name="Passwords must have at least one lowercase ('a'-'z')." xml:space="preserve">
+    <value>Ο κωδικός πρέπει να έχει τουλάχιστον ένα πεζό γράμμα ('a'-'z').</value>
+  </data>
+  <data name="Passwords must have at least one uppercase ('A'-'Z')." xml:space="preserve">
+    <value>Ο κωδικός πρέπει να έχει τουλάχιστον ένα κεφαλαίο γράμμα ('A'-'Z').</value>
+  </data>
+  <data name="The {0} field is required." xml:space="preserve">
+    <value>Το πεδίο {0} είναι υποχρεωτικό.</value>
+  </data>
+  <data name="The field {0} must be a string with a minimum length of {2} and a maximum length of {1}." xml:space="preserve">
+    <value>Το πεδίο {0} πρέπει να έχει από {2} έως {1} χαρακτήρες.</value>
+  </data>
+  <data name="The field {0} must be a string with a maximum length of {1}." xml:space="preserve">
+    <value>Το πεδίο {0} πρέπει να έχει έως {1} χαρακτήρες.</value>
+  </data>
+  <data name="The field {0} must be a string or array type with a maximum length of '{1}'." xml:space="preserve">
+    <value>Το πεδίο {0} πρέπει να έχει μήκος έως {1}.</value>
+  </data>
+  <data name="The field {0} must be a string or array type with a minimum length of '{1}'." xml:space="preserve">
+    <value>Το πεδίο {0} πρέπει να έχει μήκος τουλάχιστον {1}.</value>
+  </data>
+  <data name="The {0} field is not a valid e-mail address." xml:space="preserve">
+    <value>Το πεδίο {0} δεν είναι έγκυρη διεύθυνση email.</value>
+  </data>
+  <data name="The field {0} must be between {1} and {2}." xml:space="preserve">
+    <value>Το πεδίο {0} πρέπει να είναι από {1} έως {2}.</value>
+  </data>
+  <data name="'{0}' and '{1}' do not match." xml:space="preserve">
+    <value>Τα πεδία '{0}' και '{1}' δεν ταιριάζουν.</value>
+  </data>
+  <data name="The {0} field is not a valid phone number." xml:space="preserve">
+    <value>Το πεδίο {0} δεν είναι έγκυρος αριθμός τηλεφώνου.</value>
+  </data>
+  <data name="The value '{0}' is invalid." xml:space="preserve">
+    <value>Η τιμή '{0}' δεν είναι έγκυρη.</value>
+  </data>
+  <data name="The field {0} must be a number." xml:space="preserve">
+    <value>Το πεδίο {0} πρέπει να είναι αριθμός.</value>
+  </data>
+  <data name="The value '{0}' is not valid for {1}." xml:space="preserve">
+    <value>Η τιμή '{0}' δεν είναι έγκυρη για το πεδίο {1}.</value>
+  </data>
+  <data name="A value is required." xml:space="preserve">
+    <value>Απαιτείται τιμή.</value>
+  </data>
+  <data name="A value for the '{0}' parameter or property was not provided." xml:space="preserve">
+    <value>Δεν δόθηκε τιμή για το '{0}'.</value>
+  </data>
+  <data name="A non-empty request body is required." xml:space="preserve">
+    <value>Το αίτημα δεν μπορεί να είναι κενό.</value>
+  </data>
+  <data name="The value '{0}' is not valid." xml:space="preserve">
+    <value>Η τιμή '{0}' δεν είναι έγκυρη.</value>
+  </data>
+  <data name="The supplied value is invalid." xml:space="preserve">
+    <value>Η τιμή δεν είναι έγκυρη.</value>
+  </data>
+  <data name="The field must be a number." xml:space="preserve">
+    <value>Το πεδίο πρέπει να είναι αριθμός.</value>
+  </data>
+  <data name="The supplied value is invalid for {0}." xml:space="preserve">
+    <value>Η τιμή δεν είναι έγκυρη για το πεδίο {0}.</value>
+  </data>
+</root>
