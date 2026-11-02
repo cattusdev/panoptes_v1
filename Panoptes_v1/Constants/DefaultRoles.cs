@@ -18,15 +18,24 @@
             Permissions.Media.Delete,
         ];
 
+        // Πελάτες: όλοι τους βλέπουν (η δουλειά, τα tickets και τα οικονομικά είναι πάντα για κάποιον πελάτη)
+        private static readonly string[] AllClients =
+        [
+            Permissions.Clients.View,
+            Permissions.Clients.Create,
+            Permissions.Clients.Edit,
+            Permissions.Clients.Archive,
+        ];
+
         // Ο Admin δεν χρειάζεται permissions (περνάει όλα τα policies)
         public static readonly IReadOnlyList<(string Name, IReadOnlyList<string> Permissions)> All =
         [
             (SystemRoles.Admin, []),
             // Τα πάντα εκτός από ρυθμίσεις, διαχείριση χρηστών/ρόλων και (αργότερα) οικονομικές διορθώσεις
-            (Manager, [.. OwnFiles, Permissions.Media.ManageAll, Permissions.Users.View, Permissions.AuditLogs.View]),
-            (Staff, OwnFiles),
-            (Finance, [.. OwnFiles, Permissions.Settings.View, Permissions.Finance.Settings]),
-            (Support, OwnFiles),
+            (Manager, [.. OwnFiles, .. AllClients, Permissions.Media.ManageAll, Permissions.Users.View, Permissions.AuditLogs.View]),
+            (Staff, [.. OwnFiles, Permissions.Clients.View]),
+            (Finance, [.. OwnFiles, Permissions.Clients.View, Permissions.Settings.View, Permissions.Finance.Settings]),
+            (Support, [.. OwnFiles, Permissions.Clients.View]),
         ];
     }
 }

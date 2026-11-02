@@ -337,6 +337,7 @@
         "AuditLogs": "Audit Logs",
         "Media": "Media",
         "Settings": "Settings",
+        "Clients": "Clients",
         "Finance": "Finance"
       },
       "items": {
@@ -366,7 +367,12 @@
           "View": { "label": "View settings", "description": "See settings and their details." },
           "Edit": { "label": "Edit settings", "description": "Change the settings, except Finance." }
         },
-        "Finance": {
+        "Clients": {
+          "View": { "label": "View clients", "description": "See clients, their contacts and history." },
+          "Create": { "label": "Create clients", "description": "Add new clients." },
+          "Edit": { "label": "Edit clients", "description": "Change client details and manage contacts." },
+          "Archive": { "label": "Archive clients", "description": "Archive and unarchive clients. Nothing else changes." }
+        },        "Finance": {
           "Settings": { "label": "Finance settings", "description": "Change the default VAT rate and the date financial tracking starts." }
         }
       }

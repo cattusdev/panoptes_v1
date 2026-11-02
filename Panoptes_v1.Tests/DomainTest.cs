@@ -4,9 +4,14 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
+using Panoptes_v1.Constants;
 using Panoptes_v1.Data;
+using Panoptes_v1.Modules.Collaboration;
+using Panoptes_v1.Modules.Crm;
 using Panoptes_v1.Services;
+using Panoptes_v1.Services.Access;
 using Panoptes_v1.Services.Jobs;
+using Panoptes_v1.Services.Search;
 using Panoptes_v1.Services.Settings;
 
 namespace Panoptes_v1.Tests;
@@ -49,6 +54,12 @@ public abstract class DomainTest
         services.AddScoped<JobProcessor>();
         services.AddScoped<IJobHandler, TestJob>();
 
+        // Τα business modules, όπως στο Program.cs
+        services.AddScoped<IProjectAccess, AdminOnlyProjectAccess>();
+        services.AddScoped<SearchService>();
+        services.AddCollaborationModule();
+        services.AddCrmModule();
+
         _provider = services.BuildServiceProvider(new ServiceProviderOptions { ValidateScopes = true });
     }
 
@@ -84,6 +95,18 @@ public abstract class DomainTest
             TraceIdentifier = traceId,
         };
         return traceId;
+    }
+
+    // Ένας χρήστης με αυτά τα permissions (ή Admin), όπως θα τον έβλεπαν οι services: και για το audit, και για τους
+    // ελέγχους πρόσβασης (IRecordAccess). Επιστρέφει τον χρήστη για τις μεθόδους που τον ζητούν.
+    protected ClaimsPrincipal SignInAs(string userId, params string[] permissions)
+    {
+        SignIn(userId);
+        var claims = new List<Claim> { new(ClaimTypes.NameIdentifier, userId) };
+        claims.AddRange(permissions.Select(p => p == SystemRoles.Admin ? new Claim(ClaimTypes.Role, SystemRoles.Admin) : new Claim("Permission", p)));
+        var user = new ClaimsPrincipal(new ClaimsIdentity(claims, "Test"));
+        _provider.GetRequiredService<IHttpContextAccessor>().HttpContext!.User = user;
+        return user;
     }
 
     protected void SignOut() => _provider.GetRequiredService<IHttpContextAccessor>().HttpContext = null;

@@ -81,6 +81,15 @@ namespace Panoptes_v1.Constants
             public const string Edit = "Permissions.Settings.Edit";
         }
 
+        // Module: Clients (CRM): πελάτες, επαφές και οι σχέσεις τους. Archive χωριστά από το Edit.
+        public static class Clients
+        {
+            public const string View = "Permissions.Clients.View";
+            public const string Create = "Permissions.Clients.Create";
+            public const string Edit = "Permissions.Clients.Edit";
+            public const string Archive = "Permissions.Clients.Archive";
+        }
+
         // Module: Finance. Τα υπόλοιπα (View, Record, Adjust, Expenses) έρχονται με το module των οικονομικών.
         public static class Finance
         {

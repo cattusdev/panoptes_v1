@@ -38,6 +38,13 @@ namespace Panoptes_v1.Data
         {
             base.OnModelCreating(builder);
 
+            // Τα business modules (Modules/*/Configuration): ένα IEntityTypeConfiguration ανά οντότητα
+            builder.ApplyConfigurationsFromAssembly(typeof(ApplicationDbContext).Assembly);
+
+            // Αναζήτηση με ομοιότητα κειμένου (διπλότυπα πελατών, global search)
+            builder.HasPostgresExtension("pg_trgm");
+            builder.HasDbFunction(typeof(Trigram).GetMethod(nameof(Trigram.Similarity))!).HasName("similarity").IsBuiltIn();
+
             builder.Entity<MediaFolder>(folder =>
             {
                 folder.Property(f => f.Name).HasMaxLength(100);

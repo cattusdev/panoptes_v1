@@ -513,4 +513,34 @@
   <data name="Some of the selected jobs can't be retried any more. Reload and try again." xml:space="preserve">
     <value>Κάποιες από τις επιλεγμένες εργασίες δεν μπορούν πια να επαναληφθούν. Ανανεώστε τη σελίδα και δοκιμάστε ξανά.</value>
   </data>
+  <data name="The change wasn&apos;t saved" xml:space="preserve">
+    <value>Η αλλαγή δεν αποθηκεύτηκε</value>
+  </data>
+  <data name="Another client already has this tax ID: {0}." xml:space="preserve">
+    <value>Ο ίδιος ΑΦΜ υπάρχει ήδη σε άλλον πελάτη: {0}.</value>
+  </data>
+  <data name="This person no longer exists." xml:space="preserve">
+    <value>Αυτό το πρόσωπο δεν υπάρχει πια.</value>
+  </data>
+  <data name="{0} is already a contact of this client." xml:space="preserve">
+    <value>Το πρόσωπο {0} είναι ήδη επαφή αυτού του πελάτη.</value>
+  </data>
+  <data name="Choose a person or enter a new one." xml:space="preserve">
+    <value>Επιλέξτε ένα πρόσωπο ή συμπληρώστε ένα νέο.</value>
+  </data>
+  <data name="Enter the client&apos;s name." xml:space="preserve">
+    <value>Συμπληρώστε το όνομα του πελάτη.</value>
+  </data>
+  <data name="&quot;{0}&quot; isn&apos;t a valid email address." xml:space="preserve">
+    <value>Το «{0}» δεν είναι έγκυρη διεύθυνση email.</value>
+  </data>
+  <data name="Use a three-letter currency code, such as EUR." xml:space="preserve">
+    <value>Χρησιμοποιήστε κωδικό νομίσματος τριών γραμμάτων, π.χ. EUR.</value>
+  </data>
+  <data name="Tags can be at most 40 characters long." xml:space="preserve">
+    <value>Κάθε ετικέτα μπορεί να έχει έως 40 χαρακτήρες.</value>
+  </data>
+  <data name="Enter the first name." xml:space="preserve">
+    <value>Συμπληρώστε το όνομα.</value>
+  </data>
 </root>

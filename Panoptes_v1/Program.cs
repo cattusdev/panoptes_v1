@@ -10,6 +10,9 @@ using Panoptes_v1.Services.Media;
 using Panoptes_v1.Services.Settings;
 using Panoptes_v1.Services.Jobs;
 using Panoptes_v1.Services.Access;
+using Panoptes_v1.Services.Search;
+using Panoptes_v1.Modules.Collaboration;
+using Panoptes_v1.Modules.Crm;
 using Panoptes_v1.Api;
 using Microsoft.AspNetCore.DataProtection;
 using Microsoft.AspNetCore.Localization;
@@ -130,6 +133,12 @@ if (builder.Configuration.GetValue<bool>("Diagnostics:EnableTestEndpoints"))
 // --- ΠΡΟΣΒΑΣΗ ΣΕ PROJECTS ---
 // Μέχρι το module των projects: ό,τι ανήκει σε project το βλέπει μόνο ο Admin (fail closed)
 builder.Services.AddScoped<IProjectAccess, AdminOnlyProjectAccess>();
+
+// --- BUSINESS MODULES (Modules/*) ---
+builder.Services.AddScoped<SearchService>();
+builder.Services.AddCollaborationModule();
+builder.Services.AddCrmModule();
+
 builder.Services.AddExceptionHandler<GlobalExceptionHandler>();
 builder.Services.AddProblemDetails();
 

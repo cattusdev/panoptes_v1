@@ -45,6 +45,16 @@ namespace Panoptes_v1.Api
             var items = await query.Skip((page - 1) * pageSize).Take(pageSize).ToListAsync(cancellationToken);
             return new PagedResult<T>(items, total, page, pageSize);
         }
+
+        // Το ίδιο, με projection (Select) μετά την ταξινόμηση: μόνο οι στήλες που χρειάζεται η λίστα
+        public static async Task<PagedResult<TResult>> ToPagedAsync<T, TResult>(this IOrderedQueryable<T> query, ListRequest request,
+            Expression<Func<T, TResult>> select, CancellationToken cancellationToken = default)
+        {
+            var (page, pageSize) = Paging.Normalize(request.Page, request.PageSize);
+            var total = await query.CountAsync(cancellationToken);
+            var items = await query.Skip((page - 1) * pageSize).Take(pageSize).Select(select).ToListAsync(cancellationToken);
+            return new PagedResult<TResult>(items, total, page, pageSize);
+        }
     }
 
     // Αναζήτηση με ILIKE: τα %, _ και \ του χρήστη ψάχνονται ως χαρακτήρες, όχι ως wildcards.

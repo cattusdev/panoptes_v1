@@ -1,9 +1,11 @@
 using System.Reflection;
 using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
 using Panoptes_v1.Data;
+using Panoptes_v1.Services.Access;
 
 namespace Panoptes_v1.Tests.Architecture;
 
@@ -65,5 +67,42 @@ public class ModuleBoundaryTests
             .Distinct();
 
         Assert.That(violations, Is.Empty);
+    }
+
+    // ARCHITECTURE §3.1: κάθε οντότητα ενός module λέει ποιος τη βλέπει: δικό της IRecordAccess<T>,
+    // ή [AccessThrough] προς την εγγραφή στην οποία ανήκει (που έχει IRecordAccess)
+    [Test]
+    public void ModuleEntities_DeclareTheirRecordAccess()
+    {
+        var entities = ModuleEntities();
+        Assert.That(entities, Is.Not.Empty);
+
+        var withAccess = App.GetTypes()
+            .Where(t => !t.IsAbstract && !t.IsInterface)
+            .SelectMany(t => t.GetInterfaces())
+            .Where(i => i.IsGenericType && i.GetGenericTypeDefinition() == typeof(IRecordAccess<>))
+            .Select(i => i.GetGenericArguments()[0])
+            .ToHashSet();
+
+        bool Declared(Type entity) =>
+            withAccess.Contains(entity) ||
+            entity.GetCustomAttribute<AccessThroughAttribute>() is { } through && (through.Owner == null || withAccess.Contains(through.Owner));
+
+        Assert.That(entities.Keys.Where(e => !Declared(e)).Select(e => e.FullName), Is.Empty);
+    }
+
+    // Οι controllers των modules δεν κάνουν queries μόνοι τους: περνούν από τις services του module,
+    // που ξεκινούν από το IRecordAccess (ARCHITECTURE §1.2, §3.4)
+    [Test]
+    public void ModuleControllers_DoNotUseTheDbContext()
+    {
+        var controllers = App.GetTypes()
+            .Where(t => ModuleOf(t) != null && typeof(ControllerBase).IsAssignableFrom(t) && !t.IsAbstract)
+            .ToList();
+        Assert.That(controllers, Is.Not.Empty);
+
+        var usingDb = controllers.Where(t => SignatureTypes(t).Contains(typeof(ApplicationDbContext))).Select(t => t.FullName);
+
+        Assert.That(usingDb, Is.Empty);
     }
 }

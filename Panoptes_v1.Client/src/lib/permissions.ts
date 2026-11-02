@@ -26,6 +26,12 @@ export const Permissions = {
     View: 'Permissions.Settings.View',
     Edit: 'Permissions.Settings.Edit',
   },
+  Clients: {
+    View: 'Permissions.Clients.View',
+    Create: 'Permissions.Clients.Create',
+    Edit: 'Permissions.Clients.Edit',
+    Archive: 'Permissions.Clients.Archive',
+  },
   Finance: {
     Settings: 'Permissions.Finance.Settings',
   },

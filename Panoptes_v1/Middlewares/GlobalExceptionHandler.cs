@@ -5,6 +5,7 @@ using Microsoft.AspNetCore.Localization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Localization;
+using Panoptes_v1.Services;
 using Panoptes_v1.Services.Localization;
 
 namespace Panoptes_v1.Middlewares
@@ -44,6 +45,26 @@ namespace Panoptes_v1.Middlewares
                     Detail = _t["Someone else changed this at the same time. Reload and try again."],
                     Extensions = { ["traceId"] = traceId }
                 }, options: null, contentType: "application/problem+json", cancellationToken);
+                return true;
+            }
+
+            // Επιχειρηματικός κανόνας (π.χ. διπλότυπος ΑΦΜ): μήνυμα για τον χρήστη + σταθερό code για το UI
+            if (exception is BusinessRuleException rule && isApi)
+            {
+                var detail = _t[rule.Message, rule.Arguments].Value;
+                var problem = new ProblemDetails
+                {
+                    Status = rule.StatusCode,
+                    Title = _t["The change wasn't saved"],
+                    Detail = detail,
+                    Extensions = { ["code"] = rule.Code, ["traceId"] = traceId }
+                };
+                if (rule.Field != null)
+                    problem.Extensions["errors"] = new Dictionary<string, string[]> { [rule.Field] = [detail] };
+                if (rule.Details != null)
+                    problem.Extensions["details"] = rule.Details;
+                httpContext.Response.StatusCode = rule.StatusCode;
+                await httpContext.Response.WriteAsJsonAsync(problem, options: null, contentType: "application/problem+json", cancellationToken);
                 return true;
             }
 
