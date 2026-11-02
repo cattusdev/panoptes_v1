@@ -51,6 +51,70 @@
     "noActivity": "No activity recorded yet.",
     "changed": "<user>{{user}}</user><muted> changed </muted><table>{{table}}</table>"
   },
+  "jobs": {
+    "title": "Jobs",
+    "description": "Work the app does in the background, like sending emails. Retry what failed once the cause is fixed.",
+    "search": "Search by type or key",
+    "filterByStatus": "Filter by status",
+    "allStatuses": "All statuses",
+    "filterByType": "Filter by type",
+    "allTypes": "All types",
+    "statusCount": "{{status}} ({{count}})",
+    "status": {
+      "Pending": "Pending",
+      "Running": "Running",
+      "Succeeded": "Succeeded",
+      "Failed": "Failed",
+      "Cancelled": "Cancelled"
+    },
+    "columns": {
+      "job": "Job",
+      "status": "Status",
+      "attempts": "Attempts",
+      "lastError": "Last error",
+      "runAt": "Scheduled",
+      "created": "Created",
+      "details": "Details"
+    },
+    "attemptsOf": "{{attempts}} of {{max}}",
+    "rowLabel": "{{type}} job {{key}}",
+    "failedAlert": {
+      "title_one": "{{count}} job failed",
+      "title_other": "{{count}} jobs failed",
+      "text": "They ran out of attempts. Check the error, fix the cause and retry them.",
+      "show": "Show failed"
+    },
+    "retry": "Retry",
+    "retrySelected": "Retry selected",
+    "retryOnlyFailed": "Only failed or cancelled jobs can be retried.",
+    "retried": "Job queued again",
+    "retriedMany_one": "{{count}} job queued again",
+    "retriedMany_other": "{{count}} jobs queued again",
+    "retriedDescription": "It runs again shortly, with all its attempts.",
+    "cancel": "Cancel job",
+    "cancelled": "Job cancelled",
+    "cancelDialog": {
+      "title": "Cancel this job?",
+      "description": "It won't run. You can still retry it later from this page.",
+      "confirm": "Cancel job"
+    },
+    "detail": {
+      "title": "Job details",
+      "attempts": "Attempts",
+      "runAt": "Scheduled for",
+      "created": "Created",
+      "completed": "Finished",
+      "id": "Job ID",
+      "lastError": "Last error",
+      "payload": "Payload"
+    },
+    "empty": {
+      "title": "No background jobs yet",
+      "description": "Emails and other background work show up here when the app queues them.",
+      "filteredTitle": "No jobs match these filters",
+      "filteredDescription": "Try another status, type or search."
+    }
+  },
   "audit": {
     "title": "Audit logs",
     "description": "Every create, update and delete, with who did it and what changed.",

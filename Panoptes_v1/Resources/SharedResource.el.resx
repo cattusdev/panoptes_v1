@@ -510,4 +510,7 @@
   <data name="Say why the tracking start date changes." xml:space="preserve">
     <value>Γράψτε γιατί αλλάζει η ημερομηνία έναρξης καταγραφής.</value>
   </data>
+  <data name="Some of the selected jobs can't be retried any more. Reload and try again." xml:space="preserve">
+    <value>Κάποιες από τις επιλεγμένες εργασίες δεν μπορούν πια να επαναληφθούν. Ανανεώστε τη σελίδα και δοκιμάστε ξανά.</value>
+  </data>
 </root>

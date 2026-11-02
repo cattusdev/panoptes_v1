@@ -196,3 +196,66 @@ export function useAuditLogs(filters: AuditFilters) {
     placeholderData: keepPreviousData,
   })
 }
+
+// ---------- Background jobs (μόνο Admin) ----------
+export type JobStatus = 'Pending' | 'Running' | 'Succeeded' | 'Failed' | 'Cancelled'
+
+export const jobStatuses: readonly JobStatus[] = ['Failed', 'Pending', 'Running', 'Succeeded', 'Cancelled']
+
+export type JobItem = {
+  id: string
+  type: string
+  idempotencyKey: string
+  status: JobStatus
+  runAt: string
+  attempts: number
+  maxAttempts: number
+  lastError: string | null
+  createdAt: string
+  completedAt: string | null
+  // Μόνο στη λεπτομέρεια (useJob)
+  payload: string | null
+}
+
+export type JobFilters = { search?: string; status?: string; type?: string; sort?: string; page: number; pageSize?: number }
+
+export function useJobs(filters: JobFilters) {
+  return useQuery({
+    queryKey: ['jobs', filters],
+    queryFn: () => api<Paged<JobItem>>(`/api/jobs${toQuery({ ...filters })}`),
+    placeholderData: keepPreviousData,
+  })
+}
+
+export function useJobSummary() {
+  return useQuery({
+    queryKey: ['job-summary'],
+    queryFn: () => api<{ counts: Record<JobStatus, number>; types: string[] }>('/api/jobs/summary'),
+  })
+}
+
+export function useJob(id: string | null) {
+  return useQuery({ queryKey: ['job', id], queryFn: () => api<JobItem>(`/api/jobs/${id}`), enabled: !!id })
+}
+
+function useInvalidateJobs() {
+  const queryClient = useQueryClient()
+  return () => Promise.all([['jobs'], ['job'], ['job-summary']].map((queryKey) => queryClient.invalidateQueries({ queryKey })))
+}
+
+export function useJobAction() {
+  const invalidate = useInvalidateJobs()
+  return useMutation({
+    mutationFn: ({ id, action }: { id: string; action: 'retry' | 'cancel' }) => api<JobItem>(`/api/jobs/${id}/${action}`, { method: 'POST' }),
+    onSuccess: invalidate,
+  })
+}
+
+// Όλες ή καμία (409 αν κάποια δεν είναι πια αποτυχημένη / ακυρωμένη)
+export function useRetryJobs() {
+  const invalidate = useInvalidateJobs()
+  return useMutation({
+    mutationFn: (ids: string[]) => api<{ retried: number }>('/api/jobs/retry', { method: 'POST', body: { ids } }),
+    onSuccess: invalidate,
+  })
+}

@@ -13,6 +13,12 @@ function lazyPage<M>(load: () => Promise<M>, pick: (module: M) => ComponentType)
   return async () => ({ Component: pick(await load()) })
 }
 
+// Μόνο ο Admin (σελίδες χωρίς permission που δίνεται σε ρόλους)
+async function requiresAdmin() {
+  const { RequireAdmin } = await import('@/components/layout/RequirePermission')
+  return { Component: RequireAdmin }
+}
+
 const consoleLayout = () => import('@/components/layout/ConsoleLayout')
 
 // Οι σελίδες που θέλουν permission: χωρίς αυτό, "δεν έχετε πρόσβαση" μέσα στο console (ο server ελέγχει ούτως ή άλλως)
@@ -92,6 +98,11 @@ export const router = createBrowserRouter([
                     ],
                   },
                 ],
+              },
+              {
+                path: 'jobs',
+                lazy: requiresAdmin,
+                children: [{ index: true, lazy: lazyPage(() => import('@/pages/admin/JobsPage'), (m) => m.JobsPage) }],
               },
               {
                 path: 'media',

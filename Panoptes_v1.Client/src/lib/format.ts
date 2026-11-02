@@ -1,13 +1,16 @@
 import i18n, { currentLanguage } from '@/i18n'
 
 // "Just now", "5m ago", "3h ago", "2d ago" (στα ελληνικά "5 λ. πριν" κ.λπ.)
+// Και για το μέλλον ("in 5 min", π.χ. πότε θα τρέξει μια δουλειά): ίδια βήματα, θετικό πρόσημο
 export function timeAgo(isoDate: string) {
   const seconds = (Date.now() - new Date(isoDate).getTime()) / 1000
-  if (seconds < 60) return i18n.t('time.justNow')
+  const elapsed = Math.abs(seconds)
+  if (elapsed < 60) return i18n.t('time.justNow')
+  const sign = seconds < 0 ? 1 : -1
   const format = new Intl.RelativeTimeFormat(currentLanguage(), { style: 'narrow', numeric: 'always' })
-  if (seconds < 3600) return format.format(-Math.floor(seconds / 60), 'minute')
-  if (seconds < 86_400) return format.format(-Math.floor(seconds / 3600), 'hour')
-  return format.format(-Math.floor(seconds / 86_400), 'day')
+  if (elapsed < 3600) return format.format(sign * Math.floor(elapsed / 60), 'minute')
+  if (elapsed < 86_400) return format.format(sign * Math.floor(elapsed / 3600), 'hour')
+  return format.format(sign * Math.floor(elapsed / 86_400), 'day')
 }
 
 export function initials(email: string) {

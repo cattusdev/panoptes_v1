@@ -1,5 +1,5 @@
 import type { ComponentType } from 'react'
-import { House, Images, NotebookText, Settings, Users } from 'lucide-react'
+import { House, Images, NotebookText, ServerCog, Settings, Users } from 'lucide-react'
 import type { Resources } from '@/i18n/locales/en'
 import { canAccessAdmin, hasPermission, type SessionUser } from '@/lib/auth'
 import { Permissions } from '@/lib/permissions'
@@ -15,6 +15,8 @@ export const navGroups: NavGroupId[] = ['overview', 'relationships', 'delivery',
 export type NavRoute = {
   to: string
   permission?: string
+  // Μόνο για τον Admin (σελίδες χωρίς permission, π.χ. Jobs)
+  adminOnly?: boolean
   // Όταν η σελίδα είναι tab του item (π.χ. Roles μέσα στο Users): το όνομά της στο command palette
   label?: NavLabel
 }
@@ -55,11 +57,14 @@ export const navItems: NavItem[] = [
     group: 'administration',
     routes: [{ to: '/admin/audit-logs', permission: Permissions.AuditLogs.View }],
   },
+  { id: 'Jobs', label: 'jobs', icon: ServerCog, group: 'administration', routes: [{ to: '/admin/jobs', adminOnly: true }] },
 ]
 
 export function allowedRoutes(item: NavItem, user: SessionUser | null) {
   if (item.adminArea && !canAccessAdmin(user)) return []
-  return item.routes.filter((route) => !route.permission || hasPermission(user, route.permission))
+  return item.routes.filter(
+    (route) => (!route.adminOnly || !!user?.isAdmin) && (!route.permission || hasPermission(user, route.permission)),
+  )
 }
 
 // Οι ομάδες με τα items που βλέπει ο χρήστης και πού οδηγεί το καθένα (η πρώτη επιτρεπτή σελίδα του)

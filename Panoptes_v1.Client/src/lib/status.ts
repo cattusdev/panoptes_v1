@@ -46,3 +46,11 @@ export function userStatus(user: { isLockedOut: boolean; emailConfirmed: boolean
   if (!user.emailConfirmed) return { key: 'unconfirmed', tone: 'warning' } as const
   return { key: 'active', tone: 'success' } as const
 }
+
+// Δουλειές παρασκηνίου: αποτυχία θέλει ενέργεια, η αναμονή είναι αναμενόμενη (όχι προειδοποίηση)
+export function jobStatusTone(status: string): StatusTone {
+  if (status === 'Failed') return 'danger'
+  if (status === 'Running') return 'info'
+  if (status === 'Succeeded') return 'success'
+  return 'neutral'
+}

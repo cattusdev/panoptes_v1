@@ -11,6 +11,11 @@ export function RequirePermission({ permission }: { permission: string }) {
   return useCan(permission) ? <Outlet /> : <NoAccess />
 }
 
+// Σελίδες μόνο για τον Admin (ο server τις έχει [Authorize(Roles = Admin)])
+export function RequireAdmin() {
+  return useSession().user?.isAdmin ? <Outlet /> : <NoAccess />
+}
+
 export function NoAccess() {
   const { t } = useTranslation()
   const { user } = useSession()

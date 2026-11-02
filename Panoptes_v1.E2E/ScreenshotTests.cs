@@ -1,4 +1,4 @@
-namespace Panoptes_v1.E2E;
+﻿namespace Panoptes_v1.E2E;
 
 // Οπτικός έλεγχος: τρέχει μόνο όταν ζητηθεί ρητά
 //   dotnet test Panoptes_v1.E2E --filter "Category=Screenshots"
@@ -42,6 +42,18 @@ public class ScreenshotTests : E2ETest
         await Capture("/admin/settings/email", "19-settings-email");
         await Page.GetByRole(Microsoft.Playwright.AriaRole.Switch, new() { Name = "Use a custom SMTP server" }).ClickAsync();
         await Shot("19-settings-email-custom", fullPage: true);
+        await Capture("/admin/settings/finance", "19-settings-finance");
+
+        // Jobs: μία που απέτυχε (ειδοποίηση, κόκκινο σφάλμα) και η λεπτομέρειά της
+        var headers = await CsrfHeadersAsync(Page);
+        await Page.APIRequest.PostAsync("/api/test/jobs", new() { DataObject = new { key = "screenshot-failing", failTimes = 5, maxAttempts = 2 }, Headers = headers });
+        await Page.APIRequest.PostAsync("/api/test/jobs", new() { DataObject = new { key = "screenshot-ok" }, Headers = headers });
+        await Page.APIRequest.PostAsync("/api/test/jobs/run", new() { Headers = headers });
+        await Capture("/admin/jobs", "20-jobs");
+        await Page.GetByRole(Microsoft.Playwright.AriaRole.Row, new() { Name = "test.record job test:screenshot-failing" }).ClickAsync();
+        await Page.GetByTestId("job-error").WaitForAsync();
+        await Page.WaitForTimeoutAsync(500); // Το sheet ολοκληρώνει το άνοιγμα
+        await Shot("20-jobs-detail");
 
         await Page.SetViewportSizeAsync(390, 844);
         await Capture("/admin", "17-dashboard-mobile", fullPage: true);
