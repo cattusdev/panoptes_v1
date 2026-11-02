@@ -31,6 +31,11 @@ export function hasPermission(user: SessionUser | null, permission: string) {
   return !!user && user.permissions.includes(permission)
 }
 
+// Για να κρύβουμε κουμπιά/σελίδες: είναι μόνο UX, τον έλεγχο τον κάνει πάντα ο server
+export function useCan(permission: string) {
+  return hasPermission(useSession().user, permission)
+}
+
 // Admin area: Admin ή έστω ένα permission (ίδιος κανόνας με το AdminArea policy του server)
 export function canAccessAdmin(user: SessionUser | null) {
   return !!user && (user.isAdmin || user.permissions.length > 0)

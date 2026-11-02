@@ -40,10 +40,12 @@
     "main": "Main navigation",
     "toggleSidebar": "Toggle sidebar",
     "groups": {
-      "main": "Main",
-      "management": "Management",
-      "content": "Content",
-      "system": "System"
+      "overview": "Overview",
+      "relationships": "Relationships",
+      "delivery": "Delivery",
+      "business": "Business",
+      "workspace": "Workspace",
+      "administration": "Administration"
     },
     "dashboard": "Dashboard",
     "users": "Users",
@@ -57,6 +59,26 @@
     "open": "Account menu",
     "signedInAs": "Signed in as",
     "signOut": "Sign out"
+  },
+  "palette": {
+    "open": "Search or jump to…",
+    "title": "Command palette",
+    "description": "Search for a page or an action",
+    "placeholder": "Search pages and actions…",
+    "empty": "No results found.",
+    "groups": {
+      "pages": "Pages"
+    },
+    "hints": {
+      "navigate": "to navigate",
+      "select": "to open",
+      "close": "to close"
+    }
+  },
+  "noAccess": {
+    "title": "You don't have access to this page",
+    "text": "Your role doesn't include this page. Ask an administrator if you need access.",
+    "home": "Go to dashboard"
   },
   "authLayout": {
     "eyebrow": "Platform administration",

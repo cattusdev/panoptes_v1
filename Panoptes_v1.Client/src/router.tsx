@@ -6,6 +6,7 @@ import { HomeRedirect } from '@/pages/auth/HomeRedirect'
 import { AccessDeniedPage, LockoutPage, NotFoundPage, RouteErrorPage } from '@/pages/auth/StatusPages'
 import { TwoFactorPage } from '@/pages/auth/TwoFactorPage'
 import { BrandingRoot } from '@/components/brand/BrandingRoot'
+import { Permissions } from '@/lib/permissions'
 
 // Το console (admin + account) φορτώνεται μόνο όταν χρειαστεί: το login μένει ελαφρύ
 function lazyPage<M>(load: () => Promise<M>, pick: (module: M) => ComponentType) {
@@ -13,6 +14,14 @@ function lazyPage<M>(load: () => Promise<M>, pick: (module: M) => ComponentType)
 }
 
 const consoleLayout = () => import('@/components/layout/ConsoleLayout')
+
+// Οι σελίδες που θέλουν permission: χωρίς αυτό, "δεν έχετε πρόσβαση" μέσα στο console (ο server ελέγχει ούτως ή άλλως)
+function requires(permission: string) {
+  return async () => {
+    const { RequirePermission } = await import('@/components/layout/RequirePermission')
+    return { Component: () => <RequirePermission permission={permission} /> }
+  }
+}
 
 export const router = createBrowserRouter([
   {
@@ -50,21 +59,44 @@ export const router = createBrowserRouter([
             lazy: lazyPage(consoleLayout, (m) => m.RequireAdminArea),
             children: [
               { index: true, lazy: lazyPage(() => import('@/pages/admin/DashboardPage'), (m) => m.DashboardPage) },
-              { path: 'users', lazy: lazyPage(() => import('@/pages/admin/users/UsersPage'), (m) => m.UsersPage) },
-              { path: 'users/:id', lazy: lazyPage(() => import('@/pages/admin/users/UserDetailPage'), (m) => m.UserDetailPage) },
-              { path: 'roles', lazy: lazyPage(() => import('@/pages/admin/roles/RolesPage'), (m) => m.RolesPage) },
-              { path: 'roles/:id', lazy: lazyPage(() => import('@/pages/admin/roles/RoleDetailPage'), (m) => m.RoleDetailPage) },
-              { path: 'audit-logs', lazy: lazyPage(() => import('@/pages/admin/AuditLogsPage'), (m) => m.AuditLogsPage) },
               {
-                path: 'settings',
-                lazy: lazyPage(() => import('@/pages/admin/settings/SettingsLayout'), (m) => m.SettingsLayout),
+                lazy: requires(Permissions.Users.View),
                 children: [
-                  { index: true, lazy: lazyPage(() => import('@/pages/admin/settings/GeneralSettingsPage'), (m) => m.GeneralSettingsPage) },
-                  { path: 'branding', lazy: lazyPage(() => import('@/pages/admin/settings/BrandingPage'), (m) => m.BrandingPage) },
-                  { path: 'email', lazy: lazyPage(() => import('@/pages/admin/settings/EmailSettingsPage'), (m) => m.EmailSettingsPage) },
+                  { path: 'users', lazy: lazyPage(() => import('@/pages/admin/users/UsersPage'), (m) => m.UsersPage) },
+                  { path: 'users/:id', lazy: lazyPage(() => import('@/pages/admin/users/UserDetailPage'), (m) => m.UserDetailPage) },
                 ],
               },
-              { path: 'media', lazy: lazyPage(() => import('@/pages/admin/media/MediaPage'), (m) => m.MediaPage) },
+              {
+                lazy: requires(Permissions.Roles.View),
+                children: [
+                  { path: 'roles', lazy: lazyPage(() => import('@/pages/admin/roles/RolesPage'), (m) => m.RolesPage) },
+                  { path: 'roles/:id', lazy: lazyPage(() => import('@/pages/admin/roles/RoleDetailPage'), (m) => m.RoleDetailPage) },
+                ],
+              },
+              {
+                path: 'audit-logs',
+                lazy: requires(Permissions.AuditLogs.View),
+                children: [{ index: true, lazy: lazyPage(() => import('@/pages/admin/AuditLogsPage'), (m) => m.AuditLogsPage) }],
+              },
+              {
+                path: 'settings',
+                lazy: requires(Permissions.Settings.View),
+                children: [
+                  {
+                    lazy: lazyPage(() => import('@/pages/admin/settings/SettingsLayout'), (m) => m.SettingsLayout),
+                    children: [
+                      { index: true, lazy: lazyPage(() => import('@/pages/admin/settings/GeneralSettingsPage'), (m) => m.GeneralSettingsPage) },
+                      { path: 'branding', lazy: lazyPage(() => import('@/pages/admin/settings/BrandingPage'), (m) => m.BrandingPage) },
+                      { path: 'email', lazy: lazyPage(() => import('@/pages/admin/settings/EmailSettingsPage'), (m) => m.EmailSettingsPage) },
+                    ],
+                  },
+                ],
+              },
+              {
+                path: 'media',
+                lazy: requires(Permissions.Media.View),
+                children: [{ index: true, lazy: lazyPage(() => import('@/pages/admin/media/MediaPage'), (m) => m.MediaPage) }],
+              },
               // Μόνο με τα test endpoints (E2E): δοκιμή των κοινών components
               { path: 'dev/kit', lazy: lazyPage(() => import('@/pages/admin/dev/KitPage'), (m) => m.KitPage) },
               { path: '*', element: <NotFoundPage /> },

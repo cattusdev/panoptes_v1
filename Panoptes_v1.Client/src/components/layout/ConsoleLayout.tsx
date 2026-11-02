@@ -3,6 +3,7 @@ import { useTranslation } from 'react-i18next'
 import { Navigate, Outlet, useLocation } from 'react-router'
 import { Loader2, PanelLeft } from 'lucide-react'
 import { AdminSidebar } from '@/components/layout/AdminSidebar'
+import { CommandPalette } from '@/components/layout/CommandPalette'
 import { UserMenu } from '@/components/layout/UserMenu'
 import { Button } from '@/components/ui/button'
 import { Toaster } from '@/components/ui/sonner'
@@ -68,9 +69,12 @@ export function ConsoleLayout() {
 
       <div className={cn('pr-2.5 pl-2.5 transition-[padding] duration-250', expanded ? 'md:pl-[268px]' : 'md:pl-[84px]')}>
         <header className="sticky top-2.5 z-20 mt-2.5 flex h-15 items-center justify-between rounded-[14px] border border-border bg-[#1c1c1c] pr-3.5 pl-2.5">
-          <Button variant="ghost" size="icon" onClick={toggleSidebar} aria-label={t('nav.toggleSidebar')}>
-            <PanelLeft className="size-[18px] text-muted-foreground" />
-          </Button>
+          <div className="flex items-center gap-2">
+            <Button variant="ghost" size="icon" onClick={toggleSidebar} aria-label={t('nav.toggleSidebar')}>
+              <PanelLeft className="size-[18px] text-muted-foreground" />
+            </Button>
+            <CommandPalette />
+          </div>
           <UserMenu />
         </header>
 
