@@ -1,6 +1,6 @@
 # Hankatt Operations — Planning Pack
 
-**Status:** Gate 1 (read-only boilerplate audit) delivered, awaiting review. **No implementation is authorized** until Gates 1–3 are approved (see `IMPLEMENTATION-ROADMAP.md`).
+**Status:** Gates 1–3 approved on 2026-11-02 (audit, architecture, screen briefs). Implementation proceeds slice by slice per `ARCHITECTURE.md` §17.
 
 This pack documents the agreed functional scope and the gated delivery process for building Hankatt Operations on the Panoptes v1 boilerplate.
 
@@ -21,8 +21,8 @@ This pack documents the agreed functional scope and the gated delivery process f
 | `SCREEN-PLANNING.md` | Preliminary navigation, priority screens, UI review specifications |
 | `IMPLEMENTATION-ROADMAP.md` | Ordered discovery/design/implementation milestones and gates |
 | `BOILERPLATE-AUDIT-REPORT.md` | Gate 1: evidence-based capability/reuse matrix, risks, adoption path |
-| `ARCHITECTURE.md` | Gate 2: architecture and domain design proposal (pending) |
-| `ux/` | Gate 3: screen briefs for Dashboard, Client 360°, onboarding wizard (pending) |
+| `ARCHITECTURE.md` | Gate 2: architecture and domain design proposal (approved 2026-11-02) |
+| `ux/` | Gate 3: screen briefs for Dashboard, Client 360°, onboarding wizard (approved 2026-11-02) |
 
 The original agent prompts (`INIT-PROMPT`, `BOILERPLATE-AUDIT`) were not part of the pack as received; the audit followed the roadmap's Gate 1 description instead.
 
