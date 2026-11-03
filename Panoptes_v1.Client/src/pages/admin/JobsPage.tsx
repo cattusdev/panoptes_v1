@@ -193,7 +193,7 @@ export function JobsPage() {
       )}
 
       <Sheet open={!!selectedId} onOpenChange={(open) => !open && setSelectedId(null)}>
-        <SheetContent className="w-full gap-0 sm:max-w-xl">{selectedId && <JobDetail id={selectedId} />}</SheetContent>
+        <SheetContent className="w-full gap-0 data-[side=right]:sm:max-w-xl">{selectedId && <JobDetail id={selectedId} />}</SheetContent>
       </Sheet>
     </>
   )

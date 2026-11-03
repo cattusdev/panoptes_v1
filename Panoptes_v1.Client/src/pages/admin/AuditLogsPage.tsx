@@ -121,7 +121,7 @@ export function AuditLogsPage() {
       )}
 
       <Sheet open={!!selected} onOpenChange={(open) => !open && setSelected(null)}>
-        <SheetContent className="w-full gap-0 sm:max-w-xl">
+        <SheetContent className="w-full gap-0 data-[side=right]:sm:max-w-xl">
           {selected && <AuditDetail log={selected} />}
         </SheetContent>
       </Sheet>

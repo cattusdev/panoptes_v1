@@ -57,4 +57,5 @@ The tests need PostgreSQL and the connection string in user secrets. They also h
 - **Audit:** code without an HTTP request wraps its work in `AuditContext.Use("<area>:<what>")`. Don't use `ExecuteUpdate`/`ExecuteDelete` on audited tables. New mutable entities get a `RowVersion` (`IsRowVersion()`).
 - **Running the tests while the app runs:** `dotnet test Panoptes_v1.E2E -c Release` (or `Panoptes_v1.Tests -c Release`) builds to `bin/Release`, so it doesn't hit the locked Debug build.
 - **Search:** `EF.Functions.ILike(x, Like.Contains(term), Like.EscapeCharacter)`. Without the third argument Npgsql writes `ESCAPE ''` and a search for `50%` finds nothing (an architecture test checks this).
+- **Sheet width:** shadcn's `SheetContent` sets `data-[side=right]:sm:max-w-sm`, which beats a plain `sm:max-w-xl`. Widen a side sheet with `data-[side=right]:sm:max-w-xl`, or it stays 384 px and squeezes the form.
 - **Git:** commit or push only when the user asks.

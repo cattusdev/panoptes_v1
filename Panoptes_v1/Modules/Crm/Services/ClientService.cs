@@ -361,7 +361,18 @@ namespace Panoptes_v1.Modules.Crm.Services
         private static void Apply(Client client, ClientRequest request)
         {
             client.Kind = request.Kind!.Value;
-            client.DisplayName = request.DisplayName.Trim();
+            if (client.Kind == ClientKind.Individual)
+            {
+                client.FirstName = Clean(request.FirstName) ?? throw Invalid(nameof(ClientRequest.FirstName), "Enter the first name.");
+                client.LastName = Clean(request.LastName) ?? throw Invalid(nameof(ClientRequest.LastName), "Enter the last name.");
+                client.DisplayName = FullName(client.FirstName, client.LastName);
+            }
+            else
+            {
+                client.FirstName = null;
+                client.LastName = null;
+                client.DisplayName = Clean(request.DisplayName) ?? throw Invalid(nameof(ClientRequest.DisplayName), "Enter the client's name.");
+            }
             client.LegalName = Clean(request.LegalName);
             client.TaxId = Clean(request.TaxId);
             client.TaxIdNormalized = CrmMatching.TaxId(request.TaxId);
@@ -389,8 +400,9 @@ namespace Panoptes_v1.Modules.Crm.Services
             client.MatchPhones = CrmMatching.Phones(client.ContactMethods);
             client.Notes = Clean(request.Notes);
 
-            if (client.DisplayName.Length == 0)
-                throw Invalid(nameof(ClientRequest.DisplayName), "Enter the client's name.");
+            // Ένας πελάτης χωρίς τρόπο επικοινωνίας δεν βοηθά κανέναν
+            if (!client.ContactMethods.Any(m => m.Kind is ContactMethodKind.Email or ContactMethodKind.Phone or ContactMethodKind.Mobile))
+                throw Invalid(nameof(ClientRequest.ContactMethods), "Add at least one email or phone number.");
         }
 
         internal static List<ContactMethod> ToContactMethods(IEnumerable<ContactMethodRequest> requests, bool validate)
@@ -399,9 +411,19 @@ namespace Panoptes_v1.Modules.Crm.Services
                 .Where(m => m.Kind != null && !string.IsNullOrWhiteSpace(m.Value))
                 .Select(m => new ContactMethod { Kind = m.Kind!.Value, Value = m.Value.Trim(), Label = Clean(m.Label) })
                 .ToList();
-            if (validate && methods.FirstOrDefault(m => m.Kind == ContactMethodKind.Email && !new EmailAddressAttribute().IsValid(m.Value)) is { } invalid)
-                throw Invalid(nameof(ClientRequest.ContactMethods), "\"{0}\" isn't a valid email address.", invalid.Value);
-            return methods;
+            if (!validate) return methods;
+            // Email έγκυρο· τηλέφωνα έγκυρα για τη χώρα τους και αποθηκευμένα σε E.164
+            return methods.Select(m => m.Kind switch
+            {
+                ContactMethodKind.Email when !new EmailAddressAttribute().IsValid(m.Value) =>
+                    throw Invalid(nameof(ClientRequest.ContactMethods), "\"{0}\" isn't a valid email address.", m.Value),
+                ContactMethodKind.Phone or ContactMethodKind.Mobile => m with
+                {
+                    Value = Phones.ToE164(m.Value)
+                        ?? throw Invalid(nameof(ClientRequest.ContactMethods), "\"{0}\" isn't a valid phone number. Check the country code and the number.", m.Value),
+                },
+                _ => m,
+            }).ToList();
         }
 
         [GeneratedRegex("^[A-Z]{3}$")]

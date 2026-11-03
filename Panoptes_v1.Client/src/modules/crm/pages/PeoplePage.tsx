@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
+import { formatPhone } from '@/lib/phone'
 import { Link, useSearchParams } from 'react-router'
 import { Contact, Pencil, Plus, Star } from 'lucide-react'
 import { SearchInput, TableEmpty } from '@/components/admin/Common'
@@ -55,7 +56,7 @@ export function PeoplePage() {
       key: 'phone',
       header: t('people.columns.phone'),
       label: t('people.columns.phone'),
-      cell: (p) => <span className="text-sm text-muted-foreground">{p.phone ?? '—'}</span>,
+      cell: (p) => <span className="text-sm text-muted-foreground">{p.phone ? formatPhone(p.phone) : '—'}</span>,
     },
     {
       key: 'clients',
@@ -124,7 +125,7 @@ export function PeoplePage() {
       )}
 
       <Sheet open={!!selectedId} onOpenChange={(open) => !open && select(null)}>
-        <SheetContent className="w-full gap-0 sm:max-w-md">{selectedId && <PersonDetail id={selectedId} />}</SheetContent>
+        <SheetContent className="w-full gap-0 data-[side=right]:sm:max-w-md">{selectedId && <PersonDetail id={selectedId} />}</SheetContent>
       </Sheet>
 
       <PersonFormDialog open={createOpen} onOpenChange={setCreateOpen} onSaved={(person) => select(person.id)} />

@@ -22,7 +22,7 @@ public class CrmTests : E2ETest
             displayName = name,
             taxId,
             duplicateReason,
-            contactMethods = Array.Empty<object>(),
+            contactMethods = new[] { new { kind = "Email", value = $"{Guid.NewGuid():N}@example.com" } },
             addresses = Array.Empty<object>(),
             tags = Array.Empty<string>(),
         });
@@ -49,7 +49,7 @@ public class CrmTests : E2ETest
         await Sheet.GetByLabel("Name", new() { Exact = true }).FillAsync(first);
         await Sheet.GetByLabel("Legal name").FillAsync($"{first} Μονοπρόσωπη ΙΚΕ");
         await Sheet.GetByLabel("Tax ID (ΑΦΜ)").FillAsync(taxId);
-        await Sheet.GetByLabel("Email, number or address").First.FillAsync("info@beta.example");
+        await Sheet.GetByLabel("Email address").FillAsync("info@beta.example");
         await Sheet.GetByRole(AriaRole.Button, new() { Name = "Create client" }).ClickAsync();
 
         await Expect(Page).ToHaveURLAsync(new Regex(@"/clients/[0-9a-f-]{36}$"));
@@ -66,6 +66,7 @@ public class CrmTests : E2ETest
         var second = Unique("Beta Branch");
         await Sheet.GetByLabel("Name", new() { Exact = true }).FillAsync(second);
         await Sheet.GetByLabel("Tax ID (ΑΦΜ)").FillAsync($"EL {taxId}");
+        await Sheet.GetByLabel("Phone number").FillAsync("210 555 0199");
         var warnings = Sheet.GetByTestId("client-duplicates");
         await Expect(warnings).ToContainTextAsync("Another client has this tax ID");
         await Expect(warnings.GetByRole(AriaRole.Link, new() { Name = first })).ToBeVisibleAsync();
@@ -82,7 +83,13 @@ public class CrmTests : E2ETest
         await Expect(Page.GetByText("“Branch billed separately”", new() { Exact = false })).ToBeVisibleAsync();
 
         // Το API λέει το ίδιο, με σταθερό code για το UI
-        var refused = await ApiAsync("POST", "/api/crm/clients", new { kind = "Organization", displayName = Unique("Gamma"), taxId });
+        var refused = await ApiAsync("POST", "/api/crm/clients", new
+        {
+            kind = "Organization",
+            displayName = Unique("Gamma"),
+            taxId,
+            contactMethods = new[] { new { kind = "Email", value = "info@gamma.example" } },
+        });
         Assert.That(refused.Status, Is.EqualTo(409));
         var problem = (await refused.JsonAsync())!.Value;
         Assert.That(problem.GetProperty("code").GetString(), Is.EqualTo("crm.duplicateTaxId"));
@@ -99,12 +106,50 @@ public class CrmTests : E2ETest
         await Page.GotoAsync("/clients");
         await Page.GetByRole(AriaRole.Button, new() { Name = "New client" }).ClickAsync();
         await Sheet.GetByLabel("Name", new() { Exact = true }).FillAsync($"{name} SA");
+        await Sheet.GetByLabel("Email address").FillAsync($"{Guid.NewGuid():N}@northwind.example");
         var warnings = Sheet.GetByTestId("client-duplicates");
         await Expect(warnings).ToContainTextAsync("Similar clients already exist");
         await Expect(warnings).ToContainTextAsync("similar name");
 
         await Sheet.GetByRole(AriaRole.Button, new() { Name = "Create client" }).ClickAsync();
         await Expect(Page.GetByRole(AriaRole.Heading, new() { Name = $"{name} SA", Level = 1 })).ToBeVisibleAsync();
+    }
+
+    // Ιδιώτης: όνομα και επώνυμο. Τηλέφωνο με κωδικό χώρας (Ελλάδα προεπιλογή), ελεγμένο με το libphonenumber·
+    // χωρίς email ή τηλέφωνο ο πελάτης δεν αποθηκεύεται.
+    [Test]
+    public async Task NewIndividualClient_NeedsAFullName_AndAValidEmailOrPhone()
+    {
+        await LoginAsync(TestData.ClientsManager);
+        var lastName = Unique("Papadopoulou");
+        await Page.GotoAsync("/clients");
+        await Page.GetByRole(AriaRole.Button, new() { Name = "New client" }).ClickAsync();
+        await Sheet.GetByText("Individual", new() { Exact = true }).ClickAsync();
+        await Sheet.GetByLabel("First name").FillAsync("Maria");
+        await Sheet.GetByLabel("Last name").FillAsync(lastName);
+
+        // Η τιμή του email έχει χώρο (το panel την έστριβε σε λίγα pixel και το email γραφόταν στην ετικέτα)
+        var emailBox = await Sheet.GetByLabel("Email address").BoundingBoxAsync();
+        Assert.That(emailBox!.Width, Is.GreaterThan(150));
+
+        await Sheet.GetByRole(AriaRole.Button, new() { Name = "Create client" }).ClickAsync();
+        await Expect(Sheet.GetByText("Add at least one email or phone number.")).ToBeVisibleAsync();
+
+        await Expect(Sheet.GetByRole(AriaRole.Button, new() { Name = "Country code: Greece (+30)" })).ToBeVisibleAsync();
+        await Sheet.GetByLabel("Phone number").FillAsync("210 12");
+        await Sheet.GetByRole(AriaRole.Button, new() { Name = "Create client" }).ClickAsync();
+        await Expect(Sheet.GetByText("Enter a valid phone number. Check the country code.")).ToBeVisibleAsync();
+
+        await Sheet.GetByLabel("Phone number").FillAsync("2101234567");
+        await Sheet.GetByRole(AriaRole.Button, new() { Name = "Create client" }).ClickAsync();
+
+        await Expect(Page.GetByRole(AriaRole.Heading, new() { Name = $"Maria {lastName}", Level = 1 })).ToBeVisibleAsync();
+        var id = Regex.Match(Page.Url, "/clients/([0-9a-f-]{36})").Groups[1].Value;
+        var client = await GetJsonAsync($"/api/crm/clients/{id}");
+        Assert.That(client.GetProperty("firstName").GetString(), Is.EqualTo("Maria"));
+        Assert.That(client.GetProperty("lastName").GetString(), Is.EqualTo(lastName));
+        Assert.That(client.GetProperty("contactMethods")[0].GetProperty("value").GetString(), Is.EqualTo("+302101234567"));
+        await Expect(Page.GetByRole(AriaRole.Link, new() { Name = "Phone: +30 21 0123 4567" })).ToBeVisibleAsync();
     }
 
     // CRM-01/02: ένα πρόσωπο σε δύο πελάτες. Κάθε πελάτης δείχνει τον άλλον μόνο μέσω της επαφής ("Also contact for").
@@ -221,6 +266,7 @@ public class CrmTests : E2ETest
         {
             kind = "Organization",
             displayName = "Overwritten",
+            contactMethods = new[] { new { kind = "Email", value = "info@overwritten.example" } },
             version = client.GetProperty("version").GetUInt32(),
         });
         Assert.That(stale.Status, Is.EqualTo(409));

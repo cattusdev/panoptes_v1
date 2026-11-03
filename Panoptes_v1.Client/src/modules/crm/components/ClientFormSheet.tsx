@@ -18,7 +18,8 @@ import { Textarea } from '@/components/ui/textarea'
 import { ToggleGroup, ToggleGroupItem } from '@/components/ui/toggle-group'
 import { useDebouncedValue } from '@/hooks/use-debounced-value'
 import { ApiError, problemMessage } from '@/lib/api'
-import { applyServerErrors, schemas, useZodForm } from '@/lib/forms'
+import i18n from '@/i18n'
+import { applyServerErrors, useZodForm } from '@/lib/forms'
 import {
   duplicateTaxIdMatches,
   useClientDuplicates,
@@ -29,13 +30,24 @@ import {
   type ClientInput,
   type ClientMatch,
 } from '../api'
-import { addressSchema, contactMethodSchema, fromAddresses, fromContactMethods, refineContactDetails, toAddresses, toContactMethods } from '../forms'
+import {
+  addressSchema,
+  contactMethodSchema,
+  fromAddresses,
+  fromContactMethods,
+  refineContactDetails,
+  refineEmailOrPhone,
+  toAddresses,
+  toContactMethods,
+} from '../forms'
 import { AddressesField, ContactMethodsField } from './ContactFields'
 
 const schema = z
   .object({
     kind: z.enum(['Organization', 'Individual']),
-    displayName: schemas.text().max(200),
+    displayName: z.string().trim().max(200),
+    firstName: z.string().trim().max(100),
+    lastName: z.string().trim().max(100),
     legalName: z.string().trim().max(300),
     taxId: z.string().trim().max(30),
     taxOffice: z.string().trim().max(100),
@@ -49,20 +61,36 @@ const schema = z
     addresses: z.array(addressSchema),
     notes: z.string().trim().max(4000),
   })
-  .superRefine(refineContactDetails)
+  .superRefine((values, ctx) => {
+    // Εταιρεία: ένα όνομα. Ιδιώτης: όνομα και επώνυμο.
+    const required = (field: 'displayName' | 'firstName' | 'lastName') => {
+      if (!values[field].trim()) ctx.addIssue({ code: 'custom', path: [field], message: i18n.t('validation.required') })
+    }
+    if (values.kind === 'Individual') {
+      required('firstName')
+      required('lastName')
+    } else required('displayName')
+    refineContactDetails(values, ctx)
+    refineEmailOrPhone(values, ctx)
+  })
 
 type Values = z.input<typeof schema>
 
 const empty: Values = {
   kind: 'Organization',
   displayName: '',
+  firstName: '',
+  lastName: '',
   legalName: '',
   taxId: '',
   taxOffice: '',
   status: 'Active',
   defaultCurrency: 'EUR',
   tags: [],
-  contactMethods: [{ kind: 'Email', value: '', label: '' }],
+  contactMethods: [
+    { kind: 'Email', value: '', label: '' },
+    { kind: 'Phone', value: '', label: '' },
+  ],
   addresses: [],
   notes: '',
 }
@@ -71,6 +99,9 @@ function toValues(client: Client): Values {
   return {
     kind: client.kind,
     displayName: client.displayName,
+    // Ιδιώτης από πριν υπάρξουν όνομα/επώνυμο: το όνομά του στο "Όνομα", για να συμπληρωθεί το επώνυμο
+    firstName: client.firstName ?? (client.kind === 'Individual' ? client.displayName : ''),
+    lastName: client.lastName ?? '',
     legalName: client.legalName ?? '',
     taxId: client.taxId ?? '',
     taxOffice: client.taxOffice ?? '',
@@ -89,7 +120,7 @@ export function ClientFormSheet({ open, onOpenChange, client }: { open: boolean;
   const { t } = useTranslation('crm')
   return (
     <Sheet open={open} onOpenChange={onOpenChange}>
-      <SheetContent className="w-full gap-0 sm:max-w-xl">
+      <SheetContent className="w-full gap-0 data-[side=right]:sm:max-w-xl">
         <SheetHeader className="border-b">
           <SheetTitle>{client ? t('form.editTitle') : t('form.createTitle')}</SheetTitle>
           <SheetDescription>{client ? t('form.editDescription') : t('form.createDescription')}</SheetDescription>
@@ -113,7 +144,16 @@ function ClientForm({ client, onDone }: { client?: Client; onDone: () => void })
   const [reason, setReason] = useState('')
   const [reasonError, setReasonError] = useState(false)
 
-  const [displayName, legalName, taxId, contactMethods] = form.watch(['displayName', 'legalName', 'taxId', 'contactMethods'])
+  const [kind, typedName, firstName, lastName, legalName, taxId, contactMethods] = form.watch([
+    'kind',
+    'displayName',
+    'firstName',
+    'lastName',
+    'legalName',
+    'taxId',
+    'contactMethods',
+  ])
+  const displayName = kind === 'Individual' ? `${firstName.trim()} ${lastName.trim()}` : typedName
   // Άλλαξε ο ΑΦΜ μετά τη σύγκρουση: δεν ισχύει πια
   const taxIdConflict = conflict && conflict.taxId === taxId.trim() ? conflict.matches : null
   const checked = useDebouncedValue(
@@ -132,7 +172,9 @@ function ClientForm({ client, onDone }: { client?: Client; onDone: () => void })
     }
     const input: ClientInput = {
       kind: values.kind,
-      displayName: values.displayName,
+      displayName: values.kind === 'Organization' ? values.displayName : null,
+      firstName: values.kind === 'Individual' ? values.firstName : null,
+      lastName: values.kind === 'Individual' ? values.lastName : null,
       legalName: values.legalName || null,
       taxId: values.taxId || null,
       taxOffice: values.taxOffice || null,
@@ -198,9 +240,20 @@ function ClientForm({ client, onDone }: { client?: Client; onDone: () => void })
             )}
           </FormField>
 
-          <FormField control={form.control} name="displayName" label={t('form.displayName')} description={t('form.displayNameHint')}>
-            {(field) => <Input autoFocus={!client} maxLength={200} {...field} />}
-          </FormField>
+          {kind === 'Individual' ? (
+            <div className="grid gap-4 sm:grid-cols-2">
+              <FormField control={form.control} name="firstName" label={t('form.firstName')}>
+                {(field) => <Input autoFocus={!client} maxLength={100} autoComplete="off" {...field} />}
+              </FormField>
+              <FormField control={form.control} name="lastName" label={t('form.lastName')}>
+                {(field) => <Input maxLength={100} autoComplete="off" {...field} />}
+              </FormField>
+            </div>
+          ) : (
+            <FormField control={form.control} name="displayName" label={t('form.displayName')} description={t('form.displayNameHint')}>
+              {(field) => <Input autoFocus={!client} maxLength={200} {...field} />}
+            </FormField>
+          )}
 
           <FormField control={form.control} name="legalName" label={t('form.legalName')}>
             {(field) => <Input maxLength={300} {...field} />}

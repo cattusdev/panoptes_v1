@@ -191,6 +191,8 @@ namespace Panoptes_v1.Modules.Crm.Api
             client.Ref,
             client.Kind,
             client.DisplayName,
+            client.FirstName,
+            client.LastName,
             client.LegalName,
             client.TaxId,
             client.TaxOffice,

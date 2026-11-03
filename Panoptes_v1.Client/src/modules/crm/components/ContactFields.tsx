@@ -1,7 +1,8 @@
 import { useTranslation } from 'react-i18next'
-import { Controller, useFieldArray, type ArrayPath, type Control, type FieldArray, type FieldValues, type Path } from 'react-hook-form'
+import { Controller, useFieldArray, useFormState, useWatch, type ArrayPath, type Control, type FieldArray, type FieldValues, type Path } from 'react-hook-form'
 import { Plus, Trash2 } from 'lucide-react'
 import { OptionSelect } from '@/components/admin/OptionSelect'
+import { PhoneInput } from '@/components/form/PhoneInput'
 import { Button } from '@/components/ui/button'
 import { FieldError, FieldLegend, FieldSet } from '@/components/ui/field'
 import { Input } from '@/components/ui/input'
@@ -14,65 +15,83 @@ import type { AddressValues, ContactMethodValues } from '../forms'
 type WithContactMethods = { contactMethods: ContactMethodValues[] }
 type WithAddresses = { addresses: AddressValues[] }
 
-// Email / τηλέφωνα / site: είδος, τιμή, προαιρετική ετικέτα ("Λογιστήριο")
+// Email / τηλέφωνα / site: είδος, τιμή, προαιρετική ετικέτα ("Λογιστήριο"). Η τιμή παίρνει πάντα τον περισσότερο χώρο:
+// σε στενό panel η ετικέτα πάει κάτω από την τιμή (container query, όχι το πλάτος της οθόνης). Τα τηλέφωνα με PhoneInput.
 export function ContactMethodsField<T extends FieldValues & WithContactMethods>({ control, idPrefix }: { control: Control<T>; idPrefix: string }) {
   const { t } = useTranslation('crm')
   const { fields, append, remove } = useFieldArray({ control, name: 'contactMethods' as ArrayPath<T> })
+  const kinds = (useWatch({ control, name: 'contactMethods' as Path<T> }) as ContactMethodValues[] | undefined)?.map((m) => m.kind) ?? []
+  const { errors } = useFormState({ control, name: 'contactMethods' as Path<T> })
+  const listError = errors.contactMethods as { message?: string; root?: { message?: string } } | undefined
+  const listMessage = listError?.message ?? listError?.root?.message
   const kindOptions = contactMethodKinds.map((kind) => ({ value: kind, label: t(`contactKinds.${kind}`) }))
 
   return (
-    <FieldSet>
+    <FieldSet data-invalid={!!listMessage || undefined}>
       <FieldLegend variant="label">{t('form.contactMethods')}</FieldLegend>
-      <div className="flex flex-col gap-2">
-        {fields.map((field, index) => (
-          <div key={field.id} className="flex flex-col gap-1">
-            <div className="flex gap-2">
+      <div className="@container flex flex-col gap-3">
+        {fields.map((field, index) => {
+          const kind = kinds[index] ?? 'Email'
+          return (
+            <div key={field.id} className="grid grid-cols-[7rem_minmax(0,1fr)_auto] gap-2 @lg:grid-cols-[7rem_minmax(0,1fr)_8rem_auto]">
               <Controller
                 control={control}
                 name={`contactMethods.${index}.kind` as Path<T>}
-                render={({ field: kind }) => (
-                  <OptionSelect
-                    ariaLabel={t('form.contactKind')}
-                    value={kind.value as string}
-                    onChange={kind.onChange}
-                    options={kindOptions}
-                    className="w-32 shrink-0"
-                  />
+                render={({ field: kindField }) => (
+                  <OptionSelect ariaLabel={t('form.contactKind')} value={kindField.value as string} onChange={kindField.onChange} options={kindOptions} />
                 )}
               />
               <Controller
                 control={control}
                 name={`contactMethods.${index}.value` as Path<T>}
-                render={({ field: value, fieldState }) => (
-                  <Input
-                    {...value}
-                    id={`${idPrefix}-contact-${index}`}
-                    aria-label={t('form.contactValue')}
-                    aria-invalid={fieldState.invalid || undefined}
-                    placeholder={t('form.contactValue')}
-                    className="min-w-0 flex-1"
-                  />
-                )}
+                render={({ field: value, fieldState }) => {
+                  const common = {
+                    id: `${idPrefix}-contact-${index}`,
+                    'aria-label': t(`form.contactValues.${kind}`),
+                    'aria-invalid': fieldState.invalid || undefined,
+                    placeholder: t(`form.contactValues.${kind}`),
+                  }
+                  return kind === 'Phone' || kind === 'Mobile' ? (
+                    <PhoneInput {...common} value={value.value as string} onChange={value.onChange} onBlur={value.onBlur} ref={value.ref} className="h-9" />
+                  ) : (
+                    <Input {...value} {...common} type={kind === 'Email' ? 'email' : 'url'} className="h-9" />
+                  )
+                }}
               />
               <Controller
                 control={control}
                 name={`contactMethods.${index}.label` as Path<T>}
                 render={({ field: label }) => (
-                  <Input {...label} aria-label={t('form.contactLabel')} placeholder={t('form.contactLabel')} className="hidden w-32 sm:block" />
+                  <Input
+                    {...label}
+                    aria-label={t('form.contactLabel')}
+                    placeholder={t('form.contactLabel')}
+                    className="col-start-2 row-start-2 h-8 @lg:col-start-3 @lg:row-start-1 @lg:h-9"
+                  />
                 )}
               />
-              <Button type="button" variant="ghost" size="icon" aria-label={t('form.removeContact')} onClick={() => remove(index)}>
+              <Button
+                type="button"
+                variant="ghost"
+                size="icon"
+                aria-label={t('form.removeContact')}
+                onClick={() => remove(index)}
+                className="col-start-3 row-start-1 @lg:col-start-4"
+              >
                 <Trash2 />
               </Button>
+              <Controller
+                control={control}
+                name={`contactMethods.${index}.value` as Path<T>}
+                render={({ fieldState }) =>
+                  fieldState.error?.message ? <FieldError className="col-span-full">{fieldState.error.message}</FieldError> : <></>
+                }
+              />
             </div>
-            <Controller
-              control={control}
-              name={`contactMethods.${index}.value` as Path<T>}
-              render={({ fieldState }) => (fieldState.error?.message ? <FieldError>{fieldState.error.message}</FieldError> : <></>)}
-            />
-          </div>
-        ))}
+          )
+        })}
       </div>
+      {listMessage && <FieldError>{listMessage}</FieldError>}
       <div className="flex flex-wrap gap-2">
         {(['Email', 'Phone'] as const).map((kind) => (
           <Button

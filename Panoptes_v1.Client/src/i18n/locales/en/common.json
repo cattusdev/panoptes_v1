@@ -145,7 +145,8 @@
     "min": "Enter {{min}} or more.",
     "max": "Enter {{max}} or less.",
     "chooseAtLeast_one": "Choose at least {{count}} option.",
-    "chooseAtLeast_other": "Choose at least {{count}} options."
+    "chooseAtLeast_other": "Choose at least {{count}} options.",
+    "phone": "Enter a valid phone number. Check the country code."
   },
   "money": {
     "unknown": "Unknown",
@@ -162,5 +163,9 @@
     "empty": "No results.",
     "clear": "Clear selection",
     "more": "+{{count}}"
+  },
+  "phone": {
+    "country": "Country code: {{country}} ({{code}})",
+    "searchCountry": "Search country or code…"
   }
 }

@@ -25,12 +25,13 @@ public class ClientTests : DomainTest
 
     private static string NewTaxId() => Random.Shared.NextInt64(100_000_000, 999_999_999).ToString();
 
+    // Χωρίς δοσμένους τρόπους επικοινωνίας: ένα μοναδικό email (ο πελάτης θέλει τουλάχιστον email ή τηλέφωνο)
     private static ClientRequest NewClient(string? name = null, string? taxId = null, params ContactMethodRequest[] methods) => new()
     {
         Kind = ClientKind.Organization,
         DisplayName = name ?? Unique("Client"),
         TaxId = taxId,
-        ContactMethods = [.. methods],
+        ContactMethods = methods.Length > 0 ? [.. methods] : [Email($"{Guid.NewGuid():N}@example.com")],
     };
 
     private static ContactMethodRequest Email(string value) => new() { Kind = ContactMethodKind.Email, Value = value };
@@ -318,10 +319,61 @@ public class ClientTests : DomainTest
     public void TaxIds_AreNormalized(string input, string? expected) =>
         Assert.That(CrmMatching.TaxId(input), Is.EqualTo(expected));
 
-    [TestCase("+30 210 123 4567", "2101234567")]
-    [TestCase("0030 6912345678", "6912345678")]
-    [TestCase("210-1234567", "2101234567")]
+    // Όπως αποθηκεύονται (E.164): χωρίς "+" ο αριθμός διαβάζεται ως ελληνικός
+    [TestCase("+30 210 123 4567", "+302101234567")]
+    [TestCase("0030 6912345678", "+306912345678")]
+    [TestCase("210-1234567", "+302101234567")]
+    [TestCase("+44 20 7946 0958", "+442079460958")]
     [TestCase("123", null)]
+    [TestCase("210 12", null)]
     public void Phones_AreNormalized(string input, string? expected) =>
         Assert.That(CrmMatching.Phone(input), Is.EqualTo(expected));
+
+    [Test]
+    public async Task Phones_AreStoredWithTheirCountryCode()
+    {
+        var client = await CreateAsync(NewClient(null, null, Phone("210 123 4567"), new ContactMethodRequest { Kind = ContactMethodKind.Mobile, Value = "+44 7911 123456" }));
+
+        Assert.That(client.ContactMethods.Select(m => m.Value), Is.EqualTo(new[] { "+302101234567", "+447911123456" }));
+        Assert.That(client.MatchPhones, Is.EquivalentTo(new[] { "+302101234567", "+447911123456" }));
+    }
+
+    [Test]
+    public void InvalidPhone_IsAFieldError()
+    {
+        var error = Assert.ThrowsAsync<BusinessRuleException>(() => CreateAsync(NewClient(null, null, Email("a@example.com"), Phone("210 12"))));
+
+        Assert.That(error!.StatusCode, Is.EqualTo(400));
+        Assert.That(error.Field, Is.EqualTo(nameof(ClientRequest.ContactMethods)));
+    }
+
+    // Ένας πελάτης χωρίς email ή τηλέφωνο δεν αποθηκεύεται (ένα site μόνο του δεν αρκεί)
+    [Test]
+    public void Client_NeedsAnEmailOrAPhone()
+    {
+        var error = Assert.ThrowsAsync<BusinessRuleException>(() =>
+            CreateAsync(NewClient(null, null, new ContactMethodRequest { Kind = ContactMethodKind.Website, Value = "beta.example" })));
+
+        Assert.That(error!.Field, Is.EqualTo(nameof(ClientRequest.ContactMethods)));
+    }
+
+    // Ιδιώτης: όνομα και επώνυμο, και το όνομα του πελάτη βγαίνει από αυτά
+    [Test]
+    public async Task Individual_HasAFirstAndLastName()
+    {
+        var lastName = Unique("Papadopoulou");
+        var request = NewClient();
+        request.Kind = ClientKind.Individual;
+        request.DisplayName = null;
+        request.FirstName = " Maria ";
+        request.LastName = lastName;
+
+        var client = await CreateAsync(request);
+
+        Assert.That((client.FirstName, client.LastName, client.DisplayName), Is.EqualTo(("Maria", lastName, $"Maria {lastName}")));
+
+        request.LastName = " ";
+        var error = Assert.ThrowsAsync<BusinessRuleException>(() => CreateAsync(request));
+        Assert.That(error!.Field, Is.EqualTo(nameof(ClientRequest.LastName)));
+    }
 }

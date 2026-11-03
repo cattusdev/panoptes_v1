@@ -18,6 +18,8 @@ namespace Panoptes_v1.Modules.Crm.Configuration
             client.Property(c => c.Status).HasConversion<string>().HasMaxLength(20);
             client.Property(c => c.Origin).HasConversion<string>().HasMaxLength(20);
             client.Property(c => c.DisplayName).HasMaxLength(200);
+            client.Property(c => c.FirstName).HasMaxLength(100);
+            client.Property(c => c.LastName).HasMaxLength(100);
             client.Property(c => c.LegalName).HasMaxLength(300);
             client.Property(c => c.TaxId).HasMaxLength(30);
             client.Property(c => c.TaxIdNormalized).HasMaxLength(30);

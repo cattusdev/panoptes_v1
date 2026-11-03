@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
+import { phoneHref } from '@/lib/phone'
 import { Link, Outlet, useParams } from 'react-router'
 import { toast } from 'sonner'
 import { Archive, ArchiveRestore, ArrowLeft, ChevronDown, Copy, EllipsisVertical, Mail, Pencil, Phone, Plus, SearchX, Upload, UserPlus } from 'lucide-react'
@@ -231,7 +232,7 @@ function ClientHeader({
                   <span className="text-foreground">{primary.name}</span>
                   {primary.role && <span>({primary.role})</span>}
                   {primaryPhone && (
-                    <a href={`tel:${primaryPhone.replace(/[^\d+]/g, '')}`} aria-label={t('header.call', { name: primary.name })} className="hover:text-foreground">
+                    <a href={phoneHref(primaryPhone)} aria-label={t('header.call', { name: primary.name })} className="hover:text-foreground">
                       <Phone className="size-3.5" />
                     </a>
                   )}

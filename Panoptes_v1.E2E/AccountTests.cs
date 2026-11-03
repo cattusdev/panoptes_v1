@@ -125,11 +125,21 @@ public class MyAccountTests : E2ETest
         await LoginAsync(TestData.Phone);
         await Page.GotoAsync("/account");
 
-        await Page.Locator("#phone").FillAsync("+30 6900000000");
+        // Ελλάδα προεπιλογή: ο αριθμός χωρίς κωδικό, αποθηκεύεται σε E.164
+        await Expect(Page.GetByRole(AriaRole.Button, new() { Name = "Country code: Greece (+30)" })).ToBeVisibleAsync();
+        await Page.Locator("#phone").FillAsync("690 1234");
+        await Page.GetByRole(AriaRole.Button, new() { Name = "Save changes" }).ClickAsync();
+        await Expect(Page.GetByText("Enter a valid phone number. Check the country code.")).ToBeVisibleAsync();
+
+        await Page.Locator("#phone").FillAsync("6900000000");
         await Page.GetByRole(AriaRole.Button, new() { Name = "Save changes" }).ClickAsync();
 
         await ExpectToastAsync("Profile updated");
-        Assert.That((await TestData.FindUserAsync(TestData.Phone))!.PhoneNumber, Is.EqualTo("+30 6900000000"));
+        Assert.That((await TestData.FindUserAsync(TestData.Phone))!.PhoneNumber, Is.EqualTo("+306900000000"));
+
+        // Ο server ελέγχει κι αυτός (όχι μόνο το UI)
+        var refused = await ApiAsync("PUT", "/api/account/profile", new { phoneNumber = "+30 12" });
+        Assert.That(refused.Status, Is.EqualTo(400));
     }
 
     [Test]

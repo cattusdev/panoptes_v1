@@ -11,7 +11,12 @@ public class CrmFilesTests : MediaTest
 
     private async Task<string> CreateClientAsync(string name)
     {
-        var response = await ApiAsync("POST", "/api/crm/clients", new { kind = "Organization", displayName = name });
+        var response = await ApiAsync("POST", "/api/crm/clients", new
+        {
+            kind = "Organization",
+            displayName = name,
+            contactMethods = new[] { new { kind = "Email", value = $"{Guid.NewGuid():N}@example.com" } },
+        });
         Assert.That(response.Status, Is.EqualTo(201), await response.TextAsync());
         return (await response.JsonAsync())!.Value.GetProperty("id").GetString()!;
     }

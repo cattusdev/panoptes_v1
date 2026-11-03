@@ -28,6 +28,8 @@ namespace Panoptes_v1.Modules.Crm.Entities
         public string Ref { get; set; } = "";              // CL-0042
         public ClientKind Kind { get; set; }
         public string DisplayName { get; set; } = "";
+        public string? FirstName { get; set; }             // μόνο για ιδιώτες: το DisplayName = "Όνομα Επώνυμο"
+        public string? LastName { get; set; }
         public string? LegalName { get; set; }
         public string? TaxId { get; set; }                 // ΑΦΜ όπως γράφτηκε
         [AuditIgnore]

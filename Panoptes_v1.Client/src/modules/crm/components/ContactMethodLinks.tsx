@@ -1,13 +1,18 @@
 import { useTranslation } from 'react-i18next'
 import { Globe, Mail, Phone, Smartphone } from 'lucide-react'
+import { formatPhone, phoneHref } from '@/lib/phone'
 import type { ContactMethod } from '../api'
 
 const icons = { Email: Mail, Phone: Phone, Mobile: Smartphone, Website: Globe }
 
+function display(method: ContactMethod) {
+  return method.kind === 'Phone' || method.kind === 'Mobile' ? formatPhone(method.value) : method.value
+}
+
 function href(method: ContactMethod) {
   if (method.kind === 'Email') return `mailto:${method.value}`
   if (method.kind === 'Website') return /^https?:\/\//i.test(method.value) ? method.value : `https://${method.value}`
-  return `tel:${method.value.replace(/[^\d+]/g, '')}`
+  return phoneHref(method.value)
 }
 
 // Click-to-call / mail / site (μεγάλοι στόχοι στο κινητό). Η ετικέτα ("Λογιστήριο") δίπλα.
@@ -26,9 +31,9 @@ export function ContactMethodLinks({ methods, className }: { methods: ContactMet
               target={method.kind === 'Website' ? '_blank' : undefined}
               rel={method.kind === 'Website' ? 'noopener noreferrer' : undefined}
               className="truncate py-1 hover:underline md:py-0"
-              aria-label={`${t(`contactKinds.${method.kind}`)}: ${method.value}`}
+              aria-label={`${t(`contactKinds.${method.kind}`)}: ${display(method)}`}
             >
-              {method.value}
+              {display(method)}
             </a>
             {method.label && <span className="truncate text-xs text-muted-foreground">{method.label}</span>}
           </li>

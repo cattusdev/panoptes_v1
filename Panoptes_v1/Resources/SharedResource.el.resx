@@ -543,4 +543,16 @@
   <data name="Enter the first name." xml:space="preserve">
     <value>Συμπληρώστε το όνομα.</value>
   </data>
+  <data name="Enter the last name." xml:space="preserve">
+    <value>Συμπληρώστε το επώνυμο.</value>
+  </data>
+  <data name="Add at least one email or phone number." xml:space="preserve">
+    <value>Προσθέστε τουλάχιστον ένα email ή τηλέφωνο.</value>
+  </data>
+  <data name="&quot;{0}&quot; isn&apos;t a valid phone number. Check the country code and the number." xml:space="preserve">
+    <value>Το «{0}» δεν είναι έγκυρος αριθμός τηλεφώνου. Ελέγξτε τον κωδικό χώρας και τον αριθμό.</value>
+  </data>
+  <data name="Enter a valid phone number with its country code." xml:space="preserve">
+    <value>Συμπληρώστε έγκυρο αριθμό τηλεφώνου με τον κωδικό χώρας.</value>
+  </data>
 </root>

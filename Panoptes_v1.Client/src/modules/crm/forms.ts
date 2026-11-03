@@ -1,6 +1,7 @@
 import { z } from 'zod'
 import i18n from '@/i18n'
 import { schemas } from '@/lib/forms'
+import { isValidPhone } from '@/lib/phone'
 import { addressKinds, contactMethodKinds, type Address, type ContactMethod, type Person, type PersonInput } from './api'
 
 // Τα schemas και οι μετατροπές των φορμών πελάτη και προσώπου. Στις φόρμες τα κενά πεδία είναι "" · στο API null.
@@ -26,17 +27,27 @@ export type AddressValues = z.input<typeof addressSchema>
 
 const emailCheck = z.email()
 
-// Email γραμμές με έγκυρη διεύθυνση, διευθύνσεις με τουλάχιστον την πρώτη γραμμή (για το superRefine της φόρμας)
+// Email γραμμές με έγκυρη διεύθυνση, τηλέφωνα έγκυρα για τη χώρα τους (lib/phone), διευθύνσεις με τουλάχιστον
+// την πρώτη γραμμή (για το superRefine της φόρμας)
 export function refineContactDetails(values: { contactMethods: ContactMethodValues[]; addresses?: AddressValues[] }, ctx: z.RefinementCtx) {
   values.contactMethods.forEach((method, index) => {
-    if (method.kind === 'Email' && method.value.trim() && !emailCheck.safeParse(method.value.trim()).success)
+    const value = method.value.trim()
+    if (method.kind === 'Email' && value && !emailCheck.safeParse(value).success)
       ctx.addIssue({ code: 'custom', path: ['contactMethods', index, 'value'], message: i18n.t('validation.email') })
+    if ((method.kind === 'Phone' || method.kind === 'Mobile') && value && !isValidPhone(value))
+      ctx.addIssue({ code: 'custom', path: ['contactMethods', index, 'value'], message: i18n.t('validation.phone') })
   })
   values.addresses?.forEach((address, index) => {
     const filled = [address.line2, address.city, address.postalCode, address.region, address.country].some((v) => v.trim())
     if (filled && !address.line1.trim())
       ctx.addIssue({ code: 'custom', path: ['addresses', index, 'line1'], message: i18n.t('validation.required') })
   })
+}
+
+// Πελάτης: τουλάχιστον ένα email ή τηλέφωνο (το ίδιο ελέγχει ο server)
+export function refineEmailOrPhone(values: { contactMethods: ContactMethodValues[] }, ctx: z.RefinementCtx) {
+  if (!values.contactMethods.some((m) => m.kind !== 'Website' && m.value.trim()))
+    ctx.addIssue({ code: 'custom', path: ['contactMethods'], message: i18n.t('crm:form.contactRequired') })
 }
 
 export function toContactMethods(values: ContactMethodValues[]): ContactMethod[] {

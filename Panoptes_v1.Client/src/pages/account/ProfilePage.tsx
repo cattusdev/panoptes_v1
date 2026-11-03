@@ -2,6 +2,7 @@ import { useState, type FormEvent } from 'react'
 import { useTranslation } from 'react-i18next'
 import { toast } from 'sonner'
 import { MailWarning } from 'lucide-react'
+import { PhoneInput } from '@/components/form/PhoneInput'
 import { SettingsCard } from '@/components/admin/Common'
 import { OptionSelect } from '@/components/admin/OptionSelect'
 import { Alert, AlertAction, AlertDescription, AlertTitle } from '@/components/ui/alert'
@@ -17,6 +18,7 @@ import { defaultLanguage, languages, resolveLanguage, setLanguage } from '@/i18n
 import { useAccount, useChangeEmail, useSendVerificationEmail, useUpdateProfile, type Account } from '@/lib/account-api'
 import { fieldErrors, problemMessage } from '@/lib/api'
 import { useSession, useUpdateLanguage } from '@/lib/auth'
+import { isValidPhone } from '@/lib/phone'
 import { useGeneralSettings } from '@/lib/settings-api'
 import { ProfilePhotoCard } from './ProfilePhotoCard'
 
@@ -40,6 +42,11 @@ function Profile({ account }: { account: Account }) {
   async function saveProfile(e: FormEvent) {
     e.preventDefault()
     setPhoneError(null)
+    // Ίδιος έλεγχος με τον server (libphonenumber): κενό = χωρίς τηλέφωνο
+    if (phone && !isValidPhone(phone)) {
+      setPhoneError(t('validation.phone', { ns: 'common' }))
+      return
+    }
     try {
       await updateProfile.mutateAsync(phone)
       toast.success(t('profile.details.saved'))
@@ -93,13 +100,13 @@ function Profile({ account }: { account: Account }) {
         <form onSubmit={saveProfile}>
           <Field data-invalid={!!phoneError || undefined}>
             <FieldLabel htmlFor="phone">{t('profile.details.phone')}</FieldLabel>
-            <Input
+            <PhoneInput
               id="phone"
-              type="tel"
-              autoComplete="tel"
-              placeholder="+30 69…"
               value={phone}
-              onChange={(e) => setPhone(e.target.value)}
+              onChange={(value) => {
+                setPhone(value)
+                setPhoneError(null)
+              }}
               aria-invalid={!!phoneError || undefined}
               className="max-w-sm"
             />

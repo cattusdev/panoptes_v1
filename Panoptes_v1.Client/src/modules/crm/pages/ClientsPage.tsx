@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
+import { formatPhone } from '@/lib/phone'
 import { useNavigate } from 'react-router'
 import { Building2, Plus } from 'lucide-react'
 import { SearchInput, TableEmpty } from '@/components/admin/Common'
@@ -72,7 +73,7 @@ export function ClientsPage() {
               {c.primaryContact.name}
               {c.primaryContact.role && <span className="text-muted-foreground"> · {c.primaryContact.role}</span>}
             </div>
-            <div className="truncate text-xs text-muted-foreground">{c.primaryContact.email ?? c.primaryContact.phone}</div>
+            <div className="truncate text-xs text-muted-foreground">{c.primaryContact.email ?? (c.primaryContact.phone && formatPhone(c.primaryContact.phone))}</div>
           </div>
         ) : (
           <span className="text-sm text-muted-foreground">—</span>

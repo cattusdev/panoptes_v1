@@ -44,6 +44,8 @@ export type Client = {
   ref: string
   kind: ClientKind
   displayName: string
+  firstName: string | null
+  lastName: string | null
   legalName: string | null
   taxId: string | null
   taxOffice: string | null
@@ -61,9 +63,12 @@ export type Client = {
   canArchive: boolean
 }
 
+// Εταιρεία: displayName. Ιδιώτης: firstName + lastName (το όνομα το φτιάχνει ο server).
 export type ClientInput = {
   kind: ClientKind
-  displayName: string
+  displayName: string | null
+  firstName: string | null
+  lastName: string | null
   legalName: string | null
   taxId: string | null
   taxOffice: string | null

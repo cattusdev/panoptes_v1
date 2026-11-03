@@ -62,7 +62,8 @@ namespace Panoptes_v1.Api
 
     public class ProfileRequest
     {
-        [Phone, StringLength(32)]
+        // Με κωδικό χώρας, ελεγμένο με το libphonenumber (Phones), αποθηκευμένο σε E.164
+        [StringLength(32)]
         public string? PhoneNumber { get; set; }
     }
 
@@ -192,7 +193,12 @@ namespace Panoptes_v1.Api
             var user = await _userManager.GetUserAsync(User);
             if (user == null) return Unauthorized();
 
-            var phone = string.IsNullOrWhiteSpace(request.PhoneNumber) ? null : request.PhoneNumber.Trim();
+            var phone = Phones.ToE164(request.PhoneNumber);
+            if (phone == null && !string.IsNullOrWhiteSpace(request.PhoneNumber))
+            {
+                ModelState.AddModelError(nameof(request.PhoneNumber), _t["Enter a valid phone number with its country code."]);
+                return ValidationProblem(ModelState);
+            }
             if (phone != user.PhoneNumber)
             {
                 var result = await _userManager.SetPhoneNumberAsync(user, phone);

@@ -51,8 +51,15 @@ namespace Panoptes_v1.Modules.Crm.Api
         [Required]
         public ClientKind? Kind { get; set; }
 
-        [Required, StringLength(200)]
-        public string DisplayName { get; set; } = "";
+        // Εταιρεία: το όνομα. Ιδιώτης: όνομα και επώνυμο (το DisplayName βγαίνει από αυτά).
+        [StringLength(200)]
+        public string? DisplayName { get; set; }
+
+        [StringLength(100)]
+        public string? FirstName { get; set; }
+
+        [StringLength(100)]
+        public string? LastName { get; set; }
 
         [StringLength(300)]
         public string? LegalName { get; set; }
@@ -209,6 +216,8 @@ namespace Panoptes_v1.Modules.Crm.Api
         string Ref,
         ClientKind Kind,
         string DisplayName,
+        string? FirstName,
+        string? LastName,
         string? LegalName,
         string? TaxId,
         string? TaxOffice,
