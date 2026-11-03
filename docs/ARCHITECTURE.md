@@ -607,3 +607,4 @@ Definition of done per slice (roadmap Gate 4): migration, backend, UI, permissio
      - seed the Q6 roles;
      - remove self-registration (§16.1).
 3. **Slice 2, CRM:** clients, people, relationships, duplicate detection, the Client 360° shell, global search.
+4. **Slice 3, Projects and work:** `ProjectAccess` (internal/restricted, members), projects with configurable statuses, types and milestones, tasks with one subtask level, checklists and assignees, server-checked transitions, project and global boards, Client 360° Projects/Work tabs, project and task search. Screen brief and scope: `docs/ux/projects-work.md` (decisions S3-1…S3-7).

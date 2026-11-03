@@ -7,6 +7,7 @@
 | [dashboard.md](dashboard.md) | Dashboard + Action Center | 1 (overdue balance vs old paid work), 3 (renewals, three statuses), 7 (mobile) |
 | [client-360.md](client-360.md) | Client 360° | 1, 3, 6 (files), 7 |
 | [onboarding-wizard.md](onboarding-wizard.md) | Project creation / historical onboarding wizard | 2 (existing client + historical project + €400 unpaid task), 7 |
+| [projects-work.md](projects-work.md) | Projects, project page, task board, task details (Slice 3, **proposed 2026-11-03, awaiting approval**) | 4 (assign / move from board and details), 6 (restricted project), 7 |
 
 The design language follows CLAUDE.md: a dark neutral console, mauve primary, tinted status badges, shadcn components and our own sidebar. Every brief lists the existing boilerplate components it reuses and the gaps that Slice 1 must fill.
 
