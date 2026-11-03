@@ -1,12 +1,12 @@
 import { useTranslation } from 'react-i18next'
-import type { Control } from 'react-hook-form'
+import { useFormState, useWatch, type Control } from 'react-hook-form'
 import { FormField } from '@/components/form/FormField'
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert'
 import { Input } from '@/components/ui/input'
 import { Textarea } from '@/components/ui/textarea'
 import { useDebouncedValue } from '@/hooks/use-debounced-value'
 import { usePersonDuplicates, type PersonInput, type PersonMatch } from '../api'
-import { toPersonInput, type PersonValues } from '../forms'
+import { hasPhone, toPersonInput, type PersonValues } from '../forms'
 import { ContactMethodsField } from './ContactFields'
 
 // Τα στοιχεία ενός προσώπου: κοινά στη φόρμα "New contact" και στο "Add contact" του πελάτη
@@ -25,12 +25,34 @@ export function PersonFields({ control, idPrefix, withNotes = true }: { control:
         </FormField>
       </div>
       <ContactMethodsField control={control} idPrefix={idPrefix} />
+      <NoPhoneReasonField control={control} idPrefix={idPrefix} />
       {withNotes && (
         <FormField control={control} name="notes" id={`${idPrefix}-notes`} label={t('form.notes')}>
           {(field) => <Textarea rows={3} maxLength={4000} {...field} />}
         </FormField>
       )}
     </>
+  )
+}
+
+// Χωρίς τηλέφωνο: ένα πεδίο "γιατί" (για όταν βιαζόμαστε). Εμφανίζεται μετά την πρώτη προσπάθεια αποθήκευσης
+// χωρίς τηλέφωνο, ή όταν υπάρχει ήδη λόγος· φεύγει μόλις μπει τηλέφωνο.
+function NoPhoneReasonField({ control, idPrefix }: { control: Control<WithPerson>; idPrefix: string }) {
+  const { t } = useTranslation('crm')
+  const [methods, reason] = useWatch({ control, name: ['contactMethods', 'noPhoneReason'] })
+  const { submitCount } = useFormState({ control })
+  if (hasPhone(methods) || (submitCount === 0 && !reason)) return null
+
+  return (
+    <FormField
+      control={control}
+      name="noPhoneReason"
+      id={`${idPrefix}-no-phone-reason`}
+      label={t('people.form.noPhoneReason')}
+      description={t('people.form.noPhoneReasonHint')}
+    >
+      {(field) => <Input maxLength={300} placeholder={t('people.form.noPhoneReasonPlaceholder')} {...field} />}
+    </FormField>
   )
 }
 

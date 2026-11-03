@@ -15,6 +15,8 @@ namespace Panoptes_v1.Modules.Crm.Entities
         [AuditIgnore]
         public List<string> MatchPhones { get; set; } = [];
         public string? Notes { get; set; }
+        // Χωρίς τηλέφωνο: γιατί (π.χ. "μόνο με email προς το παρόν"). Με τηλέφωνο είναι πάντα null.
+        public string? NoPhoneReason { get; set; }
 
         public DateTime CreatedAt { get; set; }
         public string? CreatedById { get; set; }

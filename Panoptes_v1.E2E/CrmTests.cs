@@ -170,10 +170,15 @@ public class CrmTests : E2ETest
         await dialog.GetByLabel("First name").FillAsync(maria);
         await dialog.GetByLabel("Last name").FillAsync("Papadopoulou");
         await dialog.GetByLabel("Role").FillAsync("CEO");
+        // Χωρίς τηλέφωνο: ζητά αριθμό ή λόγο (για όταν βιαζόμαστε), και ο λόγος φαίνεται στην επαφή
+        await dialog.GetByRole(AriaRole.Button, new() { Name = "Add contact" }).ClickAsync();
+        await Expect(dialog.GetByText("Add a phone number, or write why there isn't one.")).ToBeVisibleAsync();
+        await dialog.GetByLabel("No phone number? Write why").FillAsync("Only by email for now");
         await dialog.GetByRole(AriaRole.Button, new() { Name = "Add contact" }).ClickAsync();
         var contact = Page.GetByTestId("client-contact").Filter(new() { HasText = maria });
         await Expect(contact).ToContainTextAsync("Primary");
         await Expect(contact).ToContainTextAsync("CEO");
+        await Expect(contact).ToContainTextAsync("No phone: Only by email for now");
         // Η κύρια επαφή και στην κεφαλίδα
         await Expect(Page.GetByTestId("client-header")).ToContainTextAsync($"{maria} Papadopoulou");
         await Expect(Page.GetByText("Get started")).ToHaveCountAsync(0);

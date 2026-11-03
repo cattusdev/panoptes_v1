@@ -61,6 +61,7 @@ namespace Panoptes_v1.Modules.Crm.Configuration
             person.HasIndex(p => p.LastName).HasMethod("gin").HasOperators("gin_trgm_ops");
             person.HasIndex(p => p.MatchEmails).HasMethod("gin");
             person.HasIndex(p => p.MatchPhones).HasMethod("gin");
+            person.Property(p => p.NoPhoneReason).HasMaxLength(300);
         }
     }
 

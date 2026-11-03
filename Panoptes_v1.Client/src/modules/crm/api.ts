@@ -94,6 +94,7 @@ export type ClientContact = {
   isPrimary: boolean
   isBillingContact: boolean
   contactMethods: ContactMethod[]
+  noPhoneReason: string | null
   alsoContactFor: LinkedClient[]
   version: number
 }
@@ -114,6 +115,7 @@ export type Person = {
   lastName: string | null
   name: string
   contactMethods: ContactMethod[]
+  noPhoneReason: string | null
   notes: string | null
   clients: {
     contactId: string
@@ -129,10 +131,12 @@ export type Person = {
   canEdit: boolean
 }
 
+// Χωρίς τηλέφωνο: noPhoneReason λέει γιατί (ο server το απαιτεί)
 export type PersonInput = {
   firstName: string
   lastName: string | null
   contactMethods: ContactMethod[]
+  noPhoneReason: string | null
   notes: string | null
   version?: number
 }

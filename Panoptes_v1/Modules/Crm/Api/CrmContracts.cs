@@ -142,10 +142,14 @@ namespace Panoptes_v1.Modules.Crm.Api
         public string? Tag { get; set; }
     }
 
+    // Ένα πρόσωπο θέλει τηλέφωνο· χωρίς τηλέφωνο, το NoPhoneReason λέει γιατί (για όταν βιαζόμαστε)
     public class PersonRequest
     {
         [Required, StringLength(100)]
         public string FirstName { get; set; } = "";
+
+        [StringLength(300)]
+        public string? NoPhoneReason { get; set; }
 
         [StringLength(100)]
         public string? LastName { get; set; }
@@ -247,6 +251,7 @@ namespace Panoptes_v1.Modules.Crm.Api
         bool IsPrimary,
         bool IsBillingContact,
         IReadOnlyList<ContactMethodDto> ContactMethods,
+        string? NoPhoneReason,
         IReadOnlyList<LinkedClientDto> AlsoContactFor,
         uint Version);
 
@@ -267,6 +272,7 @@ namespace Panoptes_v1.Modules.Crm.Api
         string? LastName,
         string Name,
         IReadOnlyList<ContactMethodDto> ContactMethods,
+        string? NoPhoneReason,
         string? Notes,
         IReadOnlyList<PersonClientDto> Clients,
         uint Version,

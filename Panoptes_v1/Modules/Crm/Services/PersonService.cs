@@ -73,7 +73,7 @@ namespace Panoptes_v1.Modules.Crm.Services
                 .Where(p => p.Id == id)
                 .Select(p => new
                 {
-                    p.Id, p.FirstName, p.LastName, p.ContactMethods, p.Notes, p.RowVersion,
+                    p.Id, p.FirstName, p.LastName, p.ContactMethods, p.NoPhoneReason, p.Notes, p.RowVersion,
                     Clients = p.Clients.Where(cc => clients.Any(c => c.Id == cc.ClientId))
                         .OrderByDescending(cc => cc.Client.ArchivedAt == null).ThenBy(cc => cc.Client.DisplayName)
                         .Select(cc => new PersonClientDto(cc.Id, cc.Client.Id, cc.Client.Ref, cc.Client.DisplayName, cc.Client.ArchivedAt != null,
@@ -83,7 +83,7 @@ namespace Panoptes_v1.Modules.Crm.Services
                 .FirstOrDefaultAsync(cancellationToken);
 
             return person == null ? null : new PersonDto(person.Id, person.FirstName, person.LastName, ClientService.FullName(person.FirstName, person.LastName),
-                person.ContactMethods.Select(m => m.ToDto()).ToList(), person.Notes, person.Clients, person.RowVersion, canEdit);
+                person.ContactMethods.Select(m => m.ToDto()).ToList(), person.NoPhoneReason, person.Notes, person.Clients, person.RowVersion, canEdit);
         }
 
         public async Task<Person> CreateAsync(PersonRequest request, CancellationToken cancellationToken = default)
@@ -152,6 +152,13 @@ namespace Panoptes_v1.Modules.Crm.Services
 
             if (person.FirstName.Length == 0)
                 throw ClientService.Invalid(nameof(PersonRequest.FirstName), "Enter the first name.");
+
+            // Τηλέφωνο, ή γραμμένος λόγος που δεν υπάρχει (φεύγει μόλις μπει τηλέφωνο)
+            var hasPhone = person.ContactMethods.Any(m => m.Kind is ContactMethodKind.Phone or ContactMethodKind.Mobile);
+            person.NoPhoneReason = hasPhone
+                ? null
+                : ClientService.Clean(request.NoPhoneReason)
+                    ?? throw ClientService.Invalid(nameof(PersonRequest.NoPhoneReason), "Add a phone number, or write why there isn't one.");
         }
     }
 }

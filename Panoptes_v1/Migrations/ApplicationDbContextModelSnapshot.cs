@@ -1019,6 +1019,10 @@ namespace Panoptes_v1.Migrations
                         .IsRequired()
                         .HasColumnType("text[]");
 
+                    b.Property<string>("NoPhoneReason")
+                        .HasMaxLength(300)
+                        .HasColumnType("character varying(300)");
+
                     b.Property<string>("Notes")
                         .HasMaxLength(4000)
                         .HasColumnType("character varying(4000)");

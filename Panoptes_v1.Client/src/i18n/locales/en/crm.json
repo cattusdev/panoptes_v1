@@ -244,6 +244,10 @@
       "editDescription": "These details are the same for every client this person belongs to.",
       "firstName": "First name",
       "lastName": "Last name",
+      "noPhoneReason": "No phone number? Write why",
+      "noPhoneReasonHint": "Saved with the contact, so the team knows a number is still missing.",
+      "noPhoneReasonPlaceholder": "e.g. Only by email for now",
+      "phoneRequired": "Add a phone number, or write why there isn't one.",
       "create": "Create contact",
       "created": "{{name}} created",
       "saved": "{{name}} saved"
@@ -260,7 +264,8 @@
       "clients": "Clients",
       "noClients": "Not linked to any client yet.",
       "edit": "Edit details"
-    }
+    },
+    "noPhone": "No phone: {{reason}}"
   },
   "files": {
     "columns": {

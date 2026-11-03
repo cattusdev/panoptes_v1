@@ -1,6 +1,6 @@
 # Screen brief: Projects, project page, task board and task details
 
-**Routes:** `/projects`, `/projects/:id` with tab routes (`…/tasks`, `…/files`, `…/activity`), `/tasks` (global board and list). Task details open in a side sheet on any of these pages, kept in the URL as `?task=T-1234`. **Status:** proposed 2026-11-03 for Slice 3, awaiting approval.
+**Routes:** `/projects`, `/projects/:id` with tab routes (`…/tasks`, `…/files`, `…/activity`), `/tasks` (global board and list). Task details open in a side sheet on any of these pages, kept in the URL as `?task=T-1234`. **Status:** approved 2026-11-03 (Gate 3 for Slice 3; decisions S3-1…S3-7 as proposed).
 **Refs:** PRD PRJ-01…08, WRK-01…04; BR A, F; SCREEN-PLANNING §4; ARCHITECTURE §3.3, §4.2, §4.3, §9.2, §10; UX-DESIGN-STANDARD priority scenario 4 (assign and change status from the board and from details) and 7 (mobile).
 
 ## 0. Slice 3 scope (what this brief covers)
@@ -255,9 +255,9 @@ Documentation pages were read; no product was inspected live.
 | **Jira: board moves are workflow transitions** (community answers, not official docs) | A card move is a transition and must exist in the workflow; users get confused when a drop silently bounces back, so we dim disallowed columns while dragging and name the reason when refused | Secondary sources | [Atlassian community: can't move a card despite transitions](https://community.atlassian.com/t5/Jira-Core-questions/Cannot-move-a-card-to-a-column-despite-workflows-and-transitions/qaq-p/1305389) |
 | **Plane: project member roles** | Project content is visible only to people added to the project; project roles (admin, contributor, commenter, guest) control what members can do; only project admins manage members | Plane's role set is larger than we need; we keep Lead / Member / Viewer | [Member roles](https://docs.plane.so/roles-and-permissions/member-roles), [Permissions matrix](https://docs.plane.so/roles-and-permissions/permissions-matrix) |
 
-## 11. Decisions to approve
+## 11. Decisions (approved 2026-11-03, all as proposed)
 
-| # | Decision | Proposal |
+| # | Decision | Approved |
 |---|---|---|
 | **S3-1** | Time tracking (timer + manual logs, WRK-05) | **Not in Slice 3.** A small follow-up slice right after it, so this slice stays reviewable. |
 | **S3-2** | Member roles | Global permissions decide what kind of action you may take; **Viewer** members are read-only in that project whatever their permissions; **Lead** is the accountable person (shown in lists, any number). Managing members needs `Projects.ManageMembers` and being able to see the project. |

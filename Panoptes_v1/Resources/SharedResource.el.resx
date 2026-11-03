@@ -555,4 +555,7 @@
   <data name="Enter a valid phone number with its country code." xml:space="preserve">
     <value>Συμπληρώστε έγκυρο αριθμό τηλεφώνου με τον κωδικό χώρας.</value>
   </data>
+  <data name="Add a phone number, or write why there isn&apos;t one." xml:space="preserve">
+    <value>Προσθέστε αριθμό τηλεφώνου ή γράψτε γιατί δεν υπάρχει.</value>
+  </data>
 </root>

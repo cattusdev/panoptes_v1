@@ -198,7 +198,7 @@ namespace Panoptes_v1.Modules.Crm.Services
                 .ThenBy(cc => cc.Person.FirstName).ThenBy(cc => cc.Person.LastName).ThenBy(cc => cc.Id)
                 .Select(cc => new
                 {
-                    cc.Id, cc.PersonId, cc.Person.FirstName, cc.Person.LastName, cc.Role, cc.IsPrimary, cc.IsBillingContact, cc.Person.ContactMethods, cc.RowVersion,
+                    cc.Id, cc.PersonId, cc.Person.FirstName, cc.Person.LastName, cc.Role, cc.IsPrimary, cc.IsBillingContact, cc.Person.ContactMethods, cc.Person.NoPhoneReason, cc.RowVersion,
                     Others = cc.Person.Clients
                         .Where(o => o.ClientId != clientId && clients.Any(c => c.Id == o.ClientId))
                         .OrderBy(o => o.Client.DisplayName)
@@ -208,7 +208,7 @@ namespace Panoptes_v1.Modules.Crm.Services
                 .ToListAsync(cancellationToken);
 
             return rows.Select(r => new ClientContactDto(r.Id, r.PersonId, r.FirstName, r.LastName, FullName(r.FirstName, r.LastName), r.Role,
-                r.IsPrimary, r.IsBillingContact, r.ContactMethods.Select(m => m.ToDto()).ToList(), r.Others, r.RowVersion)).ToList();
+                r.IsPrimary, r.IsBillingContact, r.ContactMethods.Select(m => m.ToDto()).ToList(), r.NoPhoneReason, r.Others, r.RowVersion)).ToList();
         }
 
         // Ένα υπάρχον πρόσωπο (PersonId) ή ένα νέο (Person) ως επαφή του πελάτη

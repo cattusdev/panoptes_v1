@@ -169,6 +169,7 @@ function PersonDetail({ id }: { id: string }) {
         ) : (
           <p className="text-sm text-muted-foreground">{t('people.detail.noContactMethods')}</p>
         )}
+        {p.noPhoneReason && <p className="-mt-4 text-xs text-muted-foreground">{t('people.noPhone', { reason: p.noPhoneReason })}</p>}
 
         <section>
           <h3 className="mb-2 text-sm font-medium">{t('people.detail.clients')}</h3>

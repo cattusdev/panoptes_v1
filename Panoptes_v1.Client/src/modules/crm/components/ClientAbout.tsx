@@ -127,6 +127,9 @@ export function ClientAbout({
                   )}
                 </div>
                 <ContactMethodLinks methods={contact.contactMethods} className="mt-2 flex flex-col gap-0.5" />
+                {contact.noPhoneReason && (
+                  <p className="mt-1 text-xs text-muted-foreground">{t('people.noPhone', { reason: contact.noPhoneReason })}</p>
+                )}
                 {contact.alsoContactFor.length > 0 && (
                   <div className="mt-2 text-xs text-muted-foreground">
                     {t('contacts.alsoContactFor')}{' '}

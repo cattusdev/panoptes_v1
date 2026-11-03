@@ -91,9 +91,19 @@ export const personSchema = z
     firstName: schemas.text().max(100),
     lastName: z.string().trim().max(100),
     contactMethods: z.array(contactMethodSchema),
+    noPhoneReason: z.string().trim().max(300),
     notes: z.string().trim().max(4000),
   })
-  .superRefine(refineContactDetails)
+  .superRefine((values, ctx) => {
+    refineContactDetails(values, ctx)
+    // Τηλέφωνο, ή γραμμένος λόγος που δεν υπάρχει (το ίδιο ελέγχει ο server)
+    if (!hasPhone(values.contactMethods) && !values.noPhoneReason.trim())
+      ctx.addIssue({ code: 'custom', path: ['noPhoneReason'], message: i18n.t('crm:people.form.phoneRequired') })
+  })
+
+export function hasPhone(methods: ContactMethodValues[]) {
+  return methods.some((m) => (m.kind === 'Phone' || m.kind === 'Mobile') && m.value.trim())
+}
 
 export type PersonValues = z.input<typeof personSchema>
 
@@ -104,6 +114,7 @@ export const emptyPerson: PersonValues = {
     { kind: 'Email', value: '', label: '' },
     { kind: 'Mobile', value: '', label: '' },
   ],
+  noPhoneReason: '',
   notes: '',
 }
 
@@ -112,6 +123,7 @@ export function personValues(person: Person): PersonValues {
     firstName: person.firstName,
     lastName: person.lastName ?? '',
     contactMethods: fromContactMethods(person.contactMethods),
+    noPhoneReason: person.noPhoneReason ?? '',
     notes: person.notes ?? '',
   }
 }
@@ -121,6 +133,7 @@ export function toPersonInput(values: PersonValues, version?: number): PersonInp
     firstName: values.firstName.trim(),
     lastName: values.lastName.trim() || null,
     contactMethods: toContactMethods(values.contactMethods),
+    noPhoneReason: hasPhone(values.contactMethods) ? null : values.noPhoneReason.trim() || null,
     notes: values.notes.trim() || null,
     version,
   }

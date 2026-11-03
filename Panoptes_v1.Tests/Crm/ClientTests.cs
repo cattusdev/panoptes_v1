@@ -192,7 +192,7 @@ public class ClientTests : DomainTest
             var people = services.GetRequiredService<PersonService>();
             await clients.AddContactAsync(beta.Id, new AddContactRequest
             {
-                Person = new PersonRequest { FirstName = "Maria", LastName = Unique("P"), ContactMethods = [Email($"{Guid.NewGuid():N}@beta.gr")] },
+                Person = new PersonRequest { FirstName = "Maria", LastName = Unique("P"), ContactMethods = [Email($"{Guid.NewGuid():N}@beta.gr"), Phone("6912345678")] },
                 Role = "CEO",
                 IsPrimary = true,
             }, _user, people);
@@ -226,7 +226,7 @@ public class ClientTests : DomainTest
     {
         var client = await CreateAsync(NewClient());
         async Task AddAsync(string name, bool primary) => await WithScopeAsync(services => services.GetRequiredService<ClientService>()
-            .AddContactAsync(client.Id, new AddContactRequest { Person = new PersonRequest { FirstName = name }, IsPrimary = primary }, _user,
+            .AddContactAsync(client.Id, new AddContactRequest { Person = new PersonRequest { FirstName = name, NoPhoneReason = "Test" }, IsPrimary = primary }, _user,
                 services.GetRequiredService<PersonService>()));
 
         await AddAsync("Anna", primary: true);
@@ -270,7 +270,7 @@ public class ClientTests : DomainTest
         var client = await CreateAsync(NewClient(name, taxId));
         var email = $"{Guid.NewGuid():N}@delta.gr";
         await WithScopeAsync(services => services.GetRequiredService<ClientService>().AddContactAsync(client.Id,
-            new AddContactRequest { Person = new PersonRequest { FirstName = "Nikos", ContactMethods = [Email(email)] } }, _user,
+            new AddContactRequest { Person = new PersonRequest { FirstName = "Nikos", ContactMethods = [Email(email), Phone("6912345679")] } }, _user,
             services.GetRequiredService<PersonService>()));
 
         async Task<IReadOnlyList<SearchGroup>> SearchAsync(string q) =>
@@ -355,6 +355,24 @@ public class ClientTests : DomainTest
             CreateAsync(NewClient(null, null, new ContactMethodRequest { Kind = ContactMethodKind.Website, Value = "beta.example" })));
 
         Assert.That(error!.Field, Is.EqualTo(nameof(ClientRequest.ContactMethods)));
+    }
+
+    // Ένα πρόσωπο θέλει τηλέφωνο, ή γραμμένο λόγο που δεν έχει· ο λόγος φεύγει μόλις μπει τηλέφωνο
+    [Test]
+    public async Task Person_NeedsAPhone_OrAReasonWhyNot()
+    {
+        var request = new PersonRequest { FirstName = Unique("Eleni"), ContactMethods = [Email($"{Guid.NewGuid():N}@example.com")] };
+        var error = Assert.ThrowsAsync<BusinessRuleException>(() => WithScopeAsync(services => services.GetRequiredService<PersonService>().CreateAsync(request)));
+        Assert.That(error!.Field, Is.EqualTo(nameof(PersonRequest.NoPhoneReason)));
+
+        request.NoPhoneReason = " Only by email for now ";
+        var person = await WithScopeAsync(services => services.GetRequiredService<PersonService>().CreateAsync(request));
+        Assert.That(person.NoPhoneReason, Is.EqualTo("Only by email for now"));
+
+        request.ContactMethods = [.. request.ContactMethods, Phone("6912345670")];
+        request.Version = person.RowVersion;
+        var updated = await WithScopeAsync(services => services.GetRequiredService<PersonService>().UpdateAsync(person.Id, request, _user));
+        Assert.That(updated!.NoPhoneReason, Is.Null);
     }
 
     // Ιδιώτης: όνομα και επώνυμο, και το όνομα του πελάτη βγαίνει από αυτά
